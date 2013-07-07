@@ -17,7 +17,7 @@ import java.util.HashMap;
  */
 public class Request implements Parcelable {
 
-    private static final Logger LOG = Logger.getInstance(Request.class.getSimpleName());
+//    private static final Logger LOG = Logger.getInstance(Request.class.getSimpleName());
 
     private final String mEndpoint;
     private final RequestMethod mRequestMethod;
@@ -112,9 +112,9 @@ public class Request implements Parcelable {
         try {
             return mResponseHandler.newInstance();
         } catch (IllegalAccessException e) {
-            LOG.e(e.getMessage(), e);
+//            LOG.e(e.getMessage(), e);
         } catch (InstantiationException e) {
-            LOG.e(e.getMessage(), e);
+//            LOG.e(e.getMessage(), e);
         }
         return new DefaultResponseHandler();
     }
@@ -123,9 +123,9 @@ public class Request implements Parcelable {
         try {
             return mRequestComposer.newInstance();
         } catch (IllegalAccessException e) {
-            LOG.e(e.getMessage(), e);
+//            LOG.e(e.getMessage(), e);
         } catch (InstantiationException e) {
-            LOG.e(e.getMessage(), e);
+//            LOG.e(e.getMessage(), e);
         }
         return new DefaultRequestComposer();
     }
