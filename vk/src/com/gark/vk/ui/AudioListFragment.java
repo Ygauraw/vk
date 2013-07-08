@@ -9,6 +9,7 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -18,6 +19,8 @@ import com.gark.vk.db.MusicQuery;
 import com.gark.vk.model.MusicObject;
 import com.gark.vk.navigation.NavigationControllerFragment;
 import com.gark.vk.network.ApiHelper;
+import com.gark.vk.network.PopularRespoceHandler;
+import com.gark.vk.utils.Log;
 import com.the111min.android.api.response.ResponseReceiver;
 
 /**
@@ -28,13 +31,16 @@ public class AudioListFragment extends NavigationControllerFragment implements L
     private MusicAdapter musicAdapter;
     private ListView list;
     private AsyncQueryHandler mAsyncQueryHandler;
+    private ApiHelper mApiHelper;
+    private static int offset = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mAsyncQueryHandler = new AsyncQueryHandler(getActivity().getContentResolver()) {
         };
-        new ApiHelper(getActivity(), mResponseReceiver).getPopular();
+        mApiHelper = new ApiHelper(getActivity(), mResponseReceiver);
+        mApiHelper.getPopular(offset);
     }
 
 
@@ -44,11 +50,13 @@ public class AudioListFragment extends NavigationControllerFragment implements L
 
         musicAdapter = new MusicAdapter(getActivity(), null);
         list.setAdapter(musicAdapter);
+
         getActivity().getSupportLoaderManager().initLoader(MusicQuery._TOKEN, Bundle.EMPTY, this);
     }
 
     @Override
     public void onDestroy() {
+        offset = 0;
         mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
         super.onDestroy();
     }
@@ -71,9 +79,9 @@ public class AudioListFragment extends NavigationControllerFragment implements L
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-//        musicAdapter.changeCursor(cursor);
         musicAdapter.swapCursor(cursor);
         Toast.makeText(getActivity(), "" + cursor.getCount(), Toast.LENGTH_SHORT).show();
+
     }
 
     @Override
@@ -85,6 +93,14 @@ public class AudioListFragment extends NavigationControllerFragment implements L
         @Override
         public void onRequestSuccess(int token, Bundle result) {
 
+            int count = result.getInt(PopularRespoceHandler.COUNT);
+            Toast.makeText(getActivity(), "count " + count, Toast.LENGTH_SHORT).show();
+            if (count == 0) {
+                list.setOnScrollListener(null);
+            } else {
+                list.setOnScrollListener(mOnScrollListener);
+            }
+//            list.setOnScrollListener((count == 0) ? null : mOnScrollListener);
         }
 
         @Override
@@ -95,6 +111,22 @@ public class AudioListFragment extends NavigationControllerFragment implements L
         @Override
         public void onError(int token, Exception e) {
 
+        }
+    };
+
+    final AbsListView.OnScrollListener mOnScrollListener = new AbsListView.OnScrollListener() {
+        @Override
+        public void onScrollStateChanged(AbsListView absListView, int i) {
+
+        }
+
+        @Override
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+            if (firstVisibleItem >= totalItemCount - visibleItemCount) {
+                offset += ApiHelper.COUNT;
+                mApiHelper.getPopular(offset);
+                list.setOnScrollListener(null);
+            }
         }
     };
 }

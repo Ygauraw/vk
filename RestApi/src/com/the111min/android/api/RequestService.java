@@ -29,13 +29,13 @@ import java.util.ArrayList;
  * <li>android.permission.ACCESS_NETWORK_STATE
  * <li>android.permission.WAKE_LOCK
  * </ul>
- * 
+ * <p/>
  * Manifest registration is required:
- * 
+ * <p/>
  * <pre>
  *  &lt;service android:name="com.the111min.android.api.RequestService" />
  * </pre>
- * 
+ * <p/>
  * </code>
  */
 public class RequestService extends WakefulIntentService {

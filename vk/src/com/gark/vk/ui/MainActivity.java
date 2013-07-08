@@ -2,15 +2,10 @@ package com.gark.vk.ui;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 import com.gark.vk.R;
 import com.gark.vk.navigation.NavigationController;
-import com.gark.vk.network.ApiHelper;
-import com.the111min.android.api.response.ResponseReceiver;
 
 public class MainActivity extends BaseActivity {
 

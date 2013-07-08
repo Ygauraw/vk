@@ -20,6 +20,8 @@ import java.util.ArrayList;
 public class PopularRespoceHandler extends ResponseHandler {
     private static final String RESPONSE = "response";
 
+    public static final String COUNT = "count";
+
     private static final String AID = "aid";
     private static final String OWNER_ID = "owner_id";
     private static final String ARTIST = "artist";
@@ -102,10 +104,9 @@ public class PopularRespoceHandler extends ResponseHandler {
 
         context.getContentResolver().applyBatch(VKDBSchema.CONTENT_AUTHORITY, insertOperations);
 
+        result.putInt(COUNT, insertOperations.size());
 
-//        Log.e("responce", text);
-
-        return false;
+        return true;
     }
 
 }
