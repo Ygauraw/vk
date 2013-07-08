@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="red">#900</color>
+    <color name="green">#090</color>
+    <color name="blue">#009</color>
+    <color name="white">#FFF</color>
+    <color name="black">#000</color>
+    <color name="light_grey">#F0F0F0</color>
+    <color name="view_order_list">#4ABBC8</color>
+    <color name="view_order_list_pressed">#AFEEEE</color>
+    <color name="bg_isInternet_present">#86B755</color>
+    <color name="bg_isInternet_not_present">#F37061</color>
+    <color name="red_troubleshhoting">#EF3E2E</color>
+    <color name="yellow_troubleshhoting">#D2AC4B</color>
+    <color name="blue_troubleshhoting">#4BBBC9</color>
+    
+    <color name="unused_traffic">#8DCAE6</color>
+    <color name="used_traffic">#E8B088</color>
+
+    <color name="yellow_bg">#ffbd55</color>
+    
+
+    
+
+</resources>

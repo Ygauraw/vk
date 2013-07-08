@@ -17,4 +17,10 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
 
+
+    <style name="list">
+        <item name="android:fastScrollEnabled">true</item>
+        <item name="android:scrollingCache">false</item>
+    </style>
+
 </resources>
