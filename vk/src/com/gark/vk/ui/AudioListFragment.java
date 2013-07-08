@@ -33,6 +33,7 @@ public class AudioListFragment extends NavigationControllerFragment implements L
     private AsyncQueryHandler mAsyncQueryHandler;
     private ApiHelper mApiHelper;
     private static int offset = 0;
+    private int receivedCount;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -80,6 +81,15 @@ public class AudioListFragment extends NavigationControllerFragment implements L
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         musicAdapter.swapCursor(cursor);
+
+        list.setOnScrollListener((receivedCount == 0) ? null : mOnScrollListener);
+
+//        if (receivedCount == 0) {
+//            list.setOnScrollListener(null);
+//        } else {
+//            list.setOnScrollListener(mOnScrollListener);
+//        }
+
         Toast.makeText(getActivity(), "" + cursor.getCount(), Toast.LENGTH_SHORT).show();
 
     }
@@ -92,15 +102,8 @@ public class AudioListFragment extends NavigationControllerFragment implements L
     final ResponseReceiver mResponseReceiver = new ResponseReceiver() {
         @Override
         public void onRequestSuccess(int token, Bundle result) {
-
-            int count = result.getInt(PopularRespoceHandler.COUNT);
-            Toast.makeText(getActivity(), "count " + count, Toast.LENGTH_SHORT).show();
-            if (count == 0) {
-                list.setOnScrollListener(null);
-            } else {
-                list.setOnScrollListener(mOnScrollListener);
-            }
-//            list.setOnScrollListener((count == 0) ? null : mOnScrollListener);
+            receivedCount = result.getInt(PopularRespoceHandler.COUNT);
+            Toast.makeText(getActivity(), "count " + receivedCount, Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -122,7 +125,7 @@ public class AudioListFragment extends NavigationControllerFragment implements L
 
         @Override
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-            if (firstVisibleItem >= totalItemCount - visibleItemCount) {
+            if (firstVisibleItem + 3 >= totalItemCount - visibleItemCount) {
                 offset += ApiHelper.COUNT;
                 mApiHelper.getPopular(offset);
                 list.setOnScrollListener(null);
