@@ -32,7 +32,9 @@ public class MusicAdapter extends CursorAdapter {
         final String url = getCursor().getString(cursor.getColumnIndex(MusicColumns.URL.getName()));
 
 
-        listItem.txtPlan.setText(artist + " \n " + title + "  \n " + duration + " \n " + url);
+        listItem.txtTitle.setText(title);
+        listItem.txtDuration.setText(String.valueOf(duration));
+        listItem.txtArtist.setText(artist);
 
     }
 
@@ -40,7 +42,9 @@ public class MusicAdapter extends CursorAdapter {
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         View view = mInflater.inflate(R.layout.audio_item, null);
         final ViewHolder listItem = new ViewHolder();
-        listItem.txtPlan = (TextView) view.findViewById(R.id.audio_item);
+        listItem.txtArtist = (TextView) view.findViewById(R.id.music_artist);
+        listItem.txtDuration = (TextView) view.findViewById(R.id.music_duraion);
+        listItem.txtTitle = (TextView) view.findViewById(R.id.music_title);
 
         view.setTag(listItem);
         return view;
@@ -48,7 +52,9 @@ public class MusicAdapter extends CursorAdapter {
     }
 
     public class ViewHolder {
-        TextView txtPlan;
+        TextView txtTitle;
+        TextView txtArtist;
+        TextView txtDuration;
 
     }
 
