@@ -1,5 +1,6 @@
 package com.gark.vk.ui;
 
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -28,6 +30,7 @@ import com.gark.vk.utils.Log;
 public class ControlsFragment extends NavigationControllerFragment {
     private TextView tempTxt;
     private Button btnPlayStop;
+    private SeekBar mSeekBar;
     private ServiceConnection sConn;
 
     private BroadcastReceiver updateReceiver;
@@ -40,6 +43,8 @@ public class ControlsFragment extends NavigationControllerFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.controls, null);
+        mSeekBar = (SeekBar) view.findViewById(R.id.seekBar);
+        mSeekBar.setOnSeekBarChangeListener(onSeekBarChangeListener);
         tempTxt = (TextView) view.findViewById(R.id.text_temp);
         btnPlayStop = (Button) view.findViewById(R.id.play_stop);
         btnPlayStop.setOnClickListener(onClickListener);
@@ -53,6 +58,30 @@ public class ControlsFragment extends NavigationControllerFragment {
             Intent intent = new Intent(getActivity(), PlaybackService.class);
             intent.setAction(PlaybackService.SERVICE_TOGGLE_PLAY);
             getActivity().startService(intent);
+            updateButton();
+        }
+    };
+
+    final SeekBar.OnSeekBarChangeListener onSeekBarChangeListener = new SeekBar.OnSeekBarChangeListener() {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            seekBar.setProgress(progress);
+            if (fromUser) {
+                Intent intent = new Intent(getActivity(), PlaybackService.class);
+                intent.setAction(PlaybackService.SERVICE_SEEK_TO);
+                intent.putExtra(PlaybackService.EXTRA_SEEK_TO, progress);
+                getActivity().startService(intent);
+            }
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+
         }
     };
 
@@ -69,6 +98,7 @@ public class ControlsFragment extends NavigationControllerFragment {
     boolean isBuinding;
 
     Intent intent;
+    private PlaybackService mService;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -78,30 +108,18 @@ public class ControlsFragment extends NavigationControllerFragment {
         sConn = new ServiceConnection() {
             public void onServiceConnected(ComponentName name, IBinder service) {
                 isBuinding = true;
-//                Toast.makeText(getActivity(), "binded", Toast.LENGTH_SHORT).show();
-
                 PlaybackService.LocalBinder binder = (PlaybackService.LocalBinder) service;
-
-                if (isBuinding) {
-                    String s = ((binder.getService()).isPlaying()) ? "stop" : "play";
-                    btnPlayStop.setText(s);
-                }
+                mService = binder.getService();
             }
 
             public void onServiceDisconnected(ComponentName name) {
                 isBuinding = false;
+                mService = null;
 //                Toast.makeText(getActivity(), "not binded", Toast.LENGTH_SHORT).show();
             }
         };
-
-
         intent = new Intent(getActivity(), PlaybackService.class);
         getActivity().bindService(intent, sConn, Context.BIND_AUTO_CREATE);
-
-//        if (isBuinding) {
-//            String s = (((PlaybackService) sConn).isPlaying()) ? "play" : "stop";
-//            btnPlayStop.setText(s);
-//        }
 
 
         intent = null;
@@ -112,8 +130,11 @@ public class ControlsFragment extends NavigationControllerFragment {
         }
     }
 
-    private void updateButton (){
-
+    private void updateButton() {
+        if (mService != null) {
+            String s = (mService.isPlaying()) ? "play" : "stop";
+            btnPlayStop.setText(s);
+        }
     }
 
     @Override
@@ -139,20 +160,6 @@ public class ControlsFragment extends NavigationControllerFragment {
 //    }
 
 
-    private void playNow() {
-//        startPlaylistSpinners();
-
-        intent.setAction(PlaybackService.SERVICE_PLAY_ENTRY);
-//        intent.putExtra(Playable.PLAYABLE_TYPE, playable);
-        getActivity().startService(intent);
-
-//        newsItemText.setText(playable.getTitle());
-//        contractedNewsItemText.setText(playable.getTitle());
-//        playlistAdapter.setActiveId(Long.toString(playable.getId()));
-//        refreshList();
-//        configurePlayerControls();
-    }
-
     private class PlaybackUpdateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -163,10 +170,17 @@ public class ControlsFragment extends NavigationControllerFragment {
                 return;
             }
 
+//            mSeekBar
+
+
+            int secondary = intent.getIntExtra(PlaybackService.SECONDARY_PROGRESS, 0);
             int position = intent.getIntExtra(PlaybackService.EXTRA_POSITION, 0);
             int downloaded = intent.getIntExtra(PlaybackService.EXTRA_DOWNLOADED, 1);
 
-            tempTxt.setText("Playback update; position = " + position + " millsecs; " + "downloaded = " + duration + " millsecs");
+            mSeekBar.setSecondaryProgress(secondary);
+            mSeekBar.setProgress((position * 100) / duration);
+
+            tempTxt.setText("Playback update; position = " + position + " millsecs; " + "downloaded = " + duration + " millsecs" + " percent " + ((position * 100) / duration));
 
 //            Toast.makeText(getActivity(), "Playback update; position = " + position + " millsecs; " + "downloaded = " + duration + " millsecs", Toast.LENGTH_SHORT).show();
 //            Log.v("Playback update; position = " + position + " millsecs; " + "downloaded = " + duration + " millsecs");

@@ -59,6 +59,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     public static final String EXTRA_ID = SERVICE_PREFIX + "ID";
     public static final String EXTRA_TITLE = SERVICE_PREFIX + "TITLE";
     public static final String EXTRA_DOWNLOADED = SERVICE_PREFIX + "DOWNLOADED";
+    public static final String SECONDARY_PROGRESS = SERVICE_PREFIX + "SECONDARY";
     public static final String EXTRA_DURATION = SERVICE_PREFIX + "DURATION";
     public static final String EXTRA_POSITION = SERVICE_PREFIX + "POSITION";
     public static final String EXTRA_SEEK_TO = SERVICE_PREFIX + "SEEK_TO";
@@ -80,11 +81,8 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     //    private StreamProxy proxy;
     private NotificationManager notificationManager;
     private static final int NOTIFICATION_ID = 1;
-    //    private PlaylistRepository playlist;
     private int startId;
     private String currentAction;
-    //    private Playable current = null;
-    private List<String> playlistUrls;
 
     // Error handling
     private int errorCount;
@@ -142,7 +140,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 //        playlist = new PlaylistRepository(getApplicationContext(), getContentResolver());
 
-        Log.d(LOG_TAG, "Playback service created");
 
         telephonyManager = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
         // Create a PhoneStateListener to watch for off-hook and idle events
@@ -223,21 +220,20 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 //                } else {
 //                    playCurrent(0, 1);
 //                }
+            } else {
+                currentAction = SERVICE_PLAY_ENTRY;
+                errorCount = 0;
+                playFirstUnreadEntry();
             }
-//            else {
-//                currentAction = SERVICE_PLAY_ENTRY;
-//                errorCount = 0;
-//                playFirstUnreadEntry();
-//            }
         }
 // else if (action.equals(SERVICE_BACK_30)) {
 //            seekRelative(-30000);
 //        } else if (action.equals(SERVICE_FORWARD_30)) {
 //            seekRelative(30000);
-//        } else if (action.equals(SERVICE_SEEK_TO)) {
-//            seekTo(intent.getIntExtra(EXTRA_SEEK_TO, 0));
 //        }
-        else if (action.equals(SERVICE_PLAY_NEXT)) {
+        else if (action.equals(SERVICE_SEEK_TO)) {
+            seekTo(intent.getIntExtra(EXTRA_SEEK_TO, 0));
+        } else if (action.equals(SERVICE_PLAY_NEXT)) {
             //TODO
 //            playNextEntry();
         } else if (action.equals(SERVICE_PLAY_PREVIOUS)) {
@@ -255,7 +251,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     @Override
     public IBinder onBind(Intent intent) {
-        Log.w(LOG_TAG, "onBind called, but binding no longer supported.");
         return mBinder;
     }
 
@@ -270,12 +265,12 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     }
 
     private boolean playCurrent(int startingErrorCount, int startingWaitTime) {
-//        errorCount = startingErrorCount;
-//        connectionErrorWaitTime = startingWaitTime;
-//        while (errorCount < ERROR_RETRY_COUNT) {
+        errorCount = startingErrorCount;
+        connectionErrorWaitTime = startingWaitTime;
+        while (errorCount < ERROR_RETRY_COUNT) {
             try {
                 //TODO
-                prepareThenPlay("http://cs9-2v4.vk.me/p1/aca1de3a515089.mp3", true);
+                prepareThenPlay("http://cs9-2v4.vk.me/p1/42027eeae83b20.mp3", true);
                 return true;
             } catch (UnknownHostException e) {
                 Log.w(LOG_TAG, "Unknown host in playCurrent");
@@ -288,7 +283,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 //                Log.e(LOG_TAG, "IOException on playlist entry " + current.getId(), e);
                 incrementErrorCount();
             }
-//        }
+        }
 
         return false;
     }
@@ -357,23 +352,15 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     synchronized private void seekTo(int pos) {
         if (isPrepared) {
             seekToPosition = 0;
-            mediaPlayer.seekTo(pos);
+            mediaPlayer.seekTo((pos * mediaPlayer.getDuration()) / 100);
         }
     }
 
     private void prepareThenPlay(String url, boolean stream) throws IllegalArgumentException, IllegalStateException, IOException {
-        Log.d(LOG_TAG, "playNew");
+//        Log.d(LOG_TAG, "playNew");
         // First, clean up any existing audio.
         stop();
 
-//        if (isPlaylist(url)) {
-////            downloadPlaylist(url);
-//            if (playlistUrls.size() > 0) {
-//                url = playlistUrls.remove(0);
-//            } else {
-//                throw new IOException("Empty playlist downloaded");
-//            }
-//        }
 
         Log.d(LOG_TAG, "listening to " + url + " stream=" + stream);
         String playUrl = url;
@@ -612,6 +599,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             Intent tempUpdateBroadcast = new Intent(SERVICE_UPDATE_NAME);
             tempUpdateBroadcast.putExtra(EXTRA_DURATION, duration);
             tempUpdateBroadcast.putExtra(EXTRA_DOWNLOADED, (int) ((lastBufferPercent / 100.0) * duration));
+            tempUpdateBroadcast.putExtra(SECONDARY_PROGRESS, lastBufferPercent);
             tempUpdateBroadcast.putExtra(EXTRA_POSITION, seekToPosition);
             tempUpdateBroadcast.putExtra(EXTRA_IS_PLAYING, mediaPlayer.isPlaying());
             tempUpdateBroadcast.putExtra(EXTRA_IS_PREPARED, isPrepared);
@@ -632,55 +620,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     public void onCompletion(MediaPlayer mp) {
         Log.w(LOG_TAG, "onComplete()");
 
-        synchronized (this) {
-            if (!isPrepared) {
-                // This file was not good and MediaPlayer quit
-                Log.w(LOG_TAG,
-                        "MediaPlayer refused to play current item. Bailing on prepare.");
-            }
-        }
-
-//        if (current != null) {
-//            Tracker.StopEvent e = new Tracker.StopEvent(current.getUrl());
-//            Tracker.instance(getApplication()).trackLink(e);
-//        }
-
-        // Unfinished playlist
-        if (playlistUrls != null && playlistUrls.size() > 0) {
-            boolean successfulPlay = false;
-            while (!successfulPlay && playlistUrls.size() > 0) {
-                String url = playlistUrls.remove(0);
-                errorCount = 0;
-                while (errorCount < ERROR_RETRY_COUNT) {
-                    try {
-                        prepareThenPlay(url, true);
-                        successfulPlay = true;
-                        break;
-                    } catch (UnknownHostException e) {
-                        Log.w(LOG_TAG, "Unknown host in onCompletion");
-                        handleConnectionError();
-                    } catch (ConnectException e) {
-                        Log.w(LOG_TAG, "Connect exception in onCompletion");
-                        handleConnectionError();
-                    } catch (IllegalArgumentException e) {
-                        Log.e(LOG_TAG, "", e);
-                        incrementErrorCount();
-                    } catch (IllegalStateException e) {
-                        Log.e(LOG_TAG, "", e);
-                        incrementErrorCount();
-                    } catch (IOException e) {
-                        Log.e(LOG_TAG, "", e);
-                        incrementErrorCount();
-                    }
-                }
-            }
-        }
-
-        if (currentAction.equals(SERVICE_PLAY_ENTRY)) {
-//            finishEntryAndPlayNext();
-        } else {
-            stopSelfResult(startId);
-        }
     }
 
     private void incrementErrorCount() {
@@ -748,41 +687,4 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         Log.w(LOG_TAG, "onInfo(" + arg1 + ", " + arg2 + ")");
         return false;
     }
-
-//    private boolean isPlaylist(String url) {
-//        return url.contains("m3u") || url.contains("pls");
-//    }
-
-//    private boolean downloadPlaylist(String url) throws IOException {
-//        Log.d(LOG_TAG, "downloading " + url);
-//        URLConnection cn = new URL(url).openConnection();
-//        cn.connect();
-//        InputStream stream = cn.getInputStream();
-//        if (stream == null) {
-//            Log.e(LOG_TAG, "Unable to create InputStream for url: + url");
-//            return false;
-//        }
-//
-//        File downloadingMediaFile = new File(getCacheDir(), "playlist_data");
-//        FileOutputStream out = new FileOutputStream(downloadingMediaFile);
-//        byte buf[] = new byte[16384];
-//        int bytesRead;
-//        while ((bytesRead = stream.read(buf)) > 0) {
-//            out.write(buf, 0, bytesRead);
-//        }
-//
-//        stream.close();
-//        out.close();
-//        PlaylistParser parser;
-//        if (url.contains("m3u")) {
-//            parser = new M3uParser(downloadingMediaFile);
-//        } else if (url.contains("pls")) {
-//            parser = new PlsParser(downloadingMediaFile);
-//        } else {
-//            return false;
-//        }
-//        playlistUrls = parser.getUrls();
-//        return true;
-//    }
-
 }
