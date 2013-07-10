@@ -20,7 +20,6 @@ import com.gark.vk.model.MusicObject;
 import com.gark.vk.navigation.NavigationControllerFragment;
 import com.gark.vk.network.ApiHelper;
 import com.gark.vk.network.PopularRespoceHandler;
-import com.gark.vk.utils.Log;
 import com.the111min.android.api.response.ResponseReceiver;
 
 /**
@@ -34,6 +33,8 @@ public class AudioListFragment extends NavigationControllerFragment implements L
     private ApiHelper mApiHelper;
     private static int offset = 0;
     private int receivedCount;
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,6 +55,11 @@ public class AudioListFragment extends NavigationControllerFragment implements L
 
         getActivity().getSupportLoaderManager().initLoader(MusicQuery._TOKEN, Bundle.EMPTY, this);
     }
+
+
+
+
+
 
     @Override
     public void onDestroy() {
@@ -103,7 +109,7 @@ public class AudioListFragment extends NavigationControllerFragment implements L
         @Override
         public void onRequestSuccess(int token, Bundle result) {
             receivedCount = result.getInt(PopularRespoceHandler.COUNT);
-            Toast.makeText(getActivity(), "count " + receivedCount, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getActivity(), "count " + receivedCount, Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -132,4 +138,7 @@ public class AudioListFragment extends NavigationControllerFragment implements L
             }
         }
     };
+
+
+
 }

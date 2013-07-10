@@ -41,6 +41,9 @@ public class MainActivity extends BaseActivity {
         Fragment fragment = new AudioListFragment();
         getNavigationController().pushView(this, R.id.main_frame, fragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
 
+        fragment = new ControlsFragment();
+        getNavigationController().pushView(this, R.id.controls_frame, fragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
+
 
     }
 
