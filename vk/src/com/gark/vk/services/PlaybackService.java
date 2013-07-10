@@ -27,6 +27,7 @@ import android.os.SystemClock;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -79,8 +80,8 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     private boolean mediaPlayerHasStarted = false;
 
     //    private StreamProxy proxy;
-    private NotificationManager notificationManager;
-    private static final int NOTIFICATION_ID = 1;
+//    private NotificationManager notificationManager;
+//    private static final int NOTIFICATION_ID = 1;
     private int startId;
     private String currentAction;
 
@@ -137,7 +138,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         mediaPlayer.setOnInfoListener(this);
         mediaPlayer.setOnPreparedListener(this);
         mediaPlayer.setOnSeekCompleteListener(this);
-        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 //        playlist = new PlaylistRepository(getApplicationContext(), getContentResolver());
 
 
@@ -199,52 +200,48 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     protected void onHandleIntent(Intent intent) {
         String action = intent.getAction();
-        if (action.equals(SERVICE_PLAY_SINGLE) || action.equals(SERVICE_PLAY_ENTRY)) {
-            currentAction = action;
-            //TODO
+        if (action != null) {
+            if (action.equals(SERVICE_PLAY_SINGLE) || action.equals(SERVICE_PLAY_ENTRY)) {
+                currentAction = action;
+                //TODO
 //            current = intent.getParcelableExtra(Playable.PLAYABLE_TYPE);
 //            seekToPosition = intent.getIntExtra(EXTRA_SEEK_TO, 0);
-            playCurrent(0, 1);
-        } else if (action.equals(SERVICE_TOGGLE_PLAY)) {
-            if (isPlaying()) {
-                pause();
-                // Get rid of the toggle intent, since we don't want it redelivered
-                // on restart
-                Intent emptyIntent = new Intent(intent);
-                emptyIntent.setAction("");
-                startService(emptyIntent);
-                //TODO
+                playCurrent(0, 1);
+            } else if (action.equals(SERVICE_TOGGLE_PLAY)) {
+                if (isPlaying()) {
+                    pause();
+                    // Get rid of the toggle intent, since we don't want it redelivered
+                    // on restart
+                    Intent emptyIntent = new Intent(intent);
+                    emptyIntent.setAction("");
+                    startService(emptyIntent);
+                    //TODO
 //            } else if (current != null) {
 //                if (isPrepared) {
 //                    play();
 //                } else {
 //                    playCurrent(0, 1);
 //                }
-            } else {
-                currentAction = SERVICE_PLAY_ENTRY;
-                errorCount = 0;
-                playFirstUnreadEntry();
-            }
-        }
-// else if (action.equals(SERVICE_BACK_30)) {
-//            seekRelative(-30000);
-//        } else if (action.equals(SERVICE_FORWARD_30)) {
-//            seekRelative(30000);
-//        }
-        else if (action.equals(SERVICE_SEEK_TO)) {
-            seekTo(intent.getIntExtra(EXTRA_SEEK_TO, 0));
-        } else if (action.equals(SERVICE_PLAY_NEXT)) {
-            //TODO
+                } else {
+                    currentAction = SERVICE_PLAY_ENTRY;
+                    errorCount = 0;
+                    playFirstUnreadEntry();
+                }
+            } else if (action.equals(SERVICE_SEEK_TO)) {
+                seekTo(intent.getIntExtra(EXTRA_SEEK_TO, 0));
+            } else if (action.equals(SERVICE_PLAY_NEXT)) {
+                //TODO
 //            playNextEntry();
-        } else if (action.equals(SERVICE_PLAY_PREVIOUS)) {
+            } else if (action.equals(SERVICE_PLAY_PREVIOUS)) {
 //            playPreviousEntry();
-        } else if (action.equals(SERVICE_STOP_PLAYBACK)) {
-            stopSelfResult(startId);
-        } else if (action.equals(SERVICE_STATUS)) {
-            updateProgress();
-        } else if (action.equals(SERVICE_CLEAR_PLAYER)) {
-            if (!isPlaying()) {
+            } else if (action.equals(SERVICE_STOP_PLAYBACK)) {
                 stopSelfResult(startId);
+            } else if (action.equals(SERVICE_STATUS)) {
+                updateProgress();
+            } else if (action.equals(SERVICE_CLEAR_PLAYER)) {
+                if (!isPlaying()) {
+                    stopSelfResult(startId);
+                }
             }
         }
     }
@@ -279,8 +276,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
                 Log.w(LOG_TAG, "Connect exception in playCurrent");
                 handleConnectionError();
             } catch (IOException e) {
-                //TODO
-//                Log.e(LOG_TAG, "IOException on playlist entry " + current.getId(), e);
                 incrementErrorCount();
             }
         }
@@ -288,48 +283,11 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         return false;
     }
 
-    //TODO
-//    private void playNextEntry() {
-//        do {
-//            long id = current.getId();
-//            if (id != -1) {
-//                current = playlist.getNextEntry(current.getId());
-//            } else {
-//                current = playlist.getFirstUnreadEntry();
-//            }
-//        } while (current != null && !playCurrent(0, 1));
-//    }
-//
-//    private void playPreviousEntry() {
-//        do {
-//            current = playlist.getPreviousEntry(current.getId());
-//        } while (current != null && !playCurrent(0, 1));
-//    }
-//
+
     private void playFirstUnreadEntry() {
         playCurrent(0, 1);
-//        do {
-//            current = playlist.getFirstUnreadEntry();
-//        } while (current != null && !playCurrent(0, 1));
-//
-//        if (current == null) {
-//            stopSelfResult(startId);
-//        }
     }
-//
-//    private void finishEntryAndPlayNext() {
-//        if (current.getId() >= 0 && !markedRead) {
-//            playlist.markAsRead(current.getId());
-//        }
-//
-//        do {
-//            current = playlist.getNextEntry(current.getId());
-//        } while (current != null && !playCurrent(0, 1));
-//
-//        if (current == null) {
-//            stopSelfResult(startId);
-//        }
-//    }
+
 
     synchronized private int getPosition() {
         if (isPrepared) {
@@ -342,12 +300,12 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         return isPrepared && mediaPlayer.isPlaying();
     }
 
-    synchronized private void seekRelative(int pos) {
-        if (isPrepared) {
-            seekToPosition = 0;
-            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + pos);
-        }
-    }
+//    synchronized private void seekRelative(int pos) {
+//        if (isPrepared) {
+//            seekToPosition = 0;
+//            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + pos);
+//        }
+//    }
 
     synchronized private void seekTo(int pos) {
         if (isPrepared) {
@@ -357,8 +315,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     }
 
     private void prepareThenPlay(String url, boolean stream) throws IllegalArgumentException, IllegalStateException, IOException {
-//        Log.d(LOG_TAG, "playNew");
-        // First, clean up any existing audio.
         stop();
 
 
@@ -398,11 +354,10 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     }
 
     synchronized private void play() {
-        //TODO
-//        if (!isPrepared || current == null) {
-//            Log.e(LOG_TAG, "play - not prepared");
-//            return;
-//        }
+        if (!isPrepared) {
+            Log.e(LOG_TAG, "play - not prepared");
+            return;
+        }
 //        Log.d(LOG_TAG, "play " + current.getId());
 
         mediaPlayer.start();
@@ -457,8 +412,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         if (isPrepared) {
             mediaPlayer.pause();
         }
-        notificationManager.cancel(NOTIFICATION_ID);
-
+//        notificationManager.cancel(NOTIFICATION_ID);
 //        if (current != null) {
 //            Tracker.PauseEvent e = new Tracker.PauseEvent(current.getUrl());
 //            Tracker.instance(getApplication()).trackLink(e);
@@ -554,7 +508,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
         serviceLooper.quit();
 
-        notificationManager.cancel(NOTIFICATION_ID);
+//        notificationManager.cancel(NOTIFICATION_ID);
         if (lastChangeBroadcast != null) {
             getApplicationContext().removeStickyBroadcast(lastChangeBroadcast);
         }
@@ -619,6 +573,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     @Override
     public void onCompletion(MediaPlayer mp) {
         Log.w(LOG_TAG, "onComplete()");
+        Toast.makeText(this, "onComplete", Toast.LENGTH_SHORT).show();
 
     }
 
