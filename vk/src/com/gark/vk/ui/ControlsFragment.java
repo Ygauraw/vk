@@ -30,6 +30,8 @@ import com.gark.vk.utils.Log;
 public class ControlsFragment extends NavigationControllerFragment {
     private TextView tempTxt;
     private Button btnPlayStop;
+    private Button btnNextTrack;
+    private Button btnPrevTrack;
     private SeekBar mSeekBar;
     private ServiceConnection sConn;
 
@@ -47,18 +49,36 @@ public class ControlsFragment extends NavigationControllerFragment {
         mSeekBar.setOnSeekBarChangeListener(onSeekBarChangeListener);
         tempTxt = (TextView) view.findViewById(R.id.text_temp);
         btnPlayStop = (Button) view.findViewById(R.id.play_stop);
+        btnNextTrack = (Button) view.findViewById(R.id.next_track);
+        btnPrevTrack = (Button) view.findViewById(R.id.prev_track);
         btnPlayStop.setOnClickListener(onClickListener);
-//        btnPlayStop.setOnCheckedChangeListener(onCheckedChangeListener);
+        btnPrevTrack.setOnClickListener(onClickListener);
+        btnNextTrack.setOnClickListener(onClickListener);
         return view;
     }
 
     final View.OnClickListener onClickListener = new View.OnClickListener() {
+        Intent intent = null;
         @Override
         public void onClick(View v) {
-            Intent intent = new Intent(getActivity(), PlaybackService.class);
-            intent.setAction(PlaybackService.SERVICE_TOGGLE_PLAY);
-            getActivity().startService(intent);
-            updateButton();
+            switch (v.getId()) {
+                case R.id.play_stop:
+                    intent = new Intent(getActivity(), PlaybackService.class);
+                    intent.setAction(PlaybackService.SERVICE_TOGGLE_PLAY);
+                    getActivity().startService(intent);
+//                    updateButton();
+                    break;
+                case R.id.next_track:
+                    intent = new Intent(getActivity(), PlaybackService.class);
+                    intent.setAction(PlaybackService.SERVICE_PLAY_NEXT);
+                    getActivity().startService(intent);
+                    break;
+                case R.id.prev_track:
+                    intent = new Intent(getActivity(), PlaybackService.class);
+                    intent.setAction(PlaybackService.SERVICE_PLAY_PREVIOUS);
+                    getActivity().startService(intent);
+                    break;
+            }
         }
     };
 
@@ -67,10 +87,12 @@ public class ControlsFragment extends NavigationControllerFragment {
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             seekBar.setProgress(progress);
             if (fromUser) {
-                Intent intent = new Intent(getActivity(), PlaybackService.class);
-                intent.setAction(PlaybackService.SERVICE_SEEK_TO);
-                intent.putExtra(PlaybackService.EXTRA_SEEK_TO, progress);
-                getActivity().startService(intent);
+                if (mService != null && mService.isPlaying()) {
+                    Intent intent = new Intent(getActivity(), PlaybackService.class);
+                    intent.setAction(PlaybackService.SERVICE_SEEK_TO);
+                    intent.putExtra(PlaybackService.EXTRA_SEEK_TO, progress);
+                    getActivity().startService(intent);
+                }
             }
         }
 
@@ -85,17 +107,8 @@ public class ControlsFragment extends NavigationControllerFragment {
         }
     };
 
-//    final CompoundButton.OnCheckedChangeListener onCheckedChangeListener = new CompoundButton.OnCheckedChangeListener() {
-//        @Override
-//        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-//            Intent intent = new Intent(getActivity(), PlaybackService.class);
-//            intent.setAction(PlaybackService.SERVICE_TOGGLE_PLAY);
-//            getActivity().startService(intent);
-//        }
-//    };
 
-
-    boolean isBuinding;
+//    boolean isBuinding;
 
     Intent intent;
     private PlaybackService mService;
@@ -107,13 +120,13 @@ public class ControlsFragment extends NavigationControllerFragment {
 
         sConn = new ServiceConnection() {
             public void onServiceConnected(ComponentName name, IBinder service) {
-                isBuinding = true;
+//                isBuinding = true;
                 PlaybackService.LocalBinder binder = (PlaybackService.LocalBinder) service;
                 mService = binder.getService();
             }
 
             public void onServiceDisconnected(ComponentName name) {
-                isBuinding = false;
+//                isBuinding = false;
                 mService = null;
 //                Toast.makeText(getActivity(), "not binded", Toast.LENGTH_SHORT).show();
             }
@@ -140,7 +153,7 @@ public class ControlsFragment extends NavigationControllerFragment {
     @Override
     public void onDestroyView() {
 
-        getActivity().unbindService(sConn);
+//        getActivity().unbindService(sConn);
 
         super.onDestroyView();
 
@@ -184,7 +197,7 @@ public class ControlsFragment extends NavigationControllerFragment {
 
 //            Toast.makeText(getActivity(), "Playback update; position = " + position + " millsecs; " + "downloaded = " + duration + " millsecs", Toast.LENGTH_SHORT).show();
 //            Log.v("Playback update; position = " + position + " millsecs; " + "downloaded = " + duration + " millsecs");
-            boolean isPlaying = intent.getBooleanExtra(PlaybackService.EXTRA_IS_PLAYING, false);
+//            boolean isPlaying = intent.getBooleanExtra(PlaybackService.EXTRA_IS_PLAYING, false);
 //            if (!changingProgress) {
 //                progressBar.setMax(duration);
 //                progressBar.setProgress(position);
@@ -192,32 +205,32 @@ public class ControlsFragment extends NavigationControllerFragment {
 //            progressBar.setSecondaryProgress(downloaded);
 
             // StringBuilder much faster than String.Format
-            StringBuilder length = new StringBuilder(13);
-            length.append(position / 60000);
-            length.append(':');
-            int secs = position / 1000 % 60;
-            if (secs < 10) {
-                length.append('0');
-            }
-            length.append(secs);
-            length.append(" / ");
-            length.append(duration / 60000);
-            length.append(':');
-            secs = duration / 1000 % 60;
-            if (secs < 10) {
-                length.append('0');
-            }
-            length.append(secs);
+//            StringBuilder length = new StringBuilder(13);
+//            length.append(position / 60000);
+//            length.append(':');
+//            int secs = position / 1000 % 60;
+//            if (secs < 10) {
+//                length.append('0');
+//            }
+//            length.append(secs);
+//            length.append(" / ");
+//            length.append(duration / 60000);
+//            length.append(':');
+//            secs = duration / 1000 % 60;
+//            if (secs < 10) {
+//                length.append('0');
+//            }
+//            length.append(secs);
 //            lengthText.setText(length.toString());
 
-            if (position > 0) {
-                // Streams have no 'downloaded' amount
-                if (downloaded == 0 || downloaded >= position) {
-//                    stopPlaylistSpinners();
-                } else if (isPlaying) {
-//                    startPlaylistSpinners();
-                }
-            }
+//            if (position > 0) {
+//                // Streams have no 'downloaded' amount
+//                if (downloaded == 0 || downloaded >= position) {
+////                    stopPlaylistSpinners();
+//                } else if (isPlaying) {
+////                    startPlaylistSpinners();
+//                }
+//            }
 
 //            if (isPlaying == playPauseShowsPlay) {
 //                if (isPlaying) {

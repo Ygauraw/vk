@@ -12,6 +12,7 @@ public enum MusicColumns {
 	LYRICS_ID("lyrics_id", DBType.TEXT),
 	GENRE("genre", DBType.TEXT),
 	ALBUM("album", DBType.TEXT),
+    IS_ACTIVE("is_active", DBType.TEXT),
 	;
 
 

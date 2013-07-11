@@ -16,6 +16,7 @@ public interface MusicQuery {
     		MusicColumns.URL.getName(),
     		MusicColumns.LYRICS_ID.getName(),
     		MusicColumns.GENRE.getName(),
+            MusicColumns.IS_ACTIVE.getName(),
     		MusicColumns.ALBUM.getName()
     		
     };

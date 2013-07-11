@@ -29,9 +29,12 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.gark.vk.model.MusicObject;
+
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlaybackService extends Service implements OnPreparedListener, OnSeekCompleteListener, OnBufferingUpdateListener, OnCompletionListener, OnErrorListener, OnInfoListener {
@@ -45,12 +48,14 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     public static final String SERVICE_UPDATE_NAME = SERVICE_PREFIX + "UPDATE";
     public static final String SERVICE_ERROR_NAME = SERVICE_PREFIX + "ERROR";
 
+    public static final String SERVICE_PLAY_PLAYLIST = SERVICE_PREFIX + "PLAYLIST";
     public static final String SERVICE_PLAY_SINGLE = SERVICE_PREFIX + "PLAY_SINGLE";
     public static final String SERVICE_PLAY_ENTRY = SERVICE_PREFIX + "PLAY_ENTRY";
     public static final String SERVICE_TOGGLE_PLAY = SERVICE_PREFIX + "TOGGLE_PLAY";
     public static final String SERVICE_BACK_30 = SERVICE_PREFIX + "BACK_30";
     public static final String SERVICE_FORWARD_30 = SERVICE_PREFIX + "FORWARD_30";
     public static final String SERVICE_SEEK_TO = SERVICE_PREFIX + "SEEK_TO";
+    public static final String SERVICE_PLAY_MOVE = SERVICE_PREFIX + "MOVE";
     public static final String SERVICE_PLAY_NEXT = SERVICE_PREFIX + "PLAYNEXT";
     public static final String SERVICE_PLAY_PREVIOUS = SERVICE_PREFIX + "PLAYPREVIOUS";
     public static final String SERVICE_STOP_PLAYBACK = SERVICE_PREFIX + "STOP_PLAYBACK";
@@ -59,6 +64,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     public static final String EXTRA_ID = SERVICE_PREFIX + "ID";
     public static final String EXTRA_TITLE = SERVICE_PREFIX + "TITLE";
+    public static final String EXTRA_URL = SERVICE_PREFIX + "URL";
     public static final String EXTRA_DOWNLOADED = SERVICE_PREFIX + "DOWNLOADED";
     public static final String SECONDARY_PROGRESS = SERVICE_PREFIX + "SECONDARY";
     public static final String EXTRA_DURATION = SERVICE_PREFIX + "DURATION";
@@ -83,7 +89,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 //    private NotificationManager notificationManager;
 //    private static final int NOTIFICATION_ID = 1;
     private int startId;
-    private String currentAction;
+//    private String currentAction;
 
     // Error handling
     private int errorCount;
@@ -106,6 +112,10 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     private Looper serviceLooper;
     private ServiceHandler serviceHandler;
 
+    //    private String currentUrl = null;
+    private ArrayList<MusicObject> playList;
+    private int currentPosition;
+
     private final class ServiceHandler extends Handler {
         public ServiceHandler(Looper looper) {
             super(looper);
@@ -127,6 +137,11 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         }
     }
 
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
+
 
     @Override
     public void onCreate() {
@@ -138,6 +153,9 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         mediaPlayer.setOnInfoListener(this);
         mediaPlayer.setOnPreparedListener(this);
         mediaPlayer.setOnSeekCompleteListener(this);
+
+        currentPosition = 0;
+
 //        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 //        playlist = new PlaylistRepository(getApplicationContext(), getContentResolver());
 
@@ -188,86 +206,51 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     }
 
-    //    @Override
-//    public void onStart(Intent intent, int startId) {
-//        Log.d(LOG_TAG, "OnStart");
-//        super.onStart(intent, startId);
-//        Message message = serviceHandler.obtainMessage();
-//        message.arg1 = startId;
-//        message.obj = intent;
-//        serviceHandler.sendMessage(message);
-//    }
 
     protected void onHandleIntent(Intent intent) {
-        String action = intent.getAction();
-        if (action != null) {
+        if (intent != null) {
+            String action = intent.getAction();
             if (action.equals(SERVICE_PLAY_SINGLE) || action.equals(SERVICE_PLAY_ENTRY)) {
-                currentAction = action;
-                //TODO
-//            current = intent.getParcelableExtra(Playable.PLAYABLE_TYPE);
-//            seekToPosition = intent.getIntExtra(EXTRA_SEEK_TO, 0);
+                currentPosition = intent.getIntExtra(EXTRA_POSITION, 0);
                 playCurrent(0, 1);
             } else if (action.equals(SERVICE_TOGGLE_PLAY)) {
                 if (isPlaying()) {
                     pause();
-                    // Get rid of the toggle intent, since we don't want it redelivered
-                    // on restart
                     Intent emptyIntent = new Intent(intent);
                     emptyIntent.setAction("");
                     startService(emptyIntent);
-                    //TODO
-//            } else if (current != null) {
-//                if (isPrepared) {
-//                    play();
-//                } else {
-//                    playCurrent(0, 1);
-//                }
                 } else {
-                    currentAction = SERVICE_PLAY_ENTRY;
-                    errorCount = 0;
-                    playFirstUnreadEntry();
+                    if (isPrepared) {
+                        play();
+                    } else {
+                        playCurrent(0, 1);
+                    }
                 }
             } else if (action.equals(SERVICE_SEEK_TO)) {
                 seekTo(intent.getIntExtra(EXTRA_SEEK_TO, 0));
             } else if (action.equals(SERVICE_PLAY_NEXT)) {
-                //TODO
-//            playNextEntry();
+                currentPosition++;
+                playCurrent(0, 1);
             } else if (action.equals(SERVICE_PLAY_PREVIOUS)) {
-//            playPreviousEntry();
+                if (currentPosition != 0) {
+                    currentPosition--;
+                }
+                playCurrent(0, 1);
             } else if (action.equals(SERVICE_STOP_PLAYBACK)) {
                 stopSelfResult(startId);
-            } else if (action.equals(SERVICE_STATUS)) {
-                updateProgress();
-            } else if (action.equals(SERVICE_CLEAR_PLAYER)) {
-                if (!isPlaying()) {
-                    stopSelfResult(startId);
-                }
+            } else if (action.equals(SERVICE_PLAY_PLAYLIST)) {
+                playList = intent.getParcelableArrayListExtra(SERVICE_PLAY_PLAYLIST);
             }
         }
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
-    }
-
-    @Override
-    public void onRebind(Intent intent) {
-        super.onRebind(intent);
-    }
-
-    @Override
-    public boolean onUnbind(Intent intent) {
-        return super.onUnbind(intent);
-    }
 
     private boolean playCurrent(int startingErrorCount, int startingWaitTime) {
         errorCount = startingErrorCount;
         connectionErrorWaitTime = startingWaitTime;
         while (errorCount < ERROR_RETRY_COUNT) {
             try {
-                //TODO
-                prepareThenPlay("http://cs9-2v4.vk.me/p1/42027eeae83b20.mp3", true);
+                prepareThenPlay();
                 return true;
             } catch (UnknownHostException e) {
                 Log.w(LOG_TAG, "Unknown host in playCurrent");
@@ -284,11 +267,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     }
 
 
-    private void playFirstUnreadEntry() {
-        playCurrent(0, 1);
-    }
-
-
     synchronized private int getPosition() {
         if (isPrepared) {
             return mediaPlayer.getCurrentPosition();
@@ -300,13 +278,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         return isPrepared && mediaPlayer.isPlaying();
     }
 
-//    synchronized private void seekRelative(int pos) {
-//        if (isPrepared) {
-//            seekToPosition = 0;
-//            mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + pos);
-//        }
-//    }
-
     synchronized private void seekTo(int pos) {
         if (isPrepared) {
             seekToPosition = 0;
@@ -314,42 +285,18 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         }
     }
 
-    private void prepareThenPlay(String url, boolean stream) throws IllegalArgumentException, IllegalStateException, IOException {
+    private void prepareThenPlay() throws IllegalArgumentException, IllegalStateException, IOException {
         stop();
 
 
-        Log.d(LOG_TAG, "listening to " + url + " stream=" + stream);
-        String playUrl = url;
-        // From 2.2 on (SDK ver 8), the local mediaplayer can handle Shoutcast
-        // streams natively. Let's detect that, and not proxy.
-        int sdkVersion = 0;
         try {
-            sdkVersion = Integer.parseInt(Build.VERSION.SDK);
-        } catch (NumberFormatException ignored) {
-        }
-
-        //TODO
-//        if (stream && sdkVersion < 8) {
-//            if (proxy == null) {
-//                proxy = new StreamProxy();
-//                proxy.init();
-//                proxy.start();
-//            }
-//            playUrl = String.format("http://127.0.0.1:%d/%s",
-//                    proxy.getPort(), url);
-//        }
-
-        // We only have to mark an item read on playlist items,
-        // so set markedRead to false only when a playlist entry
-        markedRead = !currentAction.equals(SERVICE_PLAY_ENTRY);
-        synchronized (this) {
-            Log.d(LOG_TAG, "reset: " + playUrl);
+            String playUrl = playList.get(currentPosition).getUrl();
             mediaPlayer.reset();
             mediaPlayer.setDataSource(playUrl);
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            Log.d(LOG_TAG, "Preparing: " + playUrl);
             mediaPlayer.prepareAsync();
-            Log.d(LOG_TAG, "Waiting for prepare");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -358,53 +305,9 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             Log.e(LOG_TAG, "play - not prepared");
             return;
         }
-//        Log.d(LOG_TAG, "play " + current.getId());
 
         mediaPlayer.start();
         mediaPlayerHasStarted = true;
-
-        //TODO
-//        CharSequence contentText = current.getTitle();
-//        Notification notification =
-//                new Notification(R.drawable.stat_notify_musicplayer,
-//                        contentText,
-//                        System.currentTimeMillis());
-//        notification.flags = Notification.FLAG_NO_CLEAR
-//                | Notification.FLAG_ONGOING_EVENT;
-//        Context context = getApplicationContext();
-//        CharSequence title = getString(R.string.app_name);
-//        Intent notificationIntent;
-//        if (current.getActivityData() != null) {
-//            notificationIntent = new Intent(this, current.getActivity());
-//            notificationIntent.putExtra(Constants.EXTRA_ACTIVITY_DATA,
-//                    current.getActivityData());
-//            notificationIntent.putExtra(Constants.EXTRA_DESCRIPTION,
-//                    R.string.msg_main_subactivity_nowplaying);
-//        } else {
-//            notificationIntent = new Intent(this, NewsListActivity.class);
-//        }
-//        notificationIntent.setAction(Intent.ACTION_VIEW);
-//        notificationIntent.addCategory(Intent.CATEGORY_DEFAULT);
-//        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
-//                notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-//        notification.setLatestEventInfo(context, title, contentText, contentIntent);
-//        notificationManager.notify(NOTIFICATION_ID, notification);
-
-        // Change broadcasts are sticky, so when a new receiver connects, it will
-        // have the data without polling.
-        if (lastChangeBroadcast != null) {
-            getApplicationContext().removeStickyBroadcast(lastChangeBroadcast);
-        }
-        lastChangeBroadcast = new Intent(SERVICE_CHANGE_NAME);
-//        lastChangeBroadcast.putExtra(EXTRA_TITLE, current.getTitle());
-//        lastChangeBroadcast.putExtra(EXTRA_ID, current.getId());
-        getApplicationContext().sendStickyBroadcast(lastChangeBroadcast);
-
-//        if (current != null && current.getUrl() != null) {
-//            Tracker.PlayEvent e = new Tracker.PlayEvent(current.getUrl());
-//            Tracker.instance(getApplication()).trackLink(e);
-//        }
     }
 
     synchronized private void pause() {
@@ -412,32 +315,24 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         if (isPrepared) {
             mediaPlayer.pause();
         }
-//        notificationManager.cancel(NOTIFICATION_ID);
-//        if (current != null) {
-//            Tracker.PauseEvent e = new Tracker.PauseEvent(current.getUrl());
-//            Tracker.instance(getApplication()).trackLink(e);
-//        }
     }
 
     synchronized private void stop() {
         Log.d(LOG_TAG, "stop");
         if (isPrepared) {
             isPrepared = false;
-//            if (proxy != null) {
-//                proxy.stop();
-//                proxy = null;
-//            }
             mediaPlayer.stop();
+            mediaPlayer.seekTo(0);
+            seekToPosition = 0;
         }
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        Toast.makeText(this, "onPrepare", Toast.LENGTH_SHORT).show();
         Log.d(LOG_TAG, "Prepared");
-        synchronized (this) {
-            if (mediaPlayer != null) {
-                isPrepared = true;
-            }
+        if (mediaPlayer != null) {
+            isPrepared = true;
         }
 
         if (seekToPosition > 0) {
@@ -477,6 +372,9 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        currentPosition = 0;
+
         Log.w(LOG_TAG, "Service exiting");
 
         stop();
@@ -490,21 +388,21 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             }
         }
 
-        synchronized (this) {
-            if (mediaPlayer != null) {
-                if (mediaPlayerHasStarted) {
-                    mediaPlayer.release();
-                } else {
-                    mediaPlayer.setOnBufferingUpdateListener(null);
-                    mediaPlayer.setOnCompletionListener(null);
-                    mediaPlayer.setOnErrorListener(null);
-                    mediaPlayer.setOnInfoListener(null);
-                    mediaPlayer.setOnPreparedListener(null);
-                    mediaPlayer.setOnSeekCompleteListener(null);
-                }
-                mediaPlayer = null;
+//        synchronized (this) {
+        if (mediaPlayer != null) {
+            if (mediaPlayerHasStarted) {
+                mediaPlayer.release();
+            } else {
+                mediaPlayer.setOnBufferingUpdateListener(null);
+                mediaPlayer.setOnCompletionListener(null);
+                mediaPlayer.setOnErrorListener(null);
+                mediaPlayer.setOnInfoListener(null);
+                mediaPlayer.setOnPreparedListener(null);
+                mediaPlayer.setOnSeekCompleteListener(null);
             }
+            mediaPlayer = null;
         }
+//        }
 
         serviceLooper.quit();
 

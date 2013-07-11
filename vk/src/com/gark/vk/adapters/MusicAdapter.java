@@ -3,6 +3,7 @@ package com.gark.vk.adapters;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v4.widget.CursorAdapter;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,9 +33,9 @@ public class MusicAdapter extends CursorAdapter {
         final String url = getCursor().getString(cursor.getColumnIndex(MusicColumns.URL.getName()));
 
 
-        listItem.txtTitle.setText(title);
+        listItem.txtTitle.setText(Html.fromHtml(title));
         listItem.txtDuration.setText(String.valueOf(duration));
-        listItem.txtArtist.setText(artist);
+        listItem.txtArtist.setText(Html.fromHtml(artist));
 
     }
 
