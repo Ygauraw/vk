@@ -6,6 +6,8 @@ package com.gark.vk.services;
 
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.AsyncQueryHandler;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
@@ -29,6 +31,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.gark.vk.db.MusicColumns;
 import com.gark.vk.model.MusicObject;
 
 import java.io.IOException;
@@ -115,6 +118,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     //    private String currentUrl = null;
     private ArrayList<MusicObject> playList;
     private int currentPosition;
+    private AsyncQueryHandler asyncQueryHandler;
 
     private final class ServiceHandler extends Handler {
         public ServiceHandler(Looper looper) {
@@ -194,6 +198,9 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
         serviceLooper = thread.getLooper();
         serviceHandler = new ServiceHandler(serviceLooper);
+
+        asyncQueryHandler = new AsyncQueryHandler(getContentResolver()) {
+        };
     }
 
     @Override
@@ -244,6 +251,18 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         }
     }
 
+    private void showActiveTrack() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MusicColumns.IS_ACTIVE.getName(), 1);
+        asyncQueryHandler.startUpdate(0, null, MusicObject.CONTENT_URI, contentValues, MusicColumns.AID.getName() + "=?", new String[]{playList.get(currentPosition).getAid()});
+    }
+
+    private void hideActiveTrack() {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MusicColumns.IS_ACTIVE.getName(), 0);
+        asyncQueryHandler.startUpdate(0, null, MusicObject.CONTENT_URI, contentValues, null, null);
+    }
+
 
     private boolean playCurrent(int startingErrorCount, int startingWaitTime) {
         errorCount = startingErrorCount;
@@ -251,6 +270,10 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         while (errorCount < ERROR_RETRY_COUNT) {
             try {
                 prepareThenPlay();
+
+                hideActiveTrack();
+                showActiveTrack();
+
                 return true;
             } catch (UnknownHostException e) {
                 Log.w(LOG_TAG, "Unknown host in playCurrent");
@@ -262,6 +285,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
                 incrementErrorCount();
             }
         }
+
 
         return false;
     }
@@ -306,11 +330,15 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             return;
         }
 
+        showActiveTrack();
+
         mediaPlayer.start();
         mediaPlayerHasStarted = true;
     }
 
     synchronized private void pause() {
+        hideActiveTrack();
+
         Log.d(LOG_TAG, "pause");
         if (isPrepared) {
             mediaPlayer.pause();
@@ -318,6 +346,8 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     }
 
     synchronized private void stop() {
+        hideActiveTrack();
+
         Log.d(LOG_TAG, "stop");
         if (isPrepared) {
             isPrepared = false;
@@ -470,8 +500,15 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        Log.w(LOG_TAG, "onComplete()");
+//        Log.w(LOG_TAG, "onComplete()");
         Toast.makeText(this, "onComplete", Toast.LENGTH_SHORT).show();
+        currentPosition++;
+        try {
+            playCurrent(0, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
     }
 

@@ -99,6 +99,7 @@ public class PopularRespoceHandler extends ResponseHandler {
                     .withValue(MusicColumns.URL.getName(), url)
                     .withValue(MusicColumns.LYRICS_ID.getName(), lyrics_id)
                     .withValue(MusicColumns.GENRE.getName(), genre)
+                    .withValue(MusicColumns.IS_ACTIVE.getName(), 0)
                     .withValue(MusicColumns.ALBUM.getName(), album).build());
         }
 

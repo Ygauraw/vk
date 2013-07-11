@@ -7,6 +7,7 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.gark.vk.R;
@@ -31,7 +32,9 @@ public class MusicAdapter extends CursorAdapter {
         final String title = getCursor().getString(cursor.getColumnIndex(MusicColumns.TITLE.getName()));
         final long duration = getCursor().getLong(cursor.getColumnIndex(MusicColumns.DURATION.getName()));
         final String url = getCursor().getString(cursor.getColumnIndex(MusicColumns.URL.getName()));
+        final int isActive = getCursor().getInt(cursor.getColumnIndex(MusicColumns.IS_ACTIVE.getName()));
 
+        listItem.imgIsAcive.setVisibility((isActive == 1) ? View.VISIBLE : View.GONE);
 
         listItem.txtTitle.setText(Html.fromHtml(title));
         listItem.txtDuration.setText(String.valueOf(duration));
@@ -46,6 +49,7 @@ public class MusicAdapter extends CursorAdapter {
         listItem.txtArtist = (TextView) view.findViewById(R.id.music_artist);
         listItem.txtDuration = (TextView) view.findViewById(R.id.music_duraion);
         listItem.txtTitle = (TextView) view.findViewById(R.id.music_title);
+        listItem.imgIsAcive = (ImageView) view.findViewById(R.id.isActiveImage);
 
         view.setTag(listItem);
         return view;
@@ -53,6 +57,7 @@ public class MusicAdapter extends CursorAdapter {
     }
 
     public class ViewHolder {
+        ImageView imgIsAcive;
         TextView txtTitle;
         TextView txtArtist;
         TextView txtDuration;
