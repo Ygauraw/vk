@@ -1,5 +1,6 @@
 package com.gark.vk.ui;
 
+import android.animation.ValueAnimator;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -13,16 +14,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.gark.vk.R;
 import com.gark.vk.navigation.NavigationControllerFragment;
 import com.gark.vk.services.PlaybackService;
 import com.gark.vk.utils.Log;
+import com.gark.vk.utils.PlayerUtils;
 
 /**
  * Created by Artem on 10.07.13.
@@ -34,8 +38,12 @@ public class ControlsFragment extends NavigationControllerFragment {
     private Button btnPrevTrack;
     private SeekBar mSeekBar;
     private ServiceConnection sConn;
+    private CheckBox chkShuffle;
+    private CheckBox chkRepeat;
 
     private BroadcastReceiver updateReceiver;
+    private BroadcastReceiver onStartReceiver;
+    private BroadcastReceiver onPrepareReceiver;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,20 +53,48 @@ public class ControlsFragment extends NavigationControllerFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.controls, null);
+
         mSeekBar = (SeekBar) view.findViewById(R.id.seekBar);
         mSeekBar.setOnSeekBarChangeListener(onSeekBarChangeListener);
+
         tempTxt = (TextView) view.findViewById(R.id.text_temp);
+
         btnPlayStop = (Button) view.findViewById(R.id.play_stop);
         btnNextTrack = (Button) view.findViewById(R.id.next_track);
         btnPrevTrack = (Button) view.findViewById(R.id.prev_track);
         btnPlayStop.setOnClickListener(onClickListener);
         btnPrevTrack.setOnClickListener(onClickListener);
         btnNextTrack.setOnClickListener(onClickListener);
+
+        chkShuffle = (CheckBox) view.findViewById(R.id.shuffle);
+        chkShuffle.setChecked(PlayerUtils.getShuffle(getActivity()));
+        chkShuffle.setOnCheckedChangeListener(onCheckedChangeListener);
+
+        chkRepeat = (CheckBox) view.findViewById(R.id.repeat);
+        chkRepeat.setChecked(PlayerUtils.getRepeat(getActivity()));
+        chkRepeat.setOnCheckedChangeListener(onCheckedChangeListener);
+
         return view;
     }
 
+    final CompoundButton.OnCheckedChangeListener onCheckedChangeListener = new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            switch (buttonView.getId()) {
+                case R.id.shuffle:
+                    PlayerUtils.setShuffle(getActivity(), isChecked);
+                    break;
+                case R.id.repeat:
+                    PlayerUtils.setRepeat(getActivity(), isChecked);
+                    break;
+            }
+
+        }
+    };
+
     final View.OnClickListener onClickListener = new View.OnClickListener() {
         Intent intent = null;
+
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
@@ -108,8 +144,6 @@ public class ControlsFragment extends NavigationControllerFragment {
     };
 
 
-//    boolean isBuinding;
-
     Intent intent;
     private PlaybackService mService;
 
@@ -120,15 +154,14 @@ public class ControlsFragment extends NavigationControllerFragment {
 
         sConn = new ServiceConnection() {
             public void onServiceConnected(ComponentName name, IBinder service) {
-//                isBuinding = true;
                 PlaybackService.LocalBinder binder = (PlaybackService.LocalBinder) service;
                 mService = binder.getService();
+                updateButton();
+
             }
 
             public void onServiceDisconnected(ComponentName name) {
-//                isBuinding = false;
                 mService = null;
-//                Toast.makeText(getActivity(), "not binded", Toast.LENGTH_SHORT).show();
             }
         };
         intent = new Intent(getActivity(), PlaybackService.class);
@@ -141,6 +174,12 @@ public class ControlsFragment extends NavigationControllerFragment {
         if (intent != null) {
             updateReceiver.onReceive(getActivity(), intent);
         }
+
+        onStartReceiver = new StartPlayReceiver();
+        getActivity().registerReceiver(onStartReceiver, new IntentFilter(PlaybackService.SERVICE_PRESS_PLAY));
+
+        onPrepareReceiver = new OnPrepareReceiver();
+        getActivity().registerReceiver(onPrepareReceiver, new IntentFilter(PlaybackService.SERVICE_ON_PREPARE));
     }
 
     private void updateButton() {
@@ -153,13 +192,23 @@ public class ControlsFragment extends NavigationControllerFragment {
     @Override
     public void onDestroyView() {
 
-//        getActivity().unbindService(sConn);
+        getActivity().unbindService(sConn);
 
         super.onDestroyView();
 
         if (updateReceiver != null) {
             getActivity().unregisterReceiver(updateReceiver);
             updateReceiver = null;
+        }
+
+        if (onStartReceiver != null) {
+            getActivity().unregisterReceiver(onStartReceiver);
+            onStartReceiver = null;
+        }
+
+        if (onPrepareReceiver != null) {
+            getActivity().unregisterReceiver(onPrepareReceiver);
+            onPrepareReceiver = null;
         }
     }
 
@@ -186,14 +235,17 @@ public class ControlsFragment extends NavigationControllerFragment {
 //            mSeekBar
 
 
+            final String artist = intent.getStringExtra(PlaybackService.EXTRA_ARTIST);
+            final String title = intent.getStringExtra(PlaybackService.EXTRA_TITLE);
             int secondary = intent.getIntExtra(PlaybackService.SECONDARY_PROGRESS, 0);
             int position = intent.getIntExtra(PlaybackService.EXTRA_POSITION, 0);
-            int downloaded = intent.getIntExtra(PlaybackService.EXTRA_DOWNLOADED, 1);
+//            int downloaded = intent.getIntExtra(PlaybackService.EXTRA_DOWNLOADED, 1);
 
             mSeekBar.setSecondaryProgress(secondary);
             mSeekBar.setProgress((position * 100) / duration);
 
-            tempTxt.setText("Playback update; position = " + position + " millsecs; " + "downloaded = " + duration + " millsecs" + " percent " + ((position * 100) / duration));
+            tempTxt.setText("Playback update; position = " + position + //" millsecs; " + "downloaded = " + duration + " millsecs" + "\n" +
+                    "Title = " + title + ", Artist = " + artist);
 
 //            Toast.makeText(getActivity(), "Playback update; position = " + position + " millsecs; " + "downloaded = " + duration + " millsecs", Toast.LENGTH_SHORT).show();
 //            Log.v("Playback update; position = " + position + " millsecs; " + "downloaded = " + duration + " millsecs");
@@ -245,4 +297,27 @@ public class ControlsFragment extends NavigationControllerFragment {
 //            }
         }
     }
+
+    private class StartPlayReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+//            Toast.makeText(getActivity(), "on play" , Toast.LENGTH_SHORT).show();
+            btnPlayStop.setText("loading");
+        }
+    }
+
+    ;
+
+
+    private class OnPrepareReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+//            Toast.makeText(getActivity(), "on prepare" , Toast.LENGTH_SHORT).show();
+            btnPlayStop.setText("ready");
+        }
+    }
+
+    ;
 }

@@ -176,12 +176,20 @@ public class AudioListFragment extends NavigationControllerFragment implements L
         intent.putExtra(PlaybackService.EXTRA_POSITION, position);
         getActivity().startService(intent);
 
-//        Cursor cursor = ((MusicAdapter) parent.getAdapter()).getCursor();
-//        if (cursor != null && cursor.moveToPosition(position)) {
-//            currentTrackNumber = position;
-//            final String url = cursor.getString(cursor.getColumnIndex(MusicColumns.URL.getName()));
-//            playMusic(url);
-//        }
+        Cursor cursor = ((MusicAdapter) parent.getAdapter()).getCursor();
+        if (cursor != null && cursor.moveToPosition(position)) {
+            final String artist = cursor.getString(cursor.getColumnIndex(MusicColumns.ARTIST.getName()));
+            final String title = cursor.getString(cursor.getColumnIndex(MusicColumns.TITLE.getName()));
+
+            Intent tempUpdateBroadcast = new Intent(PlaybackService.SERVICE_UPDATE_NAME);
+            tempUpdateBroadcast.putExtra(PlaybackService.EXTRA_DURATION, 2);
+            tempUpdateBroadcast.putExtra(PlaybackService.EXTRA_ARTIST, artist);
+            tempUpdateBroadcast.putExtra(PlaybackService.EXTRA_TITLE, title);
+            getActivity().sendBroadcast(tempUpdateBroadcast);
+
+        }
+
+//        list.smoothScrollToPosition(0);
     }
 
 //    private class MovingReceiver extends BroadcastReceiver {

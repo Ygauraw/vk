@@ -4,11 +4,9 @@ package com.gark.vk.services;
  * Created by Artem on 10.07.13.
  */
 
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -19,7 +17,6 @@ import android.media.MediaPlayer.OnInfoListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaPlayer.OnSeekCompleteListener;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -33,12 +30,12 @@ import android.widget.Toast;
 
 import com.gark.vk.db.MusicColumns;
 import com.gark.vk.model.MusicObject;
+import com.gark.vk.model.PlayList;
 
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.List;
 
 public class PlaybackService extends Service implements OnPreparedListener, OnSeekCompleteListener, OnBufferingUpdateListener, OnCompletionListener, OnErrorListener, OnInfoListener {
 
@@ -50,6 +47,8 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     public static final String SERVICE_CLOSE_NAME = SERVICE_PREFIX + "CLOSE";
     public static final String SERVICE_UPDATE_NAME = SERVICE_PREFIX + "UPDATE";
     public static final String SERVICE_ERROR_NAME = SERVICE_PREFIX + "ERROR";
+    public static final String SERVICE_PRESS_PLAY = SERVICE_PREFIX + "PRESS_PLAY";
+    public static final String SERVICE_ON_PREPARE = SERVICE_PREFIX + "ON_PREPARE";
 
     public static final String SERVICE_PLAY_PLAYLIST = SERVICE_PREFIX + "PLAYLIST";
     public static final String SERVICE_PLAY_SINGLE = SERVICE_PREFIX + "PLAY_SINGLE";
@@ -67,6 +66,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     public static final String EXTRA_ID = SERVICE_PREFIX + "ID";
     public static final String EXTRA_TITLE = SERVICE_PREFIX + "TITLE";
+    public static final String EXTRA_ARTIST = SERVICE_PREFIX + "ARTIST";
     public static final String EXTRA_URL = SERVICE_PREFIX + "URL";
     public static final String EXTRA_DOWNLOADED = SERVICE_PREFIX + "DOWNLOADED";
     public static final String SECONDARY_PROGRESS = SERVICE_PREFIX + "SECONDARY";
@@ -115,9 +115,8 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     private Looper serviceLooper;
     private ServiceHandler serviceHandler;
 
-    //    private String currentUrl = null;
-    private ArrayList<MusicObject> playList;
-    private int currentPosition;
+
+    private PlayList mPlayList;
     private AsyncQueryHandler asyncQueryHandler;
 
     private final class ServiceHandler extends Handler {
@@ -158,7 +157,8 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         mediaPlayer.setOnPreparedListener(this);
         mediaPlayer.setOnSeekCompleteListener(this);
 
-        currentPosition = 0;
+        mPlayList = new PlayList(this);
+        mPlayList.resetPosition();
 
 //        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 //        playlist = new PlaylistRepository(getApplicationContext(), getContentResolver());
@@ -205,6 +205,10 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+//        Toast.makeText(this, "onStartCommand", Toast.LENGTH_SHORT).show();
+//        Log.e("onStartCommand","onStartCommand");
+
         Message message = serviceHandler.obtainMessage();
         message.arg1 = startId;
         message.obj = intent;
@@ -215,10 +219,12 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
 
     protected void onHandleIntent(Intent intent) {
+
+
         if (intent != null) {
             String action = intent.getAction();
             if (action.equals(SERVICE_PLAY_SINGLE) || action.equals(SERVICE_PLAY_ENTRY)) {
-                currentPosition = intent.getIntExtra(EXTRA_POSITION, 0);
+                mPlayList.setCurrentPosition(intent.getIntExtra(EXTRA_POSITION, 0));
                 playCurrent(0, 1);
             } else if (action.equals(SERVICE_TOGGLE_PLAY)) {
                 if (isPlaying()) {
@@ -236,25 +242,25 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             } else if (action.equals(SERVICE_SEEK_TO)) {
                 seekTo(intent.getIntExtra(EXTRA_SEEK_TO, 0));
             } else if (action.equals(SERVICE_PLAY_NEXT)) {
-                currentPosition++;
+                mPlayList.moveToNextTrack();
                 playCurrent(0, 1);
             } else if (action.equals(SERVICE_PLAY_PREVIOUS)) {
-                if (currentPosition != 0) {
-                    currentPosition--;
-                }
+                mPlayList.moveToPreviousTrack();
                 playCurrent(0, 1);
             } else if (action.equals(SERVICE_STOP_PLAYBACK)) {
                 stopSelfResult(startId);
             } else if (action.equals(SERVICE_PLAY_PLAYLIST)) {
-                playList = intent.getParcelableArrayListExtra(SERVICE_PLAY_PLAYLIST);
+                ArrayList<MusicObject> playList = intent.getParcelableArrayListExtra(SERVICE_PLAY_PLAYLIST);
+                mPlayList.setPlayList(playList);
             }
         }
     }
 
     private void showActiveTrack() {
+        String aid = mPlayList.getCurrentItem().getAid();
         ContentValues contentValues = new ContentValues();
         contentValues.put(MusicColumns.IS_ACTIVE.getName(), 1);
-        asyncQueryHandler.startUpdate(0, null, MusicObject.CONTENT_URI, contentValues, MusicColumns.AID.getName() + "=?", new String[]{playList.get(currentPosition).getAid()});
+        asyncQueryHandler.startUpdate(0, null, MusicObject.CONTENT_URI, contentValues, MusicColumns.AID.getName() + "=?", new String[]{aid});
     }
 
     private void hideActiveTrack() {
@@ -312,9 +318,11 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     private void prepareThenPlay() throws IllegalArgumentException, IllegalStateException, IOException {
         stop();
 
+        Intent intent = new Intent(SERVICE_PRESS_PLAY);
+        getApplicationContext().sendBroadcast(intent);
 
         try {
-            String playUrl = playList.get(currentPosition).getUrl();
+            String playUrl = mPlayList.getCurrentItem().getUrl();
             mediaPlayer.reset();
             mediaPlayer.setDataSource(playUrl);
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -359,7 +367,11 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        Toast.makeText(this, "onPrepare", Toast.LENGTH_SHORT).show();
+
+        Intent intent = new Intent(SERVICE_ON_PREPARE);
+        getApplicationContext().sendBroadcast(intent);
+
+
         Log.d(LOG_TAG, "Prepared");
         if (mediaPlayer != null) {
             isPrepared = true;
@@ -401,9 +413,13 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     @Override
     public void onDestroy() {
+
+        Toast.makeText(this, "destroy", Toast.LENGTH_SHORT).show();
+        Log.e("destroy", "destroy");
+
         super.onDestroy();
 
-        currentPosition = 0;
+        mPlayList.resetPosition();
 
         Log.w(LOG_TAG, "Service exiting");
 
@@ -484,6 +500,9 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             tempUpdateBroadcast.putExtra(SECONDARY_PROGRESS, lastBufferPercent);
             tempUpdateBroadcast.putExtra(EXTRA_POSITION, seekToPosition);
             tempUpdateBroadcast.putExtra(EXTRA_IS_PLAYING, mediaPlayer.isPlaying());
+            tempUpdateBroadcast.putExtra(EXTRA_ARTIST, mPlayList.getCurrentItem().getArtist());
+            tempUpdateBroadcast.putExtra(EXTRA_TITLE, mPlayList.getCurrentItem().getTitle());
+
             tempUpdateBroadcast.putExtra(EXTRA_IS_PREPARED, isPrepared);
 
             // Update broadcasts while playing are not sticky, due to concurrency
@@ -502,7 +521,10 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     public void onCompletion(MediaPlayer mp) {
 //        Log.w(LOG_TAG, "onComplete()");
         Toast.makeText(this, "onComplete", Toast.LENGTH_SHORT).show();
-        currentPosition++;
+
+
+        mPlayList.moveToNextTrack();
+
         try {
             playCurrent(0, 1);
         } catch (Exception e) {
@@ -550,14 +572,14 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
+
+        Toast.makeText(this, "onError", Toast.LENGTH_SHORT).show();
+
         Log.w(LOG_TAG, "onError(" + what + ", " + extra + ")");
-        synchronized (this) {
-            if (!isPrepared) {
-                // This file was not good and MediaPlayer quit
-                Log.w(LOG_TAG,
-                        "MediaPlayer refused to play current item. Bailing on prepare.");
-            }
+        if (!isPrepared) {
+            Log.w(LOG_TAG, "MediaPlayer refused to play current item. Bailing on prepare.");
         }
+
         isPrepared = false;
         mediaPlayer.reset();
 
@@ -574,7 +596,8 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     @Override
     public boolean onInfo(MediaPlayer arg0, int arg1, int arg2) {
-        Log.w(LOG_TAG, "onInfo(" + arg1 + ", " + arg2 + ")");
         return false;
     }
+
+
 }
