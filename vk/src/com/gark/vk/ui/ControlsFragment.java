@@ -1,7 +1,5 @@
 package com.gark.vk.ui;
 
-import android.animation.ValueAnimator;
-import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,9 +17,7 @@ import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ToggleButton;
 
-import com.actionbarsherlock.internal.nineoldandroids.animation.ObjectAnimator;
 import com.gark.vk.R;
 import com.gark.vk.navigation.NavigationControllerFragment;
 import com.gark.vk.services.PlaybackService;
@@ -33,7 +29,7 @@ import com.gark.vk.utils.PlayerUtils;
  */
 public class ControlsFragment extends NavigationControllerFragment {
     private TextView tempTxt;
-    private Button btnPlayStop;
+    private CheckBox chkPlayStop;
     private Button btnNextTrack;
     private Button btnPrevTrack;
     private SeekBar mSeekBar;
@@ -44,6 +40,7 @@ public class ControlsFragment extends NavigationControllerFragment {
     private BroadcastReceiver updateReceiver;
     private BroadcastReceiver onStartReceiver;
     private BroadcastReceiver onPrepareReceiver;
+    private BroadcastReceiver onStopReceiver;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -59,12 +56,17 @@ public class ControlsFragment extends NavigationControllerFragment {
 
         tempTxt = (TextView) view.findViewById(R.id.text_temp);
 
-        btnPlayStop = (Button) view.findViewById(R.id.play_stop);
+
         btnNextTrack = (Button) view.findViewById(R.id.next_track);
         btnPrevTrack = (Button) view.findViewById(R.id.prev_track);
-        btnPlayStop.setOnClickListener(onClickListener);
+
+
         btnPrevTrack.setOnClickListener(onClickListener);
         btnNextTrack.setOnClickListener(onClickListener);
+
+
+        chkPlayStop = (CheckBox) view.findViewById(R.id.play_stop);
+        chkPlayStop.setOnCheckedChangeListener(onCheckedChangeListener);
 
         chkShuffle = (CheckBox) view.findViewById(R.id.shuffle);
         chkShuffle.setChecked(PlayerUtils.getShuffle(getActivity()));
@@ -87,6 +89,13 @@ public class ControlsFragment extends NavigationControllerFragment {
                 case R.id.repeat:
                     PlayerUtils.setRepeat(getActivity(), isChecked);
                     break;
+                case R.id.play_stop:
+                    if (buttonView.isPressed()) {
+                        intent = new Intent(getActivity(), PlaybackService.class);
+                        intent.setAction(PlaybackService.SERVICE_TOGGLE_PLAY);
+                        getActivity().startService(intent);
+                    }
+                    break;
             }
 
         }
@@ -98,12 +107,12 @@ public class ControlsFragment extends NavigationControllerFragment {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                case R.id.play_stop:
-                    intent = new Intent(getActivity(), PlaybackService.class);
-                    intent.setAction(PlaybackService.SERVICE_TOGGLE_PLAY);
-                    getActivity().startService(intent);
+//                case R.id.play_stop:
+//                    intent = new Intent(getActivity(), PlaybackService.class);
+//                    intent.setAction(PlaybackService.SERVICE_TOGGLE_PLAY);
+//                    getActivity().startService(intent);
 //                    updateButton();
-                    break;
+//                    break;
                 case R.id.next_track:
                     intent = new Intent(getActivity(), PlaybackService.class);
                     intent.setAction(PlaybackService.SERVICE_PLAY_NEXT);
@@ -156,8 +165,13 @@ public class ControlsFragment extends NavigationControllerFragment {
             public void onServiceConnected(ComponentName name, IBinder service) {
                 PlaybackService.LocalBinder binder = (PlaybackService.LocalBinder) service;
                 mService = binder.getService();
-                updateButton();
-
+                if (mService != null) {
+                    if (mService.isPlaying()) {
+                        showPause();
+                    } else {
+                        showPlay();
+                    }
+                }
             }
 
             public void onServiceDisconnected(ComponentName name) {
@@ -180,14 +194,11 @@ public class ControlsFragment extends NavigationControllerFragment {
 
         onPrepareReceiver = new OnPrepareReceiver();
         getActivity().registerReceiver(onPrepareReceiver, new IntentFilter(PlaybackService.SERVICE_ON_PREPARE));
+
+        onStopReceiver = new OnStopReceiver();
+        getActivity().registerReceiver(onStopReceiver, new IntentFilter(PlaybackService.SERVICE_ON_STOP));
     }
 
-    private void updateButton() {
-        if (mService != null) {
-            String s = (mService.isPlaying()) ? "play" : "stop";
-            btnPlayStop.setText(s);
-        }
-    }
 
     @Override
     public void onDestroyView() {
@@ -210,16 +221,12 @@ public class ControlsFragment extends NavigationControllerFragment {
             getActivity().unregisterReceiver(onPrepareReceiver);
             onPrepareReceiver = null;
         }
-    }
 
-//    @Override
-//    public void onStop() {
-//        super.onStop();
-//        if (updateReceiver != null) {
-//            getActivity().unregisterReceiver(updateReceiver);
-//            updateReceiver = null;
-//        }
-//    }
+        if (onStopReceiver != null) {
+            getActivity().unregisterReceiver(onStopReceiver);
+            onStopReceiver = null;
+        }
+    }
 
 
     private class PlaybackUpdateReceiver extends BroadcastReceiver {
@@ -302,8 +309,8 @@ public class ControlsFragment extends NavigationControllerFragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-//            Toast.makeText(getActivity(), "on play" , Toast.LENGTH_SHORT).show();
-            btnPlayStop.setText("loading");
+            chkPlayStop.setChecked(false);
+
         }
     }
 
@@ -314,10 +321,28 @@ public class ControlsFragment extends NavigationControllerFragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-//            Toast.makeText(getActivity(), "on prepare" , Toast.LENGTH_SHORT).show();
-            btnPlayStop.setText("ready");
+            showPause();
         }
     }
 
     ;
+
+
+    private class OnStopReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            showPlay();
+        }
+    }
+
+    ;
+
+    private void showPause() {
+        chkPlayStop.setChecked(false);
+    }
+
+    private void showPlay() {
+        chkPlayStop.setChecked(true);
+    }
 }

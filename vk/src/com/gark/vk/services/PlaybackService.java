@@ -49,6 +49,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     public static final String SERVICE_ERROR_NAME = SERVICE_PREFIX + "ERROR";
     public static final String SERVICE_PRESS_PLAY = SERVICE_PREFIX + "PRESS_PLAY";
     public static final String SERVICE_ON_PREPARE = SERVICE_PREFIX + "ON_PREPARE";
+    public static final String SERVICE_ON_STOP = SERVICE_PREFIX + "ON_STOP";
 
     public static final String SERVICE_PLAY_PLAYLIST = SERVICE_PREFIX + "PLAYLIST";
     public static final String SERVICE_PLAY_SINGLE = SERVICE_PREFIX + "PLAY_SINGLE";
@@ -251,7 +252,8 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
                 stopSelfResult(startId);
             } else if (action.equals(SERVICE_PLAY_PLAYLIST)) {
                 ArrayList<MusicObject> playList = intent.getParcelableArrayListExtra(SERVICE_PLAY_PLAYLIST);
-                mPlayList.setPlayList(playList);
+                if (playList != null && playList.size() > 0)
+                    mPlayList.setPlayList(playList);
             }
         }
     }
@@ -356,6 +358,8 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     synchronized private void stop() {
         hideActiveTrack();
 
+
+
         Log.d(LOG_TAG, "stop");
         if (isPrepared) {
             isPrepared = false;
@@ -363,12 +367,16 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             mediaPlayer.seekTo(0);
             seekToPosition = 0;
         }
+
+//        Intent intent = new Intent(SERVICE_ON_STOP);
+//        getApplicationContext().sendBroadcast(intent);
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
 
         Intent intent = new Intent(SERVICE_ON_PREPARE);
+        intent.putExtra(SERVICE_ON_PREPARE, mPlayList.getCurrentPosition());
         getApplicationContext().sendBroadcast(intent);
 
 

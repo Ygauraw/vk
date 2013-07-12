@@ -34,7 +34,8 @@ public class PlayList {
     }
 
     public MusicObject getCurrentItem() {
-        return playList.get(currentPosition);
+
+        return (playList != null && playList.size() > 0) ? playList.get(currentPosition) : null;
     }
 
     public void setCurrentPosition(int currentPosition) {
