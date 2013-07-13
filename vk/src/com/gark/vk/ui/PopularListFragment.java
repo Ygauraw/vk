@@ -1,23 +1,32 @@
 package com.gark.vk.ui;
 
+import android.app.SearchManager;
 import android.content.AsyncQueryHandler;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.widget.SearchView;
 import com.gark.vk.R;
 import com.gark.vk.adapters.MusicAdapter;
 import com.gark.vk.db.MusicColumns;
@@ -34,50 +43,37 @@ import java.util.ArrayList;
 /**
  * Created by Artem on 08.07.13.
  */
-public class AudioListFragment extends NavigationControllerFragment implements LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnItemClickListener {
+public class PopularListFragment extends NavigationControllerFragment implements LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnItemClickListener {
 
 
-    public static final String QUERY = "query";
-    private String curentQuery;
     private MusicAdapter musicAdapter;
     private ListView list;
     private AsyncQueryHandler mAsyncQueryHandler;
     private ApiHelper mApiHelper;
     private static int offset = 0;
     private int receivedCount;
-
-
     private BroadcastReceiver onPrepareReceiver;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setRetainInstance(true);
 
         offset = 0;
         mAsyncQueryHandler = new AsyncQueryHandler(getActivity().getContentResolver()) {
         };
-
-        curentQuery = getArguments().getString(QUERY);
-
         mApiHelper = new ApiHelper(getActivity(), mResponseReceiver);
-        mApiHelper.getSongsList(offset, curentQuery);
+        mApiHelper.getPopular(offset);
 
 
         musicAdapter = new MusicAdapter(getActivity(), null);
-    }
-
-    public void updateList(String newQuery) {
-        mApiHelper.getSongsList(offset, newQuery);
     }
 
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         list.setAdapter(musicAdapter);
         list.setOnItemClickListener(this);
 
@@ -89,12 +85,10 @@ public class AudioListFragment extends NavigationControllerFragment implements L
 
     @Override
     public void onDestroyView() {
-
         if (onPrepareReceiver != null) {
             getActivity().unregisterReceiver(onPrepareReceiver);
             onPrepareReceiver = null;
         }
-
         super.onDestroyView();
     }
 
@@ -104,6 +98,7 @@ public class AudioListFragment extends NavigationControllerFragment implements L
         mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
         super.onDestroy();
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -148,8 +143,6 @@ public class AudioListFragment extends NavigationControllerFragment implements L
         public void onRequestSuccess(int token, Bundle result) {
             receivedCount = result.getInt(PopularRespoceHandler.COUNT);
 //            Toast.makeText(getActivity(), "count " + receivedCount, Toast.LENGTH_SHORT).show();
-            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(list.getWindowToken(), 0);
         }
 
         @Override
@@ -173,7 +166,7 @@ public class AudioListFragment extends NavigationControllerFragment implements L
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
             if (firstVisibleItem + 3 >= totalItemCount - visibleItemCount) {
                 offset += ApiHelper.COUNT;
-                mApiHelper.getSongsList(offset, curentQuery);
+                mApiHelper.getPopular(offset);
                 list.setOnScrollListener(null);
             }
         }

@@ -10,6 +10,8 @@ public interface VKDBSchema {
 
 	interface Tables {
 		String MUSIC = "MusicTable";
+        String SUGGESTION = "SuggestionTable";
+        String VIDEO = "VideoTable";
 
 	}
 

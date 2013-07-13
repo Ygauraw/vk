@@ -323,9 +323,7 @@ public class ControlsFragment extends NavigationControllerFragment {
         public void onReceive(Context context, Intent intent) {
             showPause();
         }
-    }
-
-    ;
+    };
 
 
     private class OnStopReceiver extends BroadcastReceiver {

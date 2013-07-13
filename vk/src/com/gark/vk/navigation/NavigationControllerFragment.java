@@ -3,9 +3,10 @@ package com.gark.vk.navigation;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
+import com.actionbarsherlock.app.SherlockFragment;
 import com.gark.vk.navigation.NavigationController;
 
-public abstract class NavigationControllerFragment extends Fragment {
+public abstract class NavigationControllerFragment extends SherlockFragment {
 	protected NavigationController navigationController;
 //	protected int title;
 

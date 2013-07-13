@@ -43,7 +43,15 @@ public class PopularRespoceHandler extends ResponseHandler {
         JSONArray jsonArray = jsonObj.getJSONArray(RESPONSE);
 
         for (int i = 0; i < jsonArray.length(); i++) {
-            JSONObject item = jsonArray.getJSONObject(i);
+
+            JSONObject item;
+            try {
+                item = jsonArray.getJSONObject(i);
+            } catch (Exception e) {
+                e.printStackTrace();
+                continue;
+            }
+
 
             String aid = null;
             if (!item.isNull(AID)) {
