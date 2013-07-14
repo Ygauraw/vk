@@ -127,12 +127,12 @@ public class AudioListFragment extends NavigationControllerFragment implements L
 //        this.cursor = cursor;
         list.setOnScrollListener((receivedCount == 0) ? null : mOnScrollListener);
 
-
-        Intent intent = new Intent(getActivity(), PlaybackService.class);
-        intent.setAction(PlaybackService.SERVICE_PLAY_PLAYLIST);
-        intent.putExtra(PlaybackService.SERVICE_PLAY_PLAYLIST, getPlaylist(cursor));
-        getActivity().startService(intent);
-
+        if (getActivity() != null) {
+            Intent intent = new Intent(getActivity(), PlaybackService.class);
+            intent.setAction(PlaybackService.SERVICE_PLAY_PLAYLIST);
+            intent.putExtra(PlaybackService.SERVICE_PLAY_PLAYLIST, getPlaylist(cursor));
+            getActivity().startService(intent);
+        }
 //        Intent intent = new Intent();
 //        Toast.makeText(getActivity(), "" + cursor.getCount(), Toast.LENGTH_SHORT).show();
 

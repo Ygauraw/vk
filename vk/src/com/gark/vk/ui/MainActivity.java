@@ -1,21 +1,13 @@
 package com.gark.vk.ui;
 
-import android.app.SearchManager;
 import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.CursorAdapter;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.support.v4.app.FragmentTransaction;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
@@ -27,6 +19,7 @@ import com.gark.vk.db.SuggestionColumns;
 import com.gark.vk.db.SuggestionQuery;
 import com.gark.vk.model.MusicObject;
 import com.gark.vk.model.SuggestionObject;
+import com.gark.vk.model.VideoObject;
 import com.gark.vk.navigation.NavigationController;
 
 public class MainActivity extends BaseActivity implements SearchView.OnQueryTextListener, SearchView.OnSuggestionListener, ActionBar.OnNavigationListener {
@@ -35,6 +28,8 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
     private AsyncQueryHandler mAsyncQueryHandler;
     private SuggestionsAdapter mSuggestionsAdapter;
     private SearchView searchView;
+    private int currentPosition = 0;
+    private ControlsFragment controlsFragment;
 
 
     public MainActivity() {
@@ -48,7 +43,7 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
     // String uri =
     // "http://api.vk.com/oauth/authorize?client_id=3746605&redirect_uri=http://api.vk.com/blank.html&scope=nohttps&display=page&response_type=token";
     // String uri =
-    // "https://oauth.vk.com/authorize?client_id=3746605&redirect_uri=http://api.vk.com/blank.html&scope=nohttps&display=page&v=5.0&response_type=token";
+    // "https://oauth.vk.com/authorize?client_id=2709622&redirect_uri=http://api.vk.com/blank.html&display=page&v=5.0&scope=audio,video,offline&response_type=token";
 
     // String get =
     // "http://oauth.vk.com/authorize?client_id=3746605&scope=audio,video,friends,offline,groups&redirect_uri=http://oauth.vk.com/blank.html&display=wap&response_type=token";
@@ -76,8 +71,8 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
             Fragment fragment = new PopularListFragment();
             getNavigationController().pushView(this, R.id.main_frame, fragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
 
-            fragment = new ControlsFragment();
-            getNavigationController().pushView(this, R.id.controls_frame, fragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
+            controlsFragment = new ControlsFragment();
+            getNavigationController().pushView(this, R.id.controls_frame, controlsFragment, NavigationController.Transition.VERTICAL, NavigationController.Backstack.DO_NOT_ADD);
         }
 
         ArrayAdapter<CharSequence> list = ArrayAdapter.createFromResource(this, R.array.search_list, R.layout.sherlock_spinner_item);
@@ -132,6 +127,32 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
 
     @Override
     public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+
+        currentPosition = itemPosition;
+
+        Toast.makeText(this, "" + itemPosition + " " + itemId, Toast.LENGTH_SHORT).show();
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+//        if (fragment.isHidden()) {
+//            ft.show(fragment);
+//            button.setText("Hide");
+//        } else {
+//            ft.hide(fragment);
+//            button.setText("Show");
+//        }
+//        ft.commit();
+        switch (itemPosition) {
+            case 0:
+                ft.show(controlsFragment);
+                break;
+            case 1:
+                ft.hide(controlsFragment);
+                break;
+        }
+        ft.commit();
+
+
         return false;
     }
 
@@ -173,20 +194,44 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
     }
 
     private void pushView(String query) {
-        AudioListFragment audioListFragment = (AudioListFragment) getSupportFragmentManager().findFragmentByTag(AudioListFragment.class.getSimpleName());
-        if (audioListFragment == null) {
-            Fragment fragment = new AudioListFragment();
-            Bundle bundle = new Bundle();
-            bundle.putString(AudioListFragment.QUERY, query);
-            fragment.setArguments(bundle);
-            getNavigationController().pushView(this, R.id.main_frame, fragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
-        } else {
-            audioListFragment.updateList(query);
-        }
+
 
         searchView.clearFocus();
-//        searchView.onActionViewCollapsed();
-        mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
+        searchView.onActionViewCollapsed();
+
+        switch (currentPosition) {
+            case 0:
+
+                AudioListFragment audioListFragment = (AudioListFragment) getSupportFragmentManager().findFragmentByTag(AudioListFragment.class.getSimpleName());
+                if (audioListFragment == null) {
+                    Fragment fragment = new AudioListFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putString(AudioListFragment.QUERY, query);
+                    fragment.setArguments(bundle);
+                    getNavigationController().pushView(this, R.id.main_frame, fragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
+                } else {
+                    audioListFragment.updateList(query);
+                }
+
+                mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
+                break;
+            case 1:
+
+                VideoListFragment videoListFragment = (VideoListFragment) getSupportFragmentManager().findFragmentByTag(VideoListFragment.class.getSimpleName());
+                if (videoListFragment == null) {
+                    Fragment fragment = new VideoListFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putString(VideoListFragment.QUERY, query);
+                    fragment.setArguments(bundle);
+                    getNavigationController().pushView(this, R.id.main_frame, fragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
+                } else {
+                    videoListFragment.updateList(query);
+                }
+
+                mAsyncQueryHandler.startDelete(0, null, VideoObject.CONTENT_URI, null, null);
+                break;
+        }
+
 
     }
 
