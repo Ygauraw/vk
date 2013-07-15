@@ -4,9 +4,12 @@ package com.gark.vk.services;
  * Created by Artem on 10.07.13.
  */
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -17,20 +20,25 @@ import android.media.MediaPlayer.OnInfoListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaPlayer.OnSeekCompleteListener;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.support.v4.app.NotificationCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import com.gark.vk.R;
 import com.gark.vk.db.MusicColumns;
 import com.gark.vk.model.MusicObject;
 import com.gark.vk.model.PlayList;
+import com.gark.vk.ui.MainActivity;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -80,6 +88,10 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     public static final String EXTRA_ERROR = SERVICE_PREFIX + "ERROR";
 
     public static enum PLAYBACK_SERVICE_ERROR {Connection, Playback}
+
+    private NotificationManager m_notificationMgr;
+    private NotificationCompat.Builder nb;
+
 
     private MediaPlayer mediaPlayer;
     private boolean isPrepared = false;
@@ -341,6 +353,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         }
 
         showActiveTrack();
+        showNotification(this);
 
         mediaPlayer.start();
         mediaPlayerHasStarted = true;
@@ -348,6 +361,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     synchronized private void pause() {
         hideActiveTrack();
+        hideNotification(this);
 
         Log.d(LOG_TAG, "pause");
         if (isPrepared) {
@@ -357,6 +371,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     synchronized private void stop() {
         hideActiveTrack();
+        hideNotification(this);
 
 
         Log.d(LOG_TAG, "stop");
@@ -375,6 +390,8 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     public void onPrepared(MediaPlayer mp) {
 
         showActiveTrack();
+
+        showNotification(this);
 
         Intent intent = new Intent(SERVICE_ON_PREPARE);
         intent.putExtra(SERVICE_ON_PREPARE, mPlayList.getCurrentPosition());
@@ -609,6 +626,41 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     public boolean onInfo(MediaPlayer arg0, int arg1, int arg2) {
         return false;
     }
+
+
+    private void showNotification(Context context) {
+        m_notificationMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.notification_controls);
+//        remoteViews.setImageViewResource(R.drawable.ic_launcher, R.drawable.ic_launcher);
+//        remoteViews.setTextViewText(R.string.app_name, "sdfsdfsdfsd");
+
+        Bundle bundle = new Bundle();
+        String alarmSet = context.getString(R.string.app_name);
+
+        Intent notificationIntent = new Intent(context, MainActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        notificationIntent.putExtras(bundle);
+        nb = new NotificationCompat.Builder(context)
+                .setContent(remoteViews)
+                .setSmallIcon(R.drawable.ic_launcher)
+                .setContentTitle("My notification")
+                .setContentText("Hello World!")
+                .setContentIntent(PendingIntent.getActivity(context, NOTIFICATION_ID_ALARM, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT))
+                .setOngoing(true);
+        m_notificationMgr.notify(NOTIFICATION_ID_ALARM, nb.build());
+
+    }
+
+    private void hideNotification(Context context) {
+        m_notificationMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        m_notificationMgr.cancel(NOTIFICATION_ID_ALARM);
+
+
+
+    }
+
+    private static final int NOTIFICATION_ID_ALARM = 24;
 
 
 }
