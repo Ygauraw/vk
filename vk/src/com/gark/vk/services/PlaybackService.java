@@ -280,7 +280,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
                 prepareThenPlay();
 
                 hideActiveTrack();
-                showActiveTrack();
+//                showActiveTrack();
 
                 return true;
             } catch (UnknownHostException e) {
@@ -359,7 +359,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         hideActiveTrack();
 
 
-
         Log.d(LOG_TAG, "stop");
         if (isPrepared) {
             isPrepared = false;
@@ -374,6 +373,8 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+
+        showActiveTrack();
 
         Intent intent = new Intent(SERVICE_ON_PREPARE);
         intent.putExtra(SERVICE_ON_PREPARE, mPlayList.getCurrentPosition());
@@ -508,8 +509,10 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             tempUpdateBroadcast.putExtra(SECONDARY_PROGRESS, lastBufferPercent);
             tempUpdateBroadcast.putExtra(EXTRA_POSITION, seekToPosition);
             tempUpdateBroadcast.putExtra(EXTRA_IS_PLAYING, mediaPlayer.isPlaying());
-            tempUpdateBroadcast.putExtra(EXTRA_ARTIST, mPlayList.getCurrentItem().getArtist());
-            tempUpdateBroadcast.putExtra(EXTRA_TITLE, mPlayList.getCurrentItem().getTitle());
+            if (mPlayList.getCurrentItem() != null) {
+                tempUpdateBroadcast.putExtra(EXTRA_ARTIST, mPlayList.getCurrentItem().getArtist());
+                tempUpdateBroadcast.putExtra(EXTRA_TITLE, mPlayList.getCurrentItem().getTitle());
+            }
 
             tempUpdateBroadcast.putExtra(EXTRA_IS_PREPARED, isPrepared);
 

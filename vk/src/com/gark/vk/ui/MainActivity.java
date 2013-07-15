@@ -12,6 +12,7 @@ import android.widget.Toast;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 import com.actionbarsherlock.widget.SearchView;
 import com.gark.vk.R;
 import com.gark.vk.adapters.SuggestionsAdapter;
@@ -54,8 +55,11 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        setSupportProgressBarIndeterminateVisibility(false);
 
         mAsyncQueryHandler = new AsyncQueryHandler(getContentResolver()) {
             @Override
@@ -75,11 +79,11 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
             getNavigationController().pushView(this, R.id.controls_frame, controlsFragment, NavigationController.Transition.VERTICAL, NavigationController.Backstack.DO_NOT_ADD);
         }
 
-        ArrayAdapter<CharSequence> list = ArrayAdapter.createFromResource(this, R.array.search_list, R.layout.sherlock_spinner_item);
-        list.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
-
-        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        getSupportActionBar().setListNavigationCallbacks(list, this);
+//        ArrayAdapter<CharSequence> list = ArrayAdapter.createFromResource(this, R.array.search_list, R.layout.sherlock_spinner_item);
+//        list.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
+//
+//        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+//        getSupportActionBar().setListNavigationCallbacks(list, this);
 
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 

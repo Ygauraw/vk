@@ -1,24 +1,34 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:background="@android:color/darker_gray"
-              android:orientation="vertical">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
 
-    <SeekBar
-            android:id="@+id/seekBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            />
+                android:background="@android:color/darker_gray"
+                android:orientation="vertical">
 
 
     <TextView
+            android:layout_alignParentTop="true"
             android:id="@+id/text_temp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="tratata"/>
 
 
+    <SeekBar
+            android:maxHeight="3dp"
+            android:minHeight="3dp"
+            android:layout_below="@+id/text_temp"
+            android:id="@+id/seekBar"
+            android:layout_toLeftOf="@+id/controls_layout"
+            android:layout_alignBottom="@+id/controls_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
     <LinearLayout
+            android:id="@+id/controls_layout"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/text_temp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -83,4 +93,4 @@
 
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>

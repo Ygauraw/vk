@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,8 +31,8 @@ import com.gark.vk.utils.PlayerUtils;
 public class ControlsFragment extends NavigationControllerFragment {
     private TextView tempTxt;
     private CheckBox chkPlayStop;
-    private Button btnNextTrack;
-    private Button btnPrevTrack;
+    private ImageButton btnNextTrack;
+    private ImageButton btnPrevTrack;
     private SeekBar mSeekBar;
     private ServiceConnection sConn;
     private CheckBox chkShuffle;
@@ -57,8 +58,8 @@ public class ControlsFragment extends NavigationControllerFragment {
         tempTxt = (TextView) view.findViewById(R.id.text_temp);
 
 
-        btnNextTrack = (Button) view.findViewById(R.id.next_track);
-        btnPrevTrack = (Button) view.findViewById(R.id.prev_track);
+        btnNextTrack = (ImageButton) view.findViewById(R.id.next_track);
+        btnPrevTrack = (ImageButton) view.findViewById(R.id.prev_track);
 
 
         btnPrevTrack.setOnClickListener(onClickListener);
@@ -310,6 +311,7 @@ public class ControlsFragment extends NavigationControllerFragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             chkPlayStop.setChecked(false);
+            getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
 
         }
     }
@@ -322,6 +324,7 @@ public class ControlsFragment extends NavigationControllerFragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             showPause();
+            getSherlockActivity().setSupportProgressBarIndeterminateVisibility(false);
         }
     };
 
