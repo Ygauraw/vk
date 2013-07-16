@@ -42,7 +42,7 @@
                 android:scaleType="centerInside"
                 android:adjustViewBounds="true"
                 android:background="@drawable/btn_controls"
-                android:src="@drawable/btn_playback_pause_normal_jb_dark"
+                android:src="@drawable/btn_playback_play_normal_jb_dark"
                 />
 
         <ImageView

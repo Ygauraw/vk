@@ -8,9 +8,13 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.AsyncQueryHandler;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnBufferingUpdateListener;
@@ -31,7 +35,6 @@ import android.support.v4.app.NotificationCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -87,6 +90,12 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     public static final String EXTRA_IS_PREPARED = SERVICE_PREFIX + "IS_PREPARED";
 
     public static final String EXTRA_ERROR = SERVICE_PREFIX + "ERROR";
+
+    public static final String NOTIFICATION_UPDATE = SERVICE_PREFIX + "NOTIFICATION_UPDATE";
+    public static final int NOTIFICATION_CLOSE_ACTION = 11;
+    public static final int NOTIFICATION_NEXT_ACTION = 12;
+    public static final int NOTIFICATION_PAUSE_ACTION = 13;
+    public static final int NOTIFICATION_RESUME_ACTION = 14;
 
     public static enum PLAYBACK_SERVICE_ERROR {Connection, Playback}
 
@@ -215,6 +224,10 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
         asyncQueryHandler = new AsyncQueryHandler(getContentResolver()) {
         };
+
+        switchButtonListener = new SwitchButtonListener();
+        this.registerReceiver(switchButtonListener, new IntentFilter(PlaybackService.NOTIFICATION_UPDATE));
+
     }
 
     @Override
@@ -331,7 +344,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     }
 
     private void prepareThenPlay() throws IllegalArgumentException, IllegalStateException, IOException {
-        stop();
+        stopPlayer();
 
         Intent intent = new Intent(SERVICE_PRESS_PLAY);
         getApplicationContext().sendBroadcast(intent);
@@ -354,7 +367,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         }
 
         showActiveTrack();
-        showNotification(this);
+        showNotification(this, true);
 
         mediaPlayer.start();
         mediaPlayerHasStarted = true;
@@ -362,7 +375,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     synchronized private void pause() {
         hideActiveTrack();
-        hideNotification(this);
 
         Log.d(LOG_TAG, "pause");
         if (isPrepared) {
@@ -370,12 +382,12 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         }
     }
 
-    synchronized private void stop() {
+    synchronized private void stopPlayer() {
         hideActiveTrack();
         hideNotification(this);
 
 
-        Log.d(LOG_TAG, "stop");
+        Log.d(LOG_TAG, "stopPlayer");
         if (isPrepared) {
             isPrepared = false;
             mediaPlayer.stop();
@@ -392,7 +404,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
         showActiveTrack();
 
-        showNotification(this);
+        showNotification(this, true);
 
         Intent intent = new Intent(SERVICE_ON_PREPARE);
         intent.putExtra(SERVICE_ON_PREPARE, mPlayList.getCurrentPosition());
@@ -444,13 +456,15 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         Toast.makeText(this, "destroy", Toast.LENGTH_SHORT).show();
         Log.e("destroy", "destroy");
 
+        this.unregisterReceiver(switchButtonListener);
+
         super.onDestroy();
 
         mPlayList.resetPosition();
 
         Log.w(LOG_TAG, "Service exiting");
 
-        stop();
+        stopPlayer();
 
         if (updateProgressThread != null) {
             updateProgressThread.interrupt();
@@ -593,8 +607,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             isPrepared = false;
             mediaPlayer.reset();
         } else {
-            Log.w(LOG_TAG, "Connection error. Waiting for " +
-                    connectionErrorWaitTime + " milliseconds.");
+            Log.w(LOG_TAG, "Connection error. Waiting for " + connectionErrorWaitTime + " milliseconds.");
         }
         SystemClock.sleep(connectionErrorWaitTime);
     }
@@ -629,51 +642,84 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     }
 
 
-    private void showNotification(Context context) {
+    private void showNotification(Context context, boolean isPlaying) {
         m_notificationMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        Intent notificationIntent = new Intent(context, MainActivity.class);
+//        Intent notificationIntent = new Intent(context, MainActivity.class);
 //        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.notification_controls);
-        remoteViews.setOnClickPendingIntent(R.id.close_notification, pendingIntent);
-//        remoteViews.setImageViewResource(R.drawable.ic_launcher, R.drawable.ic_launcher);
-//        remoteViews.setTextViewText(R.string.app_name, "sdfsdfsdfsd");
-
-//        Bundle bundle = new Bundle();
-//        String alarmSet = context.getString(R.string.app_name);
+        Intent intent = new Intent(PlaybackService.NOTIFICATION_UPDATE);
+        intent.putExtra(PlaybackService.NOTIFICATION_UPDATE, NOTIFICATION_CLOSE_ACTION);
+        PendingIntent pendingIntentClose = PendingIntent.getBroadcast(this, NOTIFICATION_CLOSE_ACTION, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 
-//        notificationIntent.putExtras(bundle);
+        intent = new Intent(PlaybackService.NOTIFICATION_UPDATE);
+        intent.putExtra(PlaybackService.NOTIFICATION_UPDATE, NOTIFICATION_NEXT_ACTION);
+        PendingIntent pendingIntentNext = PendingIntent.getBroadcast(this, NOTIFICATION_NEXT_ACTION, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+        intent = new Intent(PlaybackService.NOTIFICATION_UPDATE);
+        intent.putExtra(PlaybackService.NOTIFICATION_UPDATE, NOTIFICATION_PAUSE_ACTION);
+        PendingIntent pendingIntentPause = PendingIntent.getBroadcast(this, NOTIFICATION_PAUSE_ACTION, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        remoteViews = new RemoteViews(getPackageName(), isPlaying ? R.layout.notification_controls : R.layout.notification_controls_1);
+
+        remoteViews.setOnClickPendingIntent(R.id.close_notification, pendingIntentClose);
+        remoteViews.setOnClickPendingIntent(R.id.next_track_notification, pendingIntentNext);
+        remoteViews.setOnClickPendingIntent(R.id.play_stop_notification, pendingIntentPause);
+
+
+        remoteViews.setTextViewText(R.id.text_artist, mPlayList.getCurrentItem().getArtist() + "\n" + mPlayList.getCurrentItem().getTitle());
+//        text_artist
+
+
         nb = new NotificationCompat.Builder(context)
                 .setContent(remoteViews)
                 .setSmallIcon(R.drawable.ic_launcher)
-                .setContentTitle("My notification")
-                .setContentText("Hello World!")
+//                .setContentTitle("My notification")
+//                .setContentText("Hello World!")
 //                .setContentIntent(PendingIntent.getActivity(context, NOTIFICATION_ID_ALARM, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT))
                 .setOngoing(true);
         m_notificationMgr.notify(NOTIFICATION_ID_ALARM, nb.build());
-
     }
 
-    final View.OnClickListener onClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-
-        }
-    };
 
     private void hideNotification(Context context) {
         m_notificationMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         m_notificationMgr.cancel(NOTIFICATION_ID_ALARM);
-
-
-
     }
 
+    private RemoteViews remoteViews;
     private static final int NOTIFICATION_ID_ALARM = 24;
+    private SwitchButtonListener switchButtonListener;
+
+
+    public class SwitchButtonListener extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int action = intent.getIntExtra(PlaybackService.NOTIFICATION_UPDATE, 0);
+            switch (action) {
+                case NOTIFICATION_CLOSE_ACTION:
+                    pause();
+                    stopPlayer();
+                    System.exit(1);
+                    break;
+                case NOTIFICATION_NEXT_ACTION:
+                    onCompletion(null);
+                    remoteViews.setImageViewResource(R.id.play_stop_notification, R.drawable.btn_playback_ff_normal_jb_dark);
+                    break;
+                case NOTIFICATION_PAUSE_ACTION:
+
+                    intent = new Intent(PlaybackService.this, PlaybackService.class);
+                    intent.setAction(PlaybackService.SERVICE_TOGGLE_PLAY);
+                    startService(intent);
+
+                    showNotification(PlaybackService.this, isPlaying() ? false : true);
+                    break;
+            }
+        }
+
+    }
 
 
 }
