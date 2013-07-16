@@ -31,6 +31,7 @@ import android.support.v4.app.NotificationCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.View;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -631,26 +632,38 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     private void showNotification(Context context) {
         m_notificationMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
+        Intent notificationIntent = new Intent(context, MainActivity.class);
+//        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
         RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.notification_controls);
+        remoteViews.setOnClickPendingIntent(R.id.close_notification, pendingIntent);
 //        remoteViews.setImageViewResource(R.drawable.ic_launcher, R.drawable.ic_launcher);
 //        remoteViews.setTextViewText(R.string.app_name, "sdfsdfsdfsd");
 
-        Bundle bundle = new Bundle();
-        String alarmSet = context.getString(R.string.app_name);
+//        Bundle bundle = new Bundle();
+//        String alarmSet = context.getString(R.string.app_name);
 
-        Intent notificationIntent = new Intent(context, MainActivity.class);
-        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        notificationIntent.putExtras(bundle);
+
+//        notificationIntent.putExtras(bundle);
         nb = new NotificationCompat.Builder(context)
                 .setContent(remoteViews)
                 .setSmallIcon(R.drawable.ic_launcher)
                 .setContentTitle("My notification")
                 .setContentText("Hello World!")
-                .setContentIntent(PendingIntent.getActivity(context, NOTIFICATION_ID_ALARM, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT))
+//                .setContentIntent(PendingIntent.getActivity(context, NOTIFICATION_ID_ALARM, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT))
                 .setOngoing(true);
         m_notificationMgr.notify(NOTIFICATION_ID_ALARM, nb.build());
 
     }
+
+    final View.OnClickListener onClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+        }
+    };
 
     private void hideNotification(Context context) {
         m_notificationMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

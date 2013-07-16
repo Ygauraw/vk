@@ -149,16 +149,26 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     }
 
     @Override
-    public boolean onMenuItemSelected(int featureId, MenuItem item) {
-
-        int itemId = item.getItemId();
-        switch (itemId) {
-            case android.R.id.home:
-//                toggle();
-                break;
-        }
-        return super.onMenuItemSelected(featureId, item);
+    protected void onStop() {
+        super.onStop();
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    //    @Override
+//    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+//
+//        int itemId = item.getItemId();
+//        switch (itemId) {
+//            case android.R.id.home:
+////                toggle();
+//                break;
+//        }
+//        return super.onMenuItemSelected(featureId, item);
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
