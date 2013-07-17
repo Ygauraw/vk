@@ -15,8 +15,7 @@
                 android:id="@+id/music_artist"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/black"
-                android:text="xzczxczxczxzx s c sfdsg df gdfs gdf gdsf gdf gdfssdf gdsf gsd fgsdf f  gdf gdf "/>
+                android:textColor="@android:color/black"/>
 
 
         <TextView
@@ -25,23 +24,30 @@
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/black"/>
 
-        <TextView
-                android:id="@+id/music_duraion"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@android:color/black"/>
 
     </LinearLayout>
 
+    <TextView
+            android:id="@+id/music_duraion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:text="asc"
+            android:gravity="center|bottom"
+            android:textSize="10dp"
+            android:layout_alignLeft="@+id/peak_meter_layout"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@+id/peak_meter_layout"/>
 
     <LinearLayout
             android:id="@+id/peak_meter_layout"
-            android:layout_alignParentRight="true"
+            android:layout_toLeftOf="@+id/download"
             android:gravity="center"
             android:layout_centerVertical="true"
             android:layout_width="30dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            >
 
 
         <ImageView
@@ -62,6 +68,7 @@
                 />
 
         <ImageView
+                android:focusable="false"
                 android:layout_margin="1dp"
                 android:layout_weight="1"
                 android:id="@+id/isActiveImage_3"
@@ -70,6 +77,18 @@
                 />
 
     </LinearLayout>
+
+
+    <ImageView
+            android:layout_gravity="center"
+            android:layout_alignParentRight="true"
+            android:id="@+id/download"
+            android:layout_width="wrap_content"
+            android:scaleType="centerInside"
+            android:layout_centerVertical="true"
+            android:adjustViewBounds="true"
+            android:src="@drawable/download_icon_2"
+            android:layout_height="wrap_content"/>
 
 
 </RelativeLayout>

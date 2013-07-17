@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -252,57 +253,8 @@ public class ControlsFragment extends NavigationControllerFragment {
             mSeekBar.setSecondaryProgress(secondary);
             mSeekBar.setProgress((position * 100) / duration);
 
-            tempTxt.setText("Playback update; position = " + position + //" millsecs; " + "downloaded = " + duration + " millsecs" + "\n" +
-                    "Title = " + title + ", Artist = " + artist);
+            tempTxt.setText(Html.fromHtml(artist + " " + title));
 
-//            Toast.makeText(getActivity(), "Playback update; position = " + position + " millsecs; " + "downloaded = " + duration + " millsecs", Toast.LENGTH_SHORT).show();
-//            Log.v("Playback update; position = " + position + " millsecs; " + "downloaded = " + duration + " millsecs");
-//            boolean isPlaying = intent.getBooleanExtra(PlaybackService.EXTRA_IS_PLAYING, false);
-//            if (!changingProgress) {
-//                progressBar.setMax(duration);
-//                progressBar.setProgress(position);
-//            }
-//            progressBar.setSecondaryProgress(downloaded);
-
-            // StringBuilder much faster than String.Format
-//            StringBuilder length = new StringBuilder(13);
-//            length.append(position / 60000);
-//            length.append(':');
-//            int secs = position / 1000 % 60;
-//            if (secs < 10) {
-//                length.append('0');
-//            }
-//            length.append(secs);
-//            length.append(" / ");
-//            length.append(duration / 60000);
-//            length.append(':');
-//            secs = duration / 1000 % 60;
-//            if (secs < 10) {
-//                length.append('0');
-//            }
-//            length.append(secs);
-//            lengthText.setText(length.toString());
-
-//            if (position > 0) {
-//                // Streams have no 'downloaded' amount
-//                if (downloaded == 0 || downloaded >= position) {
-////                    stopPlaylistSpinners();
-//                } else if (isPlaying) {
-////                    startPlaylistSpinners();
-//                }
-//            }
-
-//            if (isPlaying == playPauseShowsPlay) {
-//                if (isPlaying) {
-//                    playPauseButton.setImageResource(R.drawable.pause_button_normal);
-//                    contractedPlayButton.setImageResource(R.drawable.pause_button_normal);
-//                    playPauseShowsPlay = false;
-//                } else {
-//                    playPauseButton.setImageResource(R.drawable.play_button_normal);
-//                    contractedPlayButton.setImageResource(R.drawable.play_button_normal);
-//                    playPauseShowsPlay = true;
-//                }
-//            }
         }
     }
 

@@ -4,6 +4,7 @@ package com.gark.vk.services;
  * Created by Artem on 10.07.13.
  */
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -13,8 +14,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnBufferingUpdateListener;
@@ -24,7 +23,6 @@ import android.media.MediaPlayer.OnInfoListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaPlayer.OnSeekCompleteListener;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -34,6 +32,8 @@ import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
@@ -43,6 +43,7 @@ import com.gark.vk.db.MusicColumns;
 import com.gark.vk.model.MusicObject;
 import com.gark.vk.model.PlayList;
 import com.gark.vk.ui.MainActivity;
+import com.gark.vk.ui.MainActivity1;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -91,11 +92,11 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     public static final String EXTRA_ERROR = SERVICE_PREFIX + "ERROR";
 
+    public static final String NOTIFICATION_CLOSE_APPLICATION = SERVICE_PREFIX + "CLOSE_APPLICATION";
     public static final String NOTIFICATION_UPDATE = SERVICE_PREFIX + "NOTIFICATION_UPDATE";
     public static final int NOTIFICATION_CLOSE_ACTION = 11;
     public static final int NOTIFICATION_NEXT_ACTION = 12;
-    public static final int NOTIFICATION_PAUSE_ACTION = 13;
-    public static final int NOTIFICATION_RESUME_ACTION = 14;
+    public static final int NOTIFICATION_TOOGLE_ACTION = 13;
 
     public static enum PLAYBACK_SERVICE_ERROR {Connection, Playback}
 
@@ -266,6 +267,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
                         playCurrent(0, 1);
                     }
                 }
+                updateNotification();
             } else if (action.equals(SERVICE_SEEK_TO)) {
                 seekTo(intent.getIntExtra(EXTRA_SEEK_TO, 0));
             } else if (action.equals(SERVICE_PLAY_NEXT)) {
@@ -280,6 +282,10 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
                 ArrayList<MusicObject> playList = intent.getParcelableArrayListExtra(SERVICE_PLAY_PLAYLIST);
                 if (playList != null && playList.size() > 0)
                     mPlayList.setPlayList(playList);
+            } else if (action.equals(NOTIFICATION_CLOSE_APPLICATION)) {
+                if (!isPlaying()) {
+                    hideNotification(this);
+                }
             }
         }
     }
@@ -367,7 +373,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         }
 
         showActiveTrack();
-        showNotification(this, true);
+        showNotification(this);
 
         mediaPlayer.start();
         mediaPlayerHasStarted = true;
@@ -404,7 +410,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
         showActiveTrack();
 
-        showNotification(this, true);
+//        showNotification(this);
 
         Intent intent = new Intent(SERVICE_ON_PREPARE);
         intent.putExtra(SERVICE_ON_PREPARE, mPlayList.getCurrentPosition());
@@ -452,18 +458,10 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     @Override
     public void onDestroy() {
-
-        Toast.makeText(this, "destroy", Toast.LENGTH_SHORT).show();
-        Log.e("destroy", "destroy");
-
         this.unregisterReceiver(switchButtonListener);
-
         super.onDestroy();
 
         mPlayList.resetPosition();
-
-        Log.w(LOG_TAG, "Service exiting");
-
         stopPlayer();
 
         if (updateProgressThread != null) {
@@ -475,7 +473,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             }
         }
 
-//        synchronized (this) {
         if (mediaPlayer != null) {
             if (mediaPlayerHasStarted) {
                 mediaPlayer.release();
@@ -489,16 +486,13 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             }
             mediaPlayer = null;
         }
-//        }
 
         serviceLooper.quit();
 
-//        notificationManager.cancel(NOTIFICATION_ID);
         if (lastChangeBroadcast != null) {
             getApplicationContext().removeStickyBroadcast(lastChangeBroadcast);
         }
         getApplicationContext().sendBroadcast(new Intent(SERVICE_CLOSE_NAME));
-
         telephonyManager.listen(listener, PhoneStateListener.LISTEN_NONE);
     }
 
@@ -531,7 +525,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             if (!markedRead) {
                 if (seekToPosition > duration / 10) {
                     markedRead = true;
-//                    playlist.markAsRead(current.getId());
                 }
             }
 
@@ -642,10 +635,11 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     }
 
 
-    private void showNotification(Context context, boolean isPlaying) {
+    private void showNotification(Context context) {
+
         m_notificationMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-//        Intent notificationIntent = new Intent(context, MainActivity.class);
-//        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        Intent notificationIntent = new Intent(context, MainActivity1.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
 
         Intent intent = new Intent(PlaybackService.NOTIFICATION_UPDATE);
@@ -659,28 +653,32 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
 
         intent = new Intent(PlaybackService.NOTIFICATION_UPDATE);
-        intent.putExtra(PlaybackService.NOTIFICATION_UPDATE, NOTIFICATION_PAUSE_ACTION);
-        PendingIntent pendingIntentPause = PendingIntent.getBroadcast(this, NOTIFICATION_PAUSE_ACTION, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        intent.putExtra(PlaybackService.NOTIFICATION_UPDATE, NOTIFICATION_TOOGLE_ACTION);
+        PendingIntent pendingIntentPause = PendingIntent.getBroadcast(this, NOTIFICATION_TOOGLE_ACTION, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        remoteViews = new RemoteViews(getPackageName(), isPlaying ? R.layout.notification_controls : R.layout.notification_controls_1);
+        RemoteViews remoteViews = new RemoteViews(getPackageName(), R.layout.notification_controls);
 
         remoteViews.setOnClickPendingIntent(R.id.close_notification, pendingIntentClose);
         remoteViews.setOnClickPendingIntent(R.id.next_track_notification, pendingIntentNext);
         remoteViews.setOnClickPendingIntent(R.id.play_stop_notification, pendingIntentPause);
 
 
-        remoteViews.setTextViewText(R.id.text_artist, mPlayList.getCurrentItem().getArtist() + "\n" + mPlayList.getCurrentItem().getTitle());
-//        text_artist
+        if (mPlayList.getCurrentItem() != null) {
+            Spanned notificationText = Html.fromHtml(mPlayList.getCurrentItem().getArtist() + "\n" + mPlayList.getCurrentItem().getTitle());
+            remoteViews.setTextViewText(R.id.text_artist, notificationText);
+        }
 
 
         nb = new NotificationCompat.Builder(context)
                 .setContent(remoteViews)
                 .setSmallIcon(R.drawable.ic_launcher)
-//                .setContentTitle("My notification")
-//                .setContentText("Hello World!")
-//                .setContentIntent(PendingIntent.getActivity(context, NOTIFICATION_ID_ALARM, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT))
+                .setContentIntent(PendingIntent.getActivity(context, NOTIFICATION_ID_ALARM, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT))
                 .setOngoing(true);
-        m_notificationMgr.notify(NOTIFICATION_ID_ALARM, nb.build());
+
+        notification = nb.build();
+        m_notificationMgr.notify(NOTIFICATION_ID_ALARM, notification);
+
+
     }
 
 
@@ -689,7 +687,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         m_notificationMgr.cancel(NOTIFICATION_ID_ALARM);
     }
 
-    private RemoteViews remoteViews;
+    private Notification notification;
     private static final int NOTIFICATION_ID_ALARM = 24;
     private SwitchButtonListener switchButtonListener;
 
@@ -702,23 +700,25 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
                 case NOTIFICATION_CLOSE_ACTION:
                     pause();
                     stopPlayer();
+                    stopSelf();
+                    onDestroy();
                     System.exit(1);
                     break;
                 case NOTIFICATION_NEXT_ACTION:
                     onCompletion(null);
-                    remoteViews.setImageViewResource(R.id.play_stop_notification, R.drawable.btn_playback_ff_normal_jb_dark);
                     break;
-                case NOTIFICATION_PAUSE_ACTION:
-
+                case NOTIFICATION_TOOGLE_ACTION:
                     intent = new Intent(PlaybackService.this, PlaybackService.class);
                     intent.setAction(PlaybackService.SERVICE_TOGGLE_PLAY);
                     startService(intent);
-
-                    showNotification(PlaybackService.this, isPlaying() ? false : true);
                     break;
             }
         }
+    }
 
+    private void updateNotification() {
+        notification.contentView.setImageViewResource(R.id.play_stop_notification, isPlaying() ? R.drawable.btn_playback_pause_normal_jb_dark : R.drawable.btn_playback_play_normal_jb_dark);
+        m_notificationMgr.notify(NOTIFICATION_ID_ALARM, notification);
     }
 
 

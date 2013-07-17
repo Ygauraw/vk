@@ -2,6 +2,7 @@ package com.gark.vk.ui;
 
 import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -29,6 +30,7 @@ import com.gark.vk.model.MusicObject;
 import com.gark.vk.model.SuggestionObject;
 import com.gark.vk.model.VideoObject;
 import com.gark.vk.navigation.NavigationController;
+import com.gark.vk.services.PlaybackService;
 
 public class MainActivity1 extends SherlockFragmentActivity implements SearchView.OnQueryTextListener, SearchView.OnSuggestionListener, ActionBar.OnNavigationListener {
 
@@ -151,6 +153,9 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     @Override
     protected void onStop() {
         super.onStop();
+        Intent intent = new Intent(this, PlaybackService.class);
+        intent.setAction(PlaybackService.NOTIFICATION_CLOSE_APPLICATION);
+        startService(intent);
     }
 
     @Override
