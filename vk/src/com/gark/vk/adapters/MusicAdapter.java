@@ -127,7 +127,7 @@ public class MusicAdapter extends CursorAdapter {
                 request.setAllowedOverRoaming(false);
                 request.setTitle(title);
                 request.setDescription(artist);
-                request.setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, title + " " + artist);
+                request.setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, title + " " + artist  + ".mp3");
 
                 enqueue = dm.enqueue(request);
 
