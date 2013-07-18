@@ -669,7 +669,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
         nb = new NotificationCompat.Builder(context)
                 .setContent(remoteViews)
-                .setSmallIcon(R.drawable.ic_launcher)
+                .setSmallIcon(R.drawable.yellow_headphones_1)
                 .setContentIntent(PendingIntent.getActivity(context, NOTIFICATION_ID_ALARM, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT))
                 .setOngoing(true);
 
