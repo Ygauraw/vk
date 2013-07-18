@@ -15,6 +15,7 @@
                 android:id="@+id/music_artist"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textSize="16sp"
                 android:textColor="@android:color/black"/>
 
 
@@ -22,6 +23,7 @@
                 android:id="@+id/music_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textSize="12sp"
                 android:textColor="@android:color/black"/>
 
 
@@ -88,6 +90,7 @@
             android:layout_centerVertical="true"
             android:adjustViewBounds="true"
             android:src="@drawable/download_icon_2"
+            android:background="@drawable/btn_controls"
             android:layout_height="wrap_content"/>
 
 

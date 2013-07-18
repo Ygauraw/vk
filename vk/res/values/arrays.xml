@@ -4,4 +4,10 @@
         <item>@string/music</item>
         <item>@string/video</item>
     </string-array>
+
+    <string-array name="left_list">
+        <item>@string/clear_search_history</item>
+    </string-array>
+
+
 </resources>

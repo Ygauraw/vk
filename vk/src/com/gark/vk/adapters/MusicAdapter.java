@@ -2,12 +2,23 @@ package com.gark.vk.adapters;
 
 import android.annotation.TargetApi;
 import android.app.DownloadManager;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.AnimationDrawable;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.CursorAdapter;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -21,6 +32,9 @@ import android.widget.Toast;
 import com.gark.vk.R;
 import com.gark.vk.db.MusicColumns;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Locale;
 
 
@@ -30,7 +44,6 @@ public class MusicAdapter extends CursorAdapter {
     private AnimationDrawable mAnim;
     public static final String TIME_FORMATTER = "%02d:%02d";
     private DownloadManager dm;
-    private long enqueue;
 
 
     public MusicAdapter(Context context, Cursor c) {
@@ -38,6 +51,7 @@ public class MusicAdapter extends CursorAdapter {
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         dm = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
     }
+
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
@@ -113,7 +127,6 @@ public class MusicAdapter extends CursorAdapter {
         listItem.txtTitle.setText(Html.fromHtml(title));
 
         String durationValue = String.format(Locale.getDefault(), TIME_FORMATTER, duration / 60, duration % 60);
-//        String durationValue = duration/60 + ":" + duration%60;
 
         listItem.txtDuration.setText(durationValue);
         listItem.txtArtist.setText(Html.fromHtml(artist));
@@ -123,16 +136,15 @@ public class MusicAdapter extends CursorAdapter {
                 DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
 
                 request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
-                //Set whether this download may proceed over a roaming connection.
                 request.setAllowedOverRoaming(false);
                 request.setTitle(title);
                 request.setDescription(artist);
-                request.setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, title + " " + artist  + ".mp3");
+                request.setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, title + " " + artist + ".mp3");
 
-                enqueue = dm.enqueue(request);
+                dm.enqueue(request);
 
-
-//                Toast.makeText(context, artist, Toast.LENGTH_SHORT).show();
+                String downloadToastMessage = context.getString(R.string.downloading_started, artist, title);
+                Toast.makeText(context, downloadToastMessage, Toast.LENGTH_SHORT).show();
 
             }
         });
@@ -166,5 +178,6 @@ public class MusicAdapter extends CursorAdapter {
         TextView txtDuration;
 
     }
+
 
 }

@@ -9,7 +9,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
     <uses-permission android:name="android.permission.BROADCAST_STICKY"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <uses-sdk
             android:minSdkVersion="9"
@@ -40,6 +40,12 @@
                 android:exported="false"/>
 
         <service android:name=".services.PlaybackService"/>
+
+        <receiver android:name=".receiver.DownloaderReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>
+            </intent-filter>
+        </receiver>
 
     </application>
 

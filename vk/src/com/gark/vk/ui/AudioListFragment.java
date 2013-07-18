@@ -100,6 +100,7 @@ public class AudioListFragment extends NavigationControllerFragment implements L
 
     @Override
     public void onDestroy() {
+//        getActivity().unregisterReceiver(musicAdapter.downloadReceiver);
         offset = 0;
         mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
         super.onDestroy();

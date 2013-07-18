@@ -122,9 +122,9 @@ public class RequestService extends WakefulIntentService {
         if (info == null || !info.isConnected()) {
             return false;
         }
-        if (info.isRoaming()) {
-            return false;
-        }
+//        if (info.isRoaming()) {
+//            return false;
+//        }
         return true;
     }
 

@@ -247,8 +247,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
 
     protected void onHandleIntent(Intent intent) {
-
-
         if (intent != null) {
             String action = intent.getAction();
             if (action.equals(SERVICE_PLAY_SINGLE) || action.equals(SERVICE_PLAY_ENTRY)) {
@@ -717,8 +715,11 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     }
 
     private void updateNotification() {
-        notification.contentView.setImageViewResource(R.id.play_stop_notification, isPlaying() ? R.drawable.btn_playback_pause_normal_jb_dark : R.drawable.btn_playback_play_normal_jb_dark);
-        m_notificationMgr.notify(NOTIFICATION_ID_ALARM, notification);
+        if (notification != null && notification.contentView != null){
+            notification.contentView.setImageViewResource(R.id.play_stop_notification, isPlaying() ? R.drawable.btn_playback_pause_normal_jb_dark : R.drawable.btn_playback_play_normal_jb_dark);
+            m_notificationMgr.notify(NOTIFICATION_ID_ALARM, notification);
+        }
+
     }
 
 

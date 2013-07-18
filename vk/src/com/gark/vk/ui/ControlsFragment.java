@@ -26,11 +26,13 @@ import com.gark.vk.services.PlaybackService;
 import com.gark.vk.utils.Log;
 import com.gark.vk.utils.PlayerUtils;
 
+import java.util.Locale;
+
 /**
  * Created by Artem on 10.07.13.
  */
 public class ControlsFragment extends NavigationControllerFragment {
-    private TextView tempTxt;
+    //    private TextView tempTxt;
     private CheckBox chkPlayStop;
     private ImageButton btnNextTrack;
     private ImageButton btnPrevTrack;
@@ -56,7 +58,7 @@ public class ControlsFragment extends NavigationControllerFragment {
         mSeekBar = (SeekBar) view.findViewById(R.id.seekBar);
         mSeekBar.setOnSeekBarChangeListener(onSeekBarChangeListener);
 
-        tempTxt = (TextView) view.findViewById(R.id.text_temp);
+//        tempTxt = (TextView) view.findViewById(R.id.text_temp);
 
 
         btnNextTrack = (ImageButton) view.findViewById(R.id.next_track);
@@ -235,14 +237,9 @@ public class ControlsFragment extends NavigationControllerFragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             int duration = intent.getIntExtra(PlaybackService.EXTRA_DURATION, 1);
-            // Drop out if no duration is given (flicker?)
             if (duration == 1) {
-//                Log.v(LOG_TAG, "Playback update; no duration dropout");
                 return;
             }
-
-//            mSeekBar
-
 
             final String artist = intent.getStringExtra(PlaybackService.EXTRA_ARTIST);
             final String title = intent.getStringExtra(PlaybackService.EXTRA_TITLE);
@@ -253,7 +250,10 @@ public class ControlsFragment extends NavigationControllerFragment {
             mSeekBar.setSecondaryProgress(secondary);
             mSeekBar.setProgress((position * 100) / duration);
 
-            tempTxt.setText(Html.fromHtml(artist + " " + title));
+            if (artist != null && title != null){
+                String header = String.format(Locale.getDefault(), "%s \"%s\"", artist, title);
+                getSherlockActivity().getSupportActionBar().setTitle(Html.fromHtml(header));
+            }
 
         }
     }
@@ -272,17 +272,17 @@ public class ControlsFragment extends NavigationControllerFragment {
 
 
     private class OnPrepareReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(Context context, Intent intent) {
             showPause();
             getSherlockActivity().setSupportProgressBarIndeterminateVisibility(false);
         }
-    };
+    }
+
+    ;
 
 
     private class OnStopReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(Context context, Intent intent) {
             showPlay();

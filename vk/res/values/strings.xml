@@ -6,6 +6,10 @@
     <string name="video">Video</string>
     <string name="search">Search</string>
     <string name="search_for">Search for ...</string>
+    <string name="downloading_started">Downloading started \n %1$s %2$s</string>
+    <string name="downloading_complete">Downloading complete</string>
+    <string name="clear_search_history">Clear search history</string>
+    <string name="history_was_erased">History was erased</string>
 
 
     <string name="drawer_open">Open navigation drawer</string>

@@ -13,6 +13,8 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -52,7 +54,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main1);
 
-
+        setTitle("");
         setSupportProgressBarIndeterminateVisibility(false);
 
         mAsyncQueryHandler = new AsyncQueryHandler(getContentResolver()) {
@@ -112,6 +114,11 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
+//        mDrawerList
+
+        String[] leftListContent = getResources().getStringArray(R.array.left_list);
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, leftListContent));
+        mDrawerList.setOnItemClickListener(onItemClickListener);
     }
 
     public NavigationController getNavigationController() {
@@ -144,7 +151,6 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
                 } else {
                     mDrawerLayout.openDrawer(mDrawerList);
                 }
-//                toggle();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -186,7 +192,6 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 
         if (mSuggestionsAdapter == null) {
             mSuggestionsAdapter = new SuggestionsAdapter(getSupportActionBar().getThemedContext(), null);
-
         }
 
         searchView.setSuggestionsAdapter(mSuggestionsAdapter);
@@ -204,7 +209,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 
         currentPosition = itemPosition;
 
-        Toast.makeText(this, "" + itemPosition + " " + itemId, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "" + itemPosition + " " + itemId, Toast.LENGTH_SHORT).show();
 
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right);
@@ -308,6 +313,19 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 
 
     }
+
+    final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            switch (position) {
+                case 0:
+                    getContentResolver().delete(SuggestionObject.CONTENT_URI, null, null);
+                    Toast.makeText(MainActivity1.this, R.string.history_was_erased, Toast.LENGTH_SHORT).show();
+                    break;
+            }
+
+        }
+    };
 
 
 }
