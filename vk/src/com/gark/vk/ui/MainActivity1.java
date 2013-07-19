@@ -46,6 +46,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private ListView mDrawerList;
+    private ArrayAdapter<CharSequence> list;
 
 
     @Override
@@ -72,17 +73,21 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
             getNavigationController().pushView(this, R.id.main_frame, fragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
 
             controlsFragment = new ControlsFragment();
-            getNavigationController().pushView(this, R.id.controls_frame, controlsFragment, NavigationController.Transition.VERTICAL, NavigationController.Backstack.DO_NOT_ADD);
-        }
+            getNavigationController().pushView(this, R.id.controls_frame, controlsFragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
 
-//        ArrayAdapter<CharSequence> list = ArrayAdapter.createFromResource(this, R.array.search_list, R.layout.sherlock_spinner_item);
-//        list.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
+//            ArrayAdapter<CharSequence> list = ArrayAdapter.createFromResource(this, R.array.search_list, R.layout.sherlock_spinner_item);
+//            list.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
 //
-//        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-//        getSupportActionBar().setListNavigationCallbacks(list, this);
+//            getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+//            getSupportActionBar().setListNavigationCallbacks(list, this);
 
-//        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+            list = ArrayAdapter.createFromResource(this, R.array.search_list, R.layout.sherlock_spinner_item);
+            list.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
+            getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+            getSupportActionBar().setListNavigationCallbacks(list, this);
+
+        }
 
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -167,6 +172,9 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     @Override
     protected void onDestroy() {
         super.onDestroy();
+//        if (list != null) {
+//            getSupportActionBar().setListNavigationCallbacks(list, null);
+//        }
     }
 
     //    @Override
@@ -209,10 +217,10 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 
         currentPosition = itemPosition;
 
-//        Toast.makeText(this, "" + itemPosition + " " + itemId, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "" + itemPosition + " " + itemId, Toast.LENGTH_SHORT).show();
 
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+//        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+//        ft.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right);
 //        if (fragment.isHidden()) {
 //            ft.show(fragment);
 //            button.setText("Hide");
@@ -221,18 +229,20 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 //            button.setText("Show");
 //        }
 //        ft.commit();
-        switch (itemPosition) {
-            case 0:
-                ft.show(controlsFragment);
-                break;
-            case 1:
-                ft.hide(controlsFragment);
-                break;
-        }
-        ft.commit();
+//        switch (itemPosition) {
+//            case 0:
+//                ft.remove(controlsFragment);
+//                ft.commit();
+//                break;
+//            case 1:
+//                getNavigationController().pushView(this, R.id.controls_frame, controlsFragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
+//                ft.add(controlsFragment);
+//                break;
+//        }
+//        ft.commit();
 
 
-        return false;
+        return true;
     }
 
 
@@ -245,6 +255,8 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         ContentValues contentValues = new ContentValues();
         contentValues.put(SuggestionColumns.TEXT.getName(), query.trim());
         mAsyncQueryHandler.startInsert(0, null, SuggestionObject.CONTENT_URI, contentValues);
+
+        updateSearchMaskValue(query);
         return false;
     }
 
@@ -269,6 +281,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
             query = cursor.getString(cursor.getColumnIndex(SuggestionColumns.TEXT.getName()));
         }
         pushView(query);
+        updateSearchMaskValue(query);
         return false;
     }
 
@@ -312,6 +325,13 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         }
 
 
+    }
+
+    private void updateSearchMaskValue(String filter) {
+        AudioListFragment audioListFragment = (AudioListFragment) getSupportFragmentManager().findFragmentByTag(AudioListFragment.class.getSimpleName());
+        if (audioListFragment != null) {
+            audioListFragment.updateSearchFilter(filter);
+        }
     }
 
     final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {

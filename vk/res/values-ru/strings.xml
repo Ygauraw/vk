@@ -11,5 +11,7 @@
     <string name="clear_search_history">Удалить историю поиска</string>
     <string name="history_was_erased">История поиска удалена</string>
     <string name="no_results">Список пуст</string>
+    <string name="result_search_by">Результаты поиска \"%1$s\"</string>
+    <string name="popular_list">Список популярных треков</string>
 
 </resources>

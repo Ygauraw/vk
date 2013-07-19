@@ -48,6 +48,7 @@ public class AudioListFragment extends NavigationControllerFragment implements L
     private static int offset = 0;
     private int receivedCount;
     private boolean isRequestProceed = false;
+    private TextView searchResult;
 
 
     private BroadcastReceiver onPrepareReceiver;
@@ -64,6 +65,7 @@ public class AudioListFragment extends NavigationControllerFragment implements L
         };
 
         curentQuery = getArguments().getString(QUERY);
+
 
         mApiHelper = new ApiHelper(getActivity(), mResponseReceiver);
         mApiHelper.getSongsList(offset, curentQuery);
@@ -90,6 +92,8 @@ public class AudioListFragment extends NavigationControllerFragment implements L
 
         onPrepareReceiver = new OnPrepareReceiver();
         getActivity().registerReceiver(onPrepareReceiver, new IntentFilter(PlaybackService.SERVICE_ON_PREPARE));
+
+//        updateSearchFilter(curentQuery);
     }
 
     @Override
@@ -105,7 +109,6 @@ public class AudioListFragment extends NavigationControllerFragment implements L
 
     @Override
     public void onDestroy() {
-//        getActivity().unregisterReceiver(musicAdapter.downloadReceiver);
         offset = 0;
         mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
         super.onDestroy();
@@ -116,7 +119,14 @@ public class AudioListFragment extends NavigationControllerFragment implements L
         View view = inflater.inflate(R.layout.audio_list, null);
         list = (ListView) view.findViewById(R.id.audio_list);
         mNoResult = (TextView) view.findViewById(R.id.no_result);
+        searchResult = (TextView) view.findViewById(R.id.search_result_filter);
         return view;
+    }
+
+    public void updateSearchFilter(String mask) {
+        if (searchResult != null && mask != null) {
+            searchResult.setText(getString(R.string.result_search_by, mask));
+        }
     }
 
     @Override

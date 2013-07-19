@@ -22,6 +22,7 @@ import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnInfoListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaPlayer.OnSeekCompleteListener;
+import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -29,6 +30,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.telephony.PhoneStateListener;
@@ -105,7 +107,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     private NotificationCompat.Builder nb;
 
 
-    private MediaPlayer mediaPlayer;
+    private MediaPlayer mMediaPlayer;
     private boolean isPrepared = false;
     private boolean markedRead;
     // Track whether we ever called start() on the media player so we don't try
@@ -139,6 +141,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     private Looper serviceLooper;
     private ServiceHandler serviceHandler;
+    private WifiManager.WifiLock wifiLock;
 
 
     private PlayList mPlayList;
@@ -174,16 +177,21 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     @Override
     public void onCreate() {
         super.onCreate();
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setOnBufferingUpdateListener(this);
-        mediaPlayer.setOnCompletionListener(this);
-        mediaPlayer.setOnErrorListener(this);
-        mediaPlayer.setOnInfoListener(this);
-        mediaPlayer.setOnPreparedListener(this);
-        mediaPlayer.setOnSeekCompleteListener(this);
+        mMediaPlayer = new MediaPlayer();
+        mMediaPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+        mMediaPlayer.setOnBufferingUpdateListener(this);
+        mMediaPlayer.setOnCompletionListener(this);
+        mMediaPlayer.setOnErrorListener(this);
+        mMediaPlayer.setOnInfoListener(this);
+        mMediaPlayer.setOnPreparedListener(this);
+        mMediaPlayer.setOnSeekCompleteListener(this);
 
         mPlayList = new PlayList(this);
         mPlayList.resetPosition();
+
+
+        wifiLock = ((WifiManager) getSystemService(Context.WIFI_SERVICE)).createWifiLock(WifiManager.WIFI_MODE_FULL, "mylock");
+        wifiLock.acquire();
 
 //        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 //        playlist = new PlaylistRepository(getApplicationContext(), getContentResolver());
@@ -290,10 +298,12 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     }
 
     private void showActiveTrack() {
-        String aid = mPlayList.getCurrentItem().getAid();
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MusicColumns.IS_ACTIVE.getName(), 1);
-        asyncQueryHandler.startUpdate(0, null, MusicObject.CONTENT_URI, contentValues, MusicColumns.AID.getName() + "=?", new String[]{aid});
+        if (mPlayList.getCurrentItem() != null) {
+            String aid = mPlayList.getCurrentItem().getAid();
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(MusicColumns.IS_ACTIVE.getName(), 1);
+            asyncQueryHandler.startUpdate(0, null, MusicObject.CONTENT_URI, contentValues, MusicColumns.AID.getName() + "=?", new String[]{aid});
+        }
     }
 
     private void hideActiveTrack() {
@@ -334,19 +344,19 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     synchronized private int getPosition() {
         if (isPrepared) {
-            return mediaPlayer.getCurrentPosition();
+            return mMediaPlayer.getCurrentPosition();
         }
         return 0;
     }
 
     synchronized public boolean isPlaying() {
-        return isPrepared && mediaPlayer.isPlaying();
+        return isPrepared && mMediaPlayer.isPlaying();
     }
 
     synchronized private void seekTo(int pos) {
         if (isPrepared) {
             seekToPosition = 0;
-            mediaPlayer.seekTo((pos * mediaPlayer.getDuration()) / 100);
+            mMediaPlayer.seekTo((pos * mMediaPlayer.getDuration()) / 100);
         }
     }
 
@@ -354,11 +364,15 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         stopPlayer();
 
         try {
+            if (mPlayList.getCurrentItem() == null) {
+                return;
+            }
+
             String playUrl = mPlayList.getCurrentItem().getUrl();
-            mediaPlayer.reset();
-            mediaPlayer.setDataSource(playUrl);
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.prepareAsync();
+            mMediaPlayer.reset();
+            mMediaPlayer.setDataSource(playUrl);
+            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mMediaPlayer.prepareAsync();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -372,7 +386,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         showActiveTrack();
         showNotification(this);
 
-        mediaPlayer.start();
+        mMediaPlayer.start();
         mediaPlayerHasStarted = true;
 
         Intent intent = new Intent(SERVICE_PRESS_PLAY);
@@ -391,7 +405,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
         Log.d(LOG_TAG, "pause");
         if (isPrepared) {
-            mediaPlayer.pause();
+            mMediaPlayer.pause();
         }
     }
 
@@ -403,8 +417,8 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         Log.d(LOG_TAG, "stopPlayer");
         if (isPrepared) {
             isPrepared = false;
-            mediaPlayer.stop();
-            mediaPlayer.seekTo(0);
+            mMediaPlayer.stop();
+            mMediaPlayer.seekTo(0);
             seekToPosition = 0;
         }
     }
@@ -421,7 +435,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         getApplicationContext().sendBroadcast(intent);
 
 
-        if (mediaPlayer != null) {
+        if (mMediaPlayer != null) {
             isPrepared = true;
         }
 
@@ -467,6 +481,8 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         mPlayList.resetPosition();
         stopPlayer();
 
+        wifiLock.release();
+
         if (updateProgressThread != null) {
             updateProgressThread.interrupt();
             try {
@@ -476,18 +492,18 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             }
         }
 
-        if (mediaPlayer != null) {
+        if (mMediaPlayer != null) {
             if (mediaPlayerHasStarted) {
-                mediaPlayer.release();
+                mMediaPlayer.release();
             } else {
-                mediaPlayer.setOnBufferingUpdateListener(null);
-                mediaPlayer.setOnCompletionListener(null);
-                mediaPlayer.setOnErrorListener(null);
-                mediaPlayer.setOnInfoListener(null);
-                mediaPlayer.setOnPreparedListener(null);
-                mediaPlayer.setOnSeekCompleteListener(null);
+                mMediaPlayer.setOnBufferingUpdateListener(null);
+                mMediaPlayer.setOnCompletionListener(null);
+                mMediaPlayer.setOnErrorListener(null);
+                mMediaPlayer.setOnInfoListener(null);
+                mMediaPlayer.setOnPreparedListener(null);
+                mMediaPlayer.setOnSeekCompleteListener(null);
             }
-            mediaPlayer = null;
+            mMediaPlayer = null;
         }
 
         serviceLooper.quit();
@@ -513,7 +529,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     private void updateProgress() {
 
         // Stop updating after mediaplayer is released
-        if (mediaPlayer == null)
+        if (mMediaPlayer == null)
             return;
 
         if (isPrepared) {
@@ -523,8 +539,8 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
                 lastUpdateBroadcast = null;
             }
 
-            int duration = mediaPlayer.getDuration();
-            seekToPosition = mediaPlayer.getCurrentPosition();
+            int duration = mMediaPlayer.getDuration();
+            seekToPosition = mMediaPlayer.getCurrentPosition();
             if (!markedRead) {
                 if (seekToPosition > duration / 10) {
                     markedRead = true;
@@ -536,7 +552,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             tempUpdateBroadcast.putExtra(EXTRA_DOWNLOADED, (int) ((lastBufferPercent / 100.0) * duration));
             tempUpdateBroadcast.putExtra(SECONDARY_PROGRESS, lastBufferPercent);
             tempUpdateBroadcast.putExtra(EXTRA_POSITION, seekToPosition);
-            tempUpdateBroadcast.putExtra(EXTRA_IS_PLAYING, mediaPlayer.isPlaying());
+            tempUpdateBroadcast.putExtra(EXTRA_IS_PLAYING, mMediaPlayer.isPlaying());
             if (mPlayList.getCurrentItem() != null) {
                 tempUpdateBroadcast.putExtra(EXTRA_ARTIST, mPlayList.getCurrentItem().getArtist());
                 tempUpdateBroadcast.putExtra(EXTRA_TITLE, mPlayList.getCurrentItem().getTitle());
@@ -586,7 +602,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     private void handleConnectionError() {
         connectionErrorWaitTime *= 5;
         if (connectionErrorWaitTime > RETRY_SLEEP_TIME) {
-            Log.e(LOG_TAG, "Connection failed.  Resetting mediaPlayer" +
+            Log.e(LOG_TAG, "Connection failed.  Resetting mMediaPlayer" +
                     " and trying again in 30 seconds.");
 
             Intent intent = new Intent(SERVICE_ERROR_NAME);
@@ -601,7 +617,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             connectionErrorWaitTime = RETRY_SLEEP_TIME;
             // Send error notification and keep waiting
             isPrepared = false;
-            mediaPlayer.reset();
+            mMediaPlayer.reset();
         } else {
             Log.w(LOG_TAG, "Connection error. Waiting for " + connectionErrorWaitTime + " milliseconds.");
         }
@@ -619,7 +635,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         }
 
         isPrepared = false;
-        mediaPlayer.reset();
+        mMediaPlayer.reset();
 
         incrementErrorCount();
         if (errorCount < ERROR_RETRY_COUNT) {

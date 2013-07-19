@@ -55,6 +55,7 @@ public class PopularListFragment extends NavigationControllerFragment implements
     private int receivedCount;
     private BroadcastReceiver onPrepareReceiver;
     private boolean isRequestProceed = false;
+    private TextView searchResult;
 
 
     @Override
@@ -110,6 +111,8 @@ public class PopularListFragment extends NavigationControllerFragment implements
         View view = inflater.inflate(R.layout.audio_list, null);
         list = (ListView) view.findViewById(R.id.audio_list);
         mNoResult = (TextView) view.findViewById(R.id.no_result);
+        searchResult = (TextView) view.findViewById(R.id.search_result_filter);
+        searchResult.setText(R.string.popular_list);
         return view;
     }
 
