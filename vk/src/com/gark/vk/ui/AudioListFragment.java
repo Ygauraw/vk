@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.gark.vk.R;
 import com.gark.vk.adapters.MusicAdapter;
@@ -41,10 +42,12 @@ public class AudioListFragment extends NavigationControllerFragment implements L
     private String curentQuery;
     private MusicAdapter musicAdapter;
     private ListView list;
+    private TextView mNoResult;
     private AsyncQueryHandler mAsyncQueryHandler;
     private ApiHelper mApiHelper;
     private static int offset = 0;
     private int receivedCount;
+    private boolean isRequestProceed = false;
 
 
     private BroadcastReceiver onPrepareReceiver;
@@ -64,13 +67,15 @@ public class AudioListFragment extends NavigationControllerFragment implements L
 
         mApiHelper = new ApiHelper(getActivity(), mResponseReceiver);
         mApiHelper.getSongsList(offset, curentQuery);
-
+        getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
 
         musicAdapter = new MusicAdapter(getActivity(), null);
     }
 
     public void updateList(String newQuery) {
+        isRequestProceed = false;
         mApiHelper.getSongsList(offset, newQuery);
+        getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
     }
 
 
@@ -108,8 +113,10 @@ public class AudioListFragment extends NavigationControllerFragment implements L
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        list = (ListView) inflater.inflate(R.layout.audio_list, null);
-        return list;
+        View view = inflater.inflate(R.layout.audio_list, null);
+        list = (ListView) view.findViewById(R.id.audio_list);
+        mNoResult = (TextView) view.findViewById(R.id.no_result);
+        return view;
     }
 
     @Override
@@ -137,6 +144,10 @@ public class AudioListFragment extends NavigationControllerFragment implements L
 //        Intent intent = new Intent();
 //        Toast.makeText(getActivity(), "" + cursor.getCount(), Toast.LENGTH_SHORT).show();
 
+        if (isRequestProceed) {
+            mNoResult.setVisibility((cursor.getCount() == 0) ? View.VISIBLE : View.GONE);
+        }
+
     }
 
     @Override
@@ -151,18 +162,24 @@ public class AudioListFragment extends NavigationControllerFragment implements L
 //            Toast.makeText(getActivity(), "count " + receivedCount, Toast.LENGTH_SHORT).show();
             InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(list.getWindowToken(), 0);
+            updateUI();
         }
 
         @Override
         public void onRequestFailure(int token, Bundle result) {
-
+            updateUI();
         }
 
         @Override
         public void onError(int token, Exception e) {
-
+            updateUI();
         }
     };
+
+    private void updateUI() {
+        isRequestProceed = true;
+        getSherlockActivity().setSupportProgressBarIndeterminateVisibility(false);
+    }
 
     final AbsListView.OnScrollListener mOnScrollListener = new AbsListView.OnScrollListener() {
         @Override
@@ -174,8 +191,10 @@ public class AudioListFragment extends NavigationControllerFragment implements L
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
             if (firstVisibleItem + 3 >= totalItemCount - visibleItemCount) {
                 offset += ApiHelper.COUNT;
+                isRequestProceed = false;
                 mApiHelper.getSongsList(offset, curentQuery);
                 list.setOnScrollListener(null);
+                getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
             }
         }
     };

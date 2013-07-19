@@ -24,6 +24,27 @@
             android:layout_height="wrap_content"
             />
 
+
+    <TextView
+            android:id="@+id/current_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/seekBar"
+            android:layout_marginTop="5dp"
+            android:layout_alignParentLeft="true"
+            android:textColor="@android:color/black"/>
+
+
+    <TextView
+            android:id="@+id/total_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/seekBar"
+            android:layout_marginTop="5dp"
+            android:layout_toLeftOf="@+id/controls_layout"
+            android:textColor="@android:color/black"/>
+
+
     <LinearLayout
             android:layout_centerVertical="true"
             android:id="@+id/controls_layout"
@@ -33,15 +54,15 @@
             android:layout_gravity="center"
             android:orientation="horizontal">
 
-        <CheckBox
-                android:background="@drawable/ic_menu_repeat"
+        <ToggleButton
+                android:background="@drawable/btn_controls"
+                android:button="@drawable/ic_menu_repeat"
                 android:id="@+id/repeat"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:textOff=""
                 android:textOn=""
-                android:button="@null"
                 android:layout_gravity="center"
                 android:checked="false"/>
 
@@ -55,17 +76,16 @@
                 android:adjustViewBounds="true"
                 />
 
-        <CheckBox
+        <ImageView
                 android:id="@+id/play_stop"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center"
-                android:textOff=""
-                android:textOn=""
+                android:background="@drawable/btn_controls"
                 android:layout_gravity="center"
-                android:background="@drawable/ic_play_stop"
-                android:button="@null"
-                />
+                android:src="@drawable/ic_pause_dark_tablet"
+                android:scaleType="centerInside"
+                android:adjustViewBounds="true"/>
 
         <ImageButton
                 android:gravity="center"
@@ -75,20 +95,18 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_fwd_dark_tablet"
-                android:background="@drawable/btn_controls"
-                />
+                android:background="@drawable/btn_controls"/>
 
-        <CheckBox
-                android:background="@drawable/ic_menu_shuffle"
-                android:button="@null"
+        <ToggleButton
+                android:background="@drawable/btn_controls"
+                android:button="@drawable/ic_menu_shuffle"
                 android:id="@+id/shuffle"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:textOff=""
                 android:textOn=""
-                android:layout_gravity="center"
-                />
+                android:layout_gravity="center"/>
 
     </LinearLayout>
 

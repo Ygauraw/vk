@@ -23,6 +23,7 @@ import android.media.MediaPlayer.OnInfoListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaPlayer.OnSeekCompleteListener;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -42,7 +43,6 @@ import com.gark.vk.R;
 import com.gark.vk.db.MusicColumns;
 import com.gark.vk.model.MusicObject;
 import com.gark.vk.model.PlayList;
-import com.gark.vk.ui.MainActivity;
 import com.gark.vk.ui.MainActivity1;
 
 import java.io.IOException;
@@ -62,7 +62,8 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     public static final String SERVICE_ERROR_NAME = SERVICE_PREFIX + "ERROR";
     public static final String SERVICE_PRESS_PLAY = SERVICE_PREFIX + "PRESS_PLAY";
     public static final String SERVICE_ON_PREPARE = SERVICE_PREFIX + "ON_PREPARE";
-    public static final String SERVICE_ON_STOP = SERVICE_PREFIX + "ON_STOP";
+    public static final String SERVICE_ON_PAUSE = SERVICE_PREFIX + "ON_STOP";
+//    public static final String SERVICE_ON_START_PRESSED = SERVICE_PREFIX + "ON_START_PRESSED";
 
     public static final String SERVICE_PLAY_PLAYLIST = SERVICE_PREFIX + "PLAYLIST";
     public static final String SERVICE_PLAY_SINGLE = SERVICE_PREFIX + "PLAY_SINGLE";
@@ -305,6 +306,10 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     private boolean playCurrent(int startingErrorCount, int startingWaitTime) {
         errorCount = startingErrorCount;
         connectionErrorWaitTime = startingWaitTime;
+
+        Intent intent = new Intent(SERVICE_PRESS_PLAY);
+        getApplicationContext().sendBroadcast(intent);
+
         while (errorCount < ERROR_RETRY_COUNT) {
             try {
                 prepareThenPlay();
@@ -323,8 +328,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
                 incrementErrorCount();
             }
         }
-
-
         return false;
     }
 
@@ -350,9 +353,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     private void prepareThenPlay() throws IllegalArgumentException, IllegalStateException, IOException {
         stopPlayer();
 
-        Intent intent = new Intent(SERVICE_PRESS_PLAY);
-        getApplicationContext().sendBroadcast(intent);
-
         try {
             String playUrl = mPlayList.getCurrentItem().getUrl();
             mediaPlayer.reset();
@@ -366,7 +366,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
     synchronized private void play() {
         if (!isPrepared) {
-            Log.e(LOG_TAG, "play - not prepared");
             return;
         }
 
@@ -375,10 +374,20 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
 
         mediaPlayer.start();
         mediaPlayerHasStarted = true;
+
+        Intent intent = new Intent(SERVICE_PRESS_PLAY);
+        Bundle bundle = new Bundle();
+        bundle.putString(SERVICE_PRESS_PLAY, SERVICE_PRESS_PLAY);
+        intent.putExtras(bundle);
+        getApplicationContext().sendBroadcast(intent);
+
     }
 
     synchronized private void pause() {
         hideActiveTrack();
+
+        Intent intent = new Intent(SERVICE_ON_PAUSE);
+        getApplicationContext().sendBroadcast(intent);
 
         Log.d(LOG_TAG, "pause");
         if (isPrepared) {
@@ -398,9 +407,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             mediaPlayer.seekTo(0);
             seekToPosition = 0;
         }
-
-//        Intent intent = new Intent(SERVICE_ON_STOP);
-//        getApplicationContext().sendBroadcast(intent);
     }
 
     @Override
@@ -415,7 +421,6 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         getApplicationContext().sendBroadcast(intent);
 
 
-        Log.d(LOG_TAG, "Prepared");
         if (mediaPlayer != null) {
             isPrepared = true;
         }
@@ -715,7 +720,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     }
 
     private void updateNotification() {
-        if (notification != null && notification.contentView != null){
+        if (notification != null && notification.contentView != null) {
             notification.contentView.setImageViewResource(R.id.play_stop_notification, isPlaying() ? R.drawable.btn_playback_pause_normal_jb_dark : R.drawable.btn_playback_play_normal_jb_dark);
             m_notificationMgr.notify(NOTIFICATION_ID_ALARM, notification);
         }

@@ -12,6 +12,7 @@
             android:orientation="vertical">
 
         <TextView
+                android:layout_margin="5dp"
                 android:id="@+id/music_artist"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -24,6 +25,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
+                android:layout_margin="5dp"
                 android:textColor="@android:color/black"/>
 
 

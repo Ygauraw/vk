@@ -10,6 +10,7 @@
     <string name="downloading_complete">Downloading complete</string>
     <string name="clear_search_history">Clear search history</string>
     <string name="history_was_erased">History was erased</string>
+    <string name="no_results">No results</string>
 
 
     <string name="drawer_open">Open navigation drawer</string>

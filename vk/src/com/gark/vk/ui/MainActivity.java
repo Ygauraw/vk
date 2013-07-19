@@ -50,6 +50,8 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
     // "http://oauth.vk.com/authorize?client_id=3746605&scope=audio,video,friends,offline,groups&redirect_uri=http://oauth.vk.com/blank.html&display=wap&response_type=token";
 //	String get = "https://api.vk.com/method/audio.search.json?q=AC/DC%20-%20Highway%20to%20Hell&access_token=37176714256e377a408a2478728e7c06fc0586dcff56aed28d6b1dd1e3598f3af7e7a9268bb1b3ffd2c6d";
 
+    //"https://api.vk.com/method/video.search.json?q=AC/DC%20-%20Highway%20to%20Hell&access_token=37176714256e377a408a2478728e7c06fc0586dcff56aed28d6b1dd1e3598f3af7e7a9268bb1b3ffd2c6d";
+
     // String uri =
     // "https://oauth.vk.com/authorize?client_id=3746605&response_type=token";
 

@@ -10,5 +10,6 @@
     <string name="downloading_complete">Загрузка завершена</string>
     <string name="clear_search_history">Удалить историю поиска</string>
     <string name="history_was_erased">История поиска удалена</string>
+    <string name="no_results">Список пуст</string>
 
 </resources>

@@ -48,11 +48,13 @@ public class PopularListFragment extends NavigationControllerFragment implements
 
     private MusicAdapter musicAdapter;
     private ListView list;
+    private TextView mNoResult;
     private AsyncQueryHandler mAsyncQueryHandler;
     private ApiHelper mApiHelper;
     private static int offset = 0;
     private int receivedCount;
     private BroadcastReceiver onPrepareReceiver;
+    private boolean isRequestProceed = false;
 
 
     @Override
@@ -63,8 +65,10 @@ public class PopularListFragment extends NavigationControllerFragment implements
         offset = 0;
         mAsyncQueryHandler = new AsyncQueryHandler(getActivity().getContentResolver()) {
         };
+
         mApiHelper = new ApiHelper(getActivity(), mResponseReceiver);
         mApiHelper.getPopular(offset);
+        getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
 
 
         musicAdapter = new MusicAdapter(getActivity(), null);
@@ -95,7 +99,6 @@ public class PopularListFragment extends NavigationControllerFragment implements
     @Override
     public void onDestroy() {
 
-//        getActivity().unregisterReceiver(musicAdapter.downloadReceiver);
         offset = 0;
         mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
         super.onDestroy();
@@ -104,8 +107,10 @@ public class PopularListFragment extends NavigationControllerFragment implements
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        list = (ListView) inflater.inflate(R.layout.audio_list, null);
-        return list;
+        View view = inflater.inflate(R.layout.audio_list, null);
+        list = (ListView) view.findViewById(R.id.audio_list);
+        mNoResult = (TextView) view.findViewById(R.id.no_result);
+        return view;
     }
 
     @Override
@@ -121,7 +126,8 @@ public class PopularListFragment extends NavigationControllerFragment implements
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         musicAdapter.swapCursor(cursor);
-//        this.cursor = cursor;
+
+
         list.setOnScrollListener((receivedCount == 0) ? null : mOnScrollListener);
 
         if (getActivity() != null) {
@@ -129,6 +135,10 @@ public class PopularListFragment extends NavigationControllerFragment implements
             intent.setAction(PlaybackService.SERVICE_PLAY_PLAYLIST);
             intent.putExtra(PlaybackService.SERVICE_PLAY_PLAYLIST, getPlaylist(cursor));
             getActivity().startService(intent);
+        }
+
+        if (isRequestProceed) {
+            mNoResult.setVisibility((cursor.getCount() == 0) ? View.VISIBLE : View.GONE);
         }
 
     }
@@ -139,22 +149,28 @@ public class PopularListFragment extends NavigationControllerFragment implements
     }
 
     final ResponseReceiver mResponseReceiver = new ResponseReceiver() {
+
         @Override
         public void onRequestSuccess(int token, Bundle result) {
             receivedCount = result.getInt(PopularRespoceHandler.COUNT);
-//            Toast.makeText(getActivity(), "count " + receivedCount, Toast.LENGTH_SHORT).show();
+            updateUI();
         }
 
         @Override
         public void onRequestFailure(int token, Bundle result) {
-
+            updateUI();
         }
 
         @Override
         public void onError(int token, Exception e) {
-
+            updateUI();
         }
     };
+
+    private void updateUI() {
+        isRequestProceed = true;
+        getSherlockActivity().setSupportProgressBarIndeterminateVisibility(false);
+    }
 
     final AbsListView.OnScrollListener mOnScrollListener = new AbsListView.OnScrollListener() {
         @Override
@@ -166,7 +182,9 @@ public class PopularListFragment extends NavigationControllerFragment implements
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
             if (firstVisibleItem + 3 >= totalItemCount - visibleItemCount) {
                 offset += ApiHelper.COUNT;
+                isRequestProceed = false;
                 mApiHelper.getPopular(offset);
+                getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
                 list.setOnScrollListener(null);
             }
         }
