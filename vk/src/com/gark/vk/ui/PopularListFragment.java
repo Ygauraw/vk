@@ -49,13 +49,15 @@ public class PopularListFragment extends NavigationControllerFragment implements
     private MusicAdapter musicAdapter;
     private ListView list;
     private TextView mNoResult;
+    private TextView searchResult;
     private AsyncQueryHandler mAsyncQueryHandler;
     private ApiHelper mApiHelper;
     private static int offset = 0;
     private int receivedCount;
     private BroadcastReceiver onPrepareReceiver;
     private boolean isRequestProceed = false;
-    private TextView searchResult;
+    private int mRequestType = ApiHelper.POPULAR_TOKEN;
+    private String searchMask = null;
 
 
     @Override
@@ -68,11 +70,24 @@ public class PopularListFragment extends NavigationControllerFragment implements
         };
 
         mApiHelper = new ApiHelper(getActivity(), mResponseReceiver);
-        mApiHelper.getPopular(offset);
+        mRequestType = ApiHelper.POPULAR_TOKEN;
+        mApiHelper.getSongsList(offset, null, mRequestType);
+
+
         getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
-
-
         musicAdapter = new MusicAdapter(getActivity(), null);
+    }
+
+
+    public void updateSearchFilter(String mask) {
+        if (searchResult != null && mask != null) {
+            offset = 0;
+            searchMask = mask;
+            mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
+            mRequestType = ApiHelper.AUDIO_TOKEN;
+            mApiHelper.getSongsList(offset, searchMask, mRequestType);
+            searchResult.setText(getString(R.string.result_search_by, mask));
+        }
     }
 
 
@@ -86,6 +101,8 @@ public class PopularListFragment extends NavigationControllerFragment implements
 
         onPrepareReceiver = new OnPrepareReceiver();
         getActivity().registerReceiver(onPrepareReceiver, new IntentFilter(PlaybackService.SERVICE_ON_PREPARE));
+
+
     }
 
     @Override
@@ -112,7 +129,8 @@ public class PopularListFragment extends NavigationControllerFragment implements
         list = (ListView) view.findViewById(R.id.audio_list);
         mNoResult = (TextView) view.findViewById(R.id.no_result);
         searchResult = (TextView) view.findViewById(R.id.search_result_filter);
-        searchResult.setText(R.string.popular_list);
+//        searchResult.setText(getString(R.string.result_search_by, mask));
+        searchResult.setText((searchMask == null) ? getString(R.string.popular_list) : getString(R.string.result_search_by, searchMask));
         return view;
     }
 
@@ -186,7 +204,7 @@ public class PopularListFragment extends NavigationControllerFragment implements
             if (firstVisibleItem + 3 >= totalItemCount - visibleItemCount) {
                 offset += ApiHelper.COUNT;
                 isRequestProceed = false;
-                mApiHelper.getPopular(offset);
+                mApiHelper.getSongsList(offset, searchMask, mRequestType);
                 getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
                 list.setOnScrollListener(null);
             }

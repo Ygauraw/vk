@@ -14,11 +14,13 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.gark.vk.R;
 import com.gark.vk.adapters.VideoAdapter;
 import com.gark.vk.db.VideoColumns;
 import com.gark.vk.db.VideoQuery;
+import com.gark.vk.model.MusicObject;
 import com.gark.vk.model.VideoObject;
 import com.gark.vk.navigation.NavigationControllerFragment;
 import com.gark.vk.network.ApiHelper;
@@ -31,14 +33,16 @@ import com.the111min.android.api.response.ResponseReceiver;
 public class VideoListFragment extends NavigationControllerFragment implements LoaderManager.LoaderCallbacks<Cursor>, AdapterView.OnItemClickListener {
 
 
-    public static final String QUERY = "query";
-    private String curentQuery;
     private VideoAdapter videoAdapter;
     private ListView list;
     private AsyncQueryHandler mAsyncQueryHandler;
     private ApiHelper mApiHelper;
     private static int offset = 0;
     private int receivedCount;
+    private TextView mNoResult;
+    private TextView searchResult;
+    private boolean isRequestProceed = false;
+    private String searchMask = null;
 
 
     @Override
@@ -51,14 +55,23 @@ public class VideoListFragment extends NavigationControllerFragment implements L
         mAsyncQueryHandler = new AsyncQueryHandler(getActivity().getContentResolver()) {
         };
 
-        curentQuery = getArguments().getString(QUERY);
-
         mApiHelper = new ApiHelper(getActivity(), mResponseReceiver);
-        mApiHelper.getVideoList(offset, curentQuery);
 
 
         videoAdapter = new VideoAdapter(getActivity(), null);
     }
+
+
+    public void updateSearchFilter(String mask) {
+        if (searchResult != null && mask != null) {
+            offset = 0;
+            searchMask = mask;
+            mAsyncQueryHandler.startDelete(0, null, VideoObject.CONTENT_URI, null, null);
+            mApiHelper.getVideoList(offset, searchMask);
+            searchResult.setText(getString(R.string.result_search_by, mask));
+        }
+    }
+
 
     public void updateList(String newQuery) {
         mApiHelper.getVideoList(offset, newQuery);
@@ -91,8 +104,12 @@ public class VideoListFragment extends NavigationControllerFragment implements L
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        list = (ListView) inflater.inflate(R.layout.audio_list, null);
-        return list;
+        View view = inflater.inflate(R.layout.audio_list, null);
+        list = (ListView) view.findViewById(R.id.audio_list);
+        mNoResult = (TextView) view.findViewById(R.id.no_result);
+        searchResult = (TextView) view.findViewById(R.id.search_result_filter);
+        searchResult.setText((searchMask == null) ? "" : getString(R.string.result_search_by, searchMask));
+        return view;
     }
 
     @Override
@@ -111,15 +128,15 @@ public class VideoListFragment extends NavigationControllerFragment implements L
 //        this.cursor = cursor;
         list.setOnScrollListener((receivedCount == 0) ? null : mOnScrollListener);
 
+        if (isRequestProceed) {
+            mNoResult.setVisibility((cursor.getCount() == 0) ? View.VISIBLE : View.GONE);
+        }
 
-//        Intent intent = new Intent(getActivity(), PlaybackService.class);
-//        intent.setAction(PlaybackService.SERVICE_PLAY_PLAYLIST);
-//        intent.putExtra(PlaybackService.SERVICE_PLAY_PLAYLIST, getPlaylist(cursor));
-//        getActivity().startService(intent);
+    }
 
-//        Intent intent = new Intent();
-//        Toast.makeText(getActivity(), "" + cursor.getCount(), Toast.LENGTH_SHORT).show();
-
+    private void updateUI() {
+        isRequestProceed = true;
+        getSherlockActivity().setSupportProgressBarIndeterminateVisibility(false);
     }
 
     @Override
@@ -131,19 +148,17 @@ public class VideoListFragment extends NavigationControllerFragment implements L
         @Override
         public void onRequestSuccess(int token, Bundle result) {
             receivedCount = result.getInt(PopularRespoceHandler.COUNT);
-//            Toast.makeText(getActivity(), "count " + receivedCount, Toast.LENGTH_SHORT).show();
-//            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-//            imm.hideSoftInputFromWindow(list.getWindowToken(), 0);
+            updateUI();
         }
 
         @Override
         public void onRequestFailure(int token, Bundle result) {
-
+            updateUI();
         }
 
         @Override
         public void onError(int token, Exception e) {
-
+            updateUI();
         }
     };
 
@@ -157,8 +172,9 @@ public class VideoListFragment extends NavigationControllerFragment implements L
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
             if (firstVisibleItem + 3 >= totalItemCount - visibleItemCount) {
                 offset += ApiHelper.COUNT;
-                mApiHelper.getVideoList(offset, curentQuery);
+                mApiHelper.getVideoList(offset, searchMask);
                 list.setOnScrollListener(null);
+                getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
             }
         }
     };
@@ -181,14 +197,16 @@ public class VideoListFragment extends NavigationControllerFragment implements L
         Cursor cursor = ((VideoAdapter) parent.getAdapter()).getCursor();
         if (cursor != null && cursor.moveToPosition(position)) {
             final String player = cursor.getString(cursor.getColumnIndex(VideoColumns.PLAYER.getName()));
+
+            mApiHelper.getVideoDirectFiles(player);
 //            final String title = cursor.getString(cursor.getColumnIndex(MusicColumns.TITLE.getName()));
 
-            Intent i = new Intent(Intent.ACTION_VIEW);
+//            Intent i = new Intent(Intent.ACTION_VIEW);
 //            i.setData(Uri.parse(player));
-            i.setDataAndType(Uri.parse("http://vimeo.com/30592532"), "video/*");
+//            i.setDataAndType(Uri.parse("http://vimeo.com/30592532"), "video/*");
 //            startActivity(i);
 
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://player.vimeo.com/video/30592532")));
+//            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://player.vimeo.com/video/30592532")));
 
 //            Intent localIntent = new Intent("android.intent.action.VIEW");
 //            localIntent.setDataAndType(Uri.fromFile(new File(((DownloadEntry)paramAnonymousView.getTag()).getFilename())), "video/mp4");

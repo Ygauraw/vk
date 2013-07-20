@@ -8,11 +8,15 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -46,14 +50,24 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private ListView mDrawerList;
-    private ArrayAdapter<CharSequence> list;
+    private ViewPager viewPager;
+    private View controlsFrame;
+    private Animation animSlideIn;
+    private Animation animSlideOut;
 
+    private MyFragmentPagerAdapter fragmentPagerAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main1);
+        animSlideIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_left_out);
+        animSlideOut = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.slide_right_in);
+
+        viewPager = (ViewPager) findViewById(R.id.view_pager);
+        controlsFrame = findViewById(R.id.controls_frame);
 
         setTitle("");
         setSupportProgressBarIndeterminateVisibility(false);
@@ -69,11 +83,21 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         navigationController = new NavigationController(this, null);
 
         if (savedInstanceState == null) {
-            Fragment fragment = new PopularListFragment();
-            getNavigationController().pushView(this, R.id.main_frame, fragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
-
             controlsFragment = new ControlsFragment();
             getNavigationController().pushView(this, R.id.controls_frame, controlsFragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
+        }
+
+        fragmentPagerAdapter = new MyFragmentPagerAdapter(getSupportFragmentManager());
+
+        viewPager.setAdapter(fragmentPagerAdapter);
+        viewPager.setOnPageChangeListener(onPageChangeListener);
+
+
+//            Fragment fragment = new PopularListFragment();
+//            getNavigationController().pushView(this, R.id.main_frame, fragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
+//
+//            controlsFragment = new ControlsFragment();
+//            getNavigationController().pushView(this, R.id.controls_frame, controlsFragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
 
 //            ArrayAdapter<CharSequence> list = ArrayAdapter.createFromResource(this, R.array.search_list, R.layout.sherlock_spinner_item);
 //            list.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
@@ -82,12 +106,12 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 //            getSupportActionBar().setListNavigationCallbacks(list, this);
 
 
-            list = ArrayAdapter.createFromResource(this, R.array.search_list, R.layout.sherlock_spinner_item);
-            list.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
-            getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-            getSupportActionBar().setListNavigationCallbacks(list, this);
+//            list = ArrayAdapter.createFromResource(this, R.array.search_list, R.layout.sherlock_spinner_item);
+//            list.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
+//            getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+//            getSupportActionBar().setListNavigationCallbacks(list, this);
 
-        }
+//        }
 
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -125,6 +149,37 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, leftListContent));
         mDrawerList.setOnItemClickListener(onItemClickListener);
     }
+
+    final ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
+
+        @Override
+        public void onPageScrolled(int i, float v, int i2) {
+
+        }
+
+        @Override
+        public void onPageSelected(int i) {
+            FragmentTransaction fmt = getSupportFragmentManager().beginTransaction();
+//            controlsFragment = new ControlsFragment();
+            switch (i) {
+                case 0:
+                    controlsFrame.setAnimation(animSlideOut);
+                    controlsFrame.setVisibility(View.VISIBLE);
+                    break;
+                case 1:
+                    controlsFrame.setAnimation(animSlideIn);
+                    controlsFrame.setVisibility(View.GONE);
+                    break;
+            }
+            fmt.commit();
+
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int i) {
+
+        }
+    };
 
     public NavigationController getNavigationController() {
         return navigationController;
@@ -217,40 +272,13 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 
         currentPosition = itemPosition;
 
-        Toast.makeText(this, "" + itemPosition + " " + itemId, Toast.LENGTH_SHORT).show();
-
-//        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-//        ft.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-//        if (fragment.isHidden()) {
-//            ft.show(fragment);
-//            button.setText("Hide");
-//        } else {
-//            ft.hide(fragment);
-//            button.setText("Show");
-//        }
-//        ft.commit();
-//        switch (itemPosition) {
-//            case 0:
-//                ft.remove(controlsFragment);
-//                ft.commit();
-//                break;
-//            case 1:
-//                getNavigationController().pushView(this, R.id.controls_frame, controlsFragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
-//                ft.add(controlsFragment);
-//                break;
-//        }
-//        ft.commit();
-
-
+//        Toast.makeText(this, "" + itemPosition + " " + itemId, Toast.LENGTH_SHORT).show();
         return true;
     }
 
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-
-
-        pushView(query);
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(SuggestionColumns.TEXT.getName(), query.trim());
@@ -280,58 +308,30 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         if (cursor != null && cursor.moveToPosition(position)) {
             query = cursor.getString(cursor.getColumnIndex(SuggestionColumns.TEXT.getName()));
         }
-        pushView(query);
+//        pushView(query);
         updateSearchMaskValue(query);
         return false;
     }
 
-    private void pushView(String query) {
-
-
-        searchView.clearFocus();
-        searchView.onActionViewCollapsed();
-
-        switch (currentPosition) {
-            case 0:
-
-                AudioListFragment audioListFragment = (AudioListFragment) getSupportFragmentManager().findFragmentByTag(AudioListFragment.class.getSimpleName());
-                if (audioListFragment == null) {
-                    Fragment fragment = new AudioListFragment();
-                    Bundle bundle = new Bundle();
-                    bundle.putString(AudioListFragment.QUERY, query);
-                    fragment.setArguments(bundle);
-                    getNavigationController().pushView(this, R.id.main_frame, fragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
-                } else {
-                    audioListFragment.updateList(query);
-                }
-
-                mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
-                break;
-            case 1:
-
-                VideoListFragment videoListFragment = (VideoListFragment) getSupportFragmentManager().findFragmentByTag(VideoListFragment.class.getSimpleName());
-                if (videoListFragment == null) {
-                    Fragment fragment = new VideoListFragment();
-                    Bundle bundle = new Bundle();
-                    bundle.putString(VideoListFragment.QUERY, query);
-                    fragment.setArguments(bundle);
-                    getNavigationController().pushView(this, R.id.main_frame, fragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
-                } else {
-                    videoListFragment.updateList(query);
-                }
-
-                mAsyncQueryHandler.startDelete(0, null, VideoObject.CONTENT_URI, null, null);
-                break;
-        }
-
-
-    }
 
     private void updateSearchMaskValue(String filter) {
-        AudioListFragment audioListFragment = (AudioListFragment) getSupportFragmentManager().findFragmentByTag(AudioListFragment.class.getSimpleName());
-        if (audioListFragment != null) {
-            audioListFragment.updateSearchFilter(filter);
+
+        switch (viewPager.getCurrentItem()) {
+            case 0:
+                PopularListFragment popularListFragment = (PopularListFragment) getSupportFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + fragmentPagerAdapter.getItemId(0));
+                if (popularListFragment != null) {
+                    popularListFragment.updateSearchFilter(filter);
+                }
+                break;
+            case 1:
+                VideoListFragment videoListFragment = (VideoListFragment) getSupportFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + fragmentPagerAdapter.getItemId(1));
+                if (videoListFragment != null) {
+                    videoListFragment.updateSearchFilter(filter);
+                }
+                break;
         }
+
+
     }
 
     final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
@@ -348,4 +348,30 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     };
 
 
+    public class MyFragmentPagerAdapter extends FragmentPagerAdapter {
+
+        public MyFragmentPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int i) {
+            Fragment fragment = null;
+            switch (i) {
+                case 0:
+                    fragment = new PopularListFragment();
+                    break;
+                case 1:
+                    fragment = new VideoListFragment();
+                    break;
+
+            }
+            return fragment;
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+    }
 }

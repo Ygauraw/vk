@@ -167,7 +167,6 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
     public boolean onQueryTextSubmit(String query) {
 
 
-        pushView(query);
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(SuggestionColumns.TEXT.getName(), query.trim());
@@ -195,51 +194,10 @@ public class MainActivity extends BaseActivity implements SearchView.OnQueryText
         if (cursor != null && cursor.moveToPosition(position)) {
             query = cursor.getString(cursor.getColumnIndex(SuggestionColumns.TEXT.getName()));
         }
-        pushView(query);
         return false;
     }
 
-    private void pushView(String query) {
 
-
-        searchView.clearFocus();
-        searchView.onActionViewCollapsed();
-
-        switch (currentPosition) {
-            case 0:
-
-                AudioListFragment audioListFragment = (AudioListFragment) getSupportFragmentManager().findFragmentByTag(AudioListFragment.class.getSimpleName());
-                if (audioListFragment == null) {
-                    Fragment fragment = new AudioListFragment();
-                    Bundle bundle = new Bundle();
-                    bundle.putString(AudioListFragment.QUERY, query);
-                    fragment.setArguments(bundle);
-                    getNavigationController().pushView(this, R.id.main_frame, fragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
-                } else {
-                    audioListFragment.updateList(query);
-                }
-
-                mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
-                break;
-            case 1:
-
-                VideoListFragment videoListFragment = (VideoListFragment) getSupportFragmentManager().findFragmentByTag(VideoListFragment.class.getSimpleName());
-                if (videoListFragment == null) {
-                    Fragment fragment = new VideoListFragment();
-                    Bundle bundle = new Bundle();
-                    bundle.putString(VideoListFragment.QUERY, query);
-                    fragment.setArguments(bundle);
-                    getNavigationController().pushView(this, R.id.main_frame, fragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
-                } else {
-                    videoListFragment.updateList(query);
-                }
-
-                mAsyncQueryHandler.startDelete(0, null, VideoObject.CONTENT_URI, null, null);
-                break;
-        }
-
-
-    }
 
 
 }

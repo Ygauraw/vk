@@ -10,18 +10,27 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.Volley;
 import com.gark.vk.R;
 import com.gark.vk.db.MusicColumns;
 import com.gark.vk.db.VideoColumns;
+import com.gark.vk.utils.BitmapLruCache;
 
 
 public class VideoAdapter extends CursorAdapter {
 
     private LayoutInflater mInflater;
+    private ImageLoader mImageLoader;
+    RequestQueue mRequestQ;
 
     public VideoAdapter(Context context, Cursor c) {
         super(context, c, false);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mRequestQ = Volley.newRequestQueue(context);
+        mImageLoader = new ImageLoader(mRequestQ, new BitmapLruCache(context));
 
     }
 
@@ -36,9 +45,21 @@ public class VideoAdapter extends CursorAdapter {
         final String player = getCursor().getString(cursor.getColumnIndex(VideoColumns.PLAYER.getName()));
 
 
+        mImageLoader.get(image_url, new ImageLoader.ImageListener() {
+            @Override
+            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                listItem.imgVideo.setImageBitmap(response.getBitmap());
+            }
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+
         listItem.txtTitle.setText(Html.fromHtml(title));
         listItem.txtDuration.setText(String.valueOf(duration));
-        listItem.txtArtist.setText(Html.fromHtml(description) + "\n" + image_url + "\n" + player);
+        listItem.txtArtist.setText(Html.fromHtml(description));
 
     }
 
@@ -49,6 +70,7 @@ public class VideoAdapter extends CursorAdapter {
         listItem.txtArtist = (TextView) view.findViewById(R.id.video_artist);
         listItem.txtDuration = (TextView) view.findViewById(R.id.video_duration);
         listItem.txtTitle = (TextView) view.findViewById(R.id.video_title);
+        listItem.imgVideo = (ImageView) view.findViewById(R.id.video_img);
 
         view.setTag(listItem);
         return view;
@@ -56,6 +78,7 @@ public class VideoAdapter extends CursorAdapter {
     }
 
     public class ViewHolder {
+        ImageView imgVideo;
         TextView txtTitle;
         TextView txtArtist;
         TextView txtDuration;
