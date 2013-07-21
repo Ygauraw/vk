@@ -37,13 +37,12 @@ import com.gark.vk.navigation.NavigationController;
 import com.gark.vk.services.PlaybackService;
 import com.gark.vk.utils.PlayerUtils;
 
-public class MainActivity1 extends SherlockFragmentActivity implements SearchView.OnQueryTextListener, SearchView.OnSuggestionListener, ActionBar.OnNavigationListener {
+public class MainActivity1 extends SherlockFragmentActivity implements SearchView.OnQueryTextListener, SearchView.OnSuggestionListener {
 
     private NavigationController navigationController;
     private AsyncQueryHandler mAsyncQueryHandler;
     private SuggestionsAdapter mSuggestionsAdapter;
     private SearchView searchView;
-    private int currentPosition = 0;
     private ControlsFragment controlsFragment;
 
     private DrawerLayout mDrawerLayout;
@@ -274,14 +273,15 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         return true;
     }
 
-    @Override
-    public boolean onNavigationItemSelected(int itemPosition, long itemId) {
 
-        currentPosition = itemPosition;
 
-//        Toast.makeText(this, "" + itemPosition + " " + itemId, Toast.LENGTH_SHORT).show();
-        return true;
-    }
+//    @Override
+//    public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+//        currentPosition = itemPosition;
+//
+////        Toast.makeText(this, "" + itemPosition + " " + itemId, Toast.LENGTH_SHORT).show();
+//        return true;
+//    }
 
 
     @Override
@@ -292,6 +292,8 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         mAsyncQueryHandler.startInsert(0, null, SuggestionObject.CONTENT_URI, contentValues);
 
         updateSearchMaskValue(query);
+        searchView.clearFocus();
+
         return false;
     }
 
@@ -315,8 +317,10 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         if (cursor != null && cursor.moveToPosition(position)) {
             query = cursor.getString(cursor.getColumnIndex(SuggestionColumns.TEXT.getName()));
         }
-//        pushView(query);
         updateSearchMaskValue(query);
+//        searchView.setQuery("", false);
+        searchView.clearFocus();
+
         return false;
     }
 
