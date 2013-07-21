@@ -1,7 +1,5 @@
 package com.gark.vk.utils;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -9,7 +7,21 @@ public class PlayerUtils {
 
     private static final String SHUFFLE = "SHUFFLE";
     private static final String REPEAT = "REPEAT";
+    private static final String LAST_POSITION = "LAST_POSITION";
     public static final String PLAY_OPTIONS = "PLAY_OPTIONS";
+
+
+    public static void setLastPosition(Context context, int position) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PLAY_OPTIONS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(LAST_POSITION, position);
+        editor.commit();
+    }
+
+    public static int getLastPosition(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PLAY_OPTIONS, Context.MODE_PRIVATE);
+        return sharedPreferences.getInt(LAST_POSITION, 0);
+    }
 
 
     public static void setRepeat(Context context, boolean repeat) {

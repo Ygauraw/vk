@@ -1,12 +1,13 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="horizontal">
 
     <ImageView
+            android:layout_weight="2"
             android:id="@+id/video_img"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:adjustViewBounds="true"
             android:scaleType="centerInside"
             android:layout_centerVertical="true"
@@ -18,8 +19,8 @@
     <LinearLayout
             android:layout_toRightOf="@+id/video_img"
             android:layout_alignParentRight="true"
-            android:layout_weight="5"
-            android:layout_width="wrap_content"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
@@ -45,4 +46,4 @@
     </LinearLayout>
 
 
-</RelativeLayout>
+</LinearLayout>

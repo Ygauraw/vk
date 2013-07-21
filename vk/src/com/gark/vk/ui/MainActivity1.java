@@ -32,11 +32,10 @@ import com.gark.vk.R;
 import com.gark.vk.adapters.SuggestionsAdapter;
 import com.gark.vk.db.SuggestionColumns;
 import com.gark.vk.db.SuggestionQuery;
-import com.gark.vk.model.MusicObject;
 import com.gark.vk.model.SuggestionObject;
-import com.gark.vk.model.VideoObject;
 import com.gark.vk.navigation.NavigationController;
 import com.gark.vk.services.PlaybackService;
+import com.gark.vk.utils.PlayerUtils;
 
 public class MainActivity1 extends SherlockFragmentActivity implements SearchView.OnQueryTextListener, SearchView.OnSuggestionListener, ActionBar.OnNavigationListener {
 
@@ -91,6 +90,8 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 
         viewPager.setAdapter(fragmentPagerAdapter);
         viewPager.setOnPageChangeListener(onPageChangeListener);
+        int currentPosition = PlayerUtils.getLastPosition(this);
+        viewPager.setCurrentItem(currentPosition);
 
 
 //            Fragment fragment = new PopularListFragment();
@@ -224,8 +225,14 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         startService(intent);
     }
 
+    public ViewPager getViewPager() {
+        return viewPager;
+    }
+
     @Override
     protected void onDestroy() {
+        int currentPosition = viewPager.getCurrentItem();
+        PlayerUtils.setLastPosition(this, currentPosition);
         super.onDestroy();
 //        if (list != null) {
 //            getSupportActionBar().setListNavigationCallbacks(list, null);

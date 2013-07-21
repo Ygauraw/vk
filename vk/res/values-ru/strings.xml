@@ -13,5 +13,9 @@
     <string name="no_results">Список пуст</string>
     <string name="result_search_by">Результаты поиска \"%1$s\"</string>
     <string name="popular_list">Список популярных треков</string>
+    <string name="choose_quality">Выберете качество</string>
+    <string name="play">Воспроизвести</string>
+    <string name="download">Загрузить</string>
+    <string name="video_search">Поиск видео</string>
 
 </resources>

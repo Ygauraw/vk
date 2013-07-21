@@ -71,6 +71,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     public static final String SERVICE_PLAY_SINGLE = SERVICE_PREFIX + "PLAY_SINGLE";
     public static final String SERVICE_PLAY_ENTRY = SERVICE_PREFIX + "PLAY_ENTRY";
     public static final String SERVICE_TOGGLE_PLAY = SERVICE_PREFIX + "TOGGLE_PLAY";
+    public static final String SERVICE_STOP = SERVICE_PREFIX + "STOP";
     public static final String SERVICE_BACK_30 = SERVICE_PREFIX + "BACK_30";
     public static final String SERVICE_FORWARD_30 = SERVICE_PREFIX + "FORWARD_30";
     public static final String SERVICE_SEEK_TO = SERVICE_PREFIX + "SEEK_TO";
@@ -275,6 +276,10 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
                     }
                 }
                 updateNotification();
+            } else if (action.equals(SERVICE_STOP)) {
+                if (isPlaying()) {
+                    pause();
+                }
             } else if (action.equals(SERVICE_SEEK_TO)) {
                 seekTo(intent.getIntExtra(EXTRA_SEEK_TO, 0));
             } else if (action.equals(SERVICE_PLAY_NEXT)) {

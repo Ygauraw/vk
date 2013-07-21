@@ -13,7 +13,10 @@
     <string name="no_results">No results</string>
     <string name="result_search_by">Search result by \"%1$s\"</string>
     <string name="popular_list">Popular track list</string>
-
+    <string name="choose_quality">Choose quality</string>
+    <string name="play">Play</string>
+    <string name="download">Download</string>
+    <string name="video_search">Search video</string>
 
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>

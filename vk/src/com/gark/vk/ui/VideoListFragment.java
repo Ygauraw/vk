@@ -1,10 +1,12 @@
 package com.gark.vk.ui;
 
+import android.app.Dialog;
 import android.content.AsyncQueryHandler;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -22,9 +24,12 @@ import com.gark.vk.db.VideoColumns;
 import com.gark.vk.db.VideoQuery;
 import com.gark.vk.model.MusicObject;
 import com.gark.vk.model.VideoObject;
+import com.gark.vk.model.VideoTypes;
 import com.gark.vk.navigation.NavigationControllerFragment;
 import com.gark.vk.network.ApiHelper;
+import com.gark.vk.network.DirectVideoFilesReposeHandler;
 import com.gark.vk.network.PopularRespoceHandler;
+import com.gark.vk.services.PlaybackService;
 import com.the111min.android.api.response.ResponseReceiver;
 
 /**
@@ -43,6 +48,7 @@ public class VideoListFragment extends NavigationControllerFragment implements L
     private TextView searchResult;
     private boolean isRequestProceed = false;
     private String searchMask = null;
+    private String currentTitle = "";
 
 
     @Override
@@ -108,7 +114,7 @@ public class VideoListFragment extends NavigationControllerFragment implements L
         list = (ListView) view.findViewById(R.id.audio_list);
         mNoResult = (TextView) view.findViewById(R.id.no_result);
         searchResult = (TextView) view.findViewById(R.id.search_result_filter);
-        searchResult.setText((searchMask == null) ? "" : getString(R.string.result_search_by, searchMask));
+        searchResult.setText((searchMask == null) ? getString(R.string.video_search) : getString(R.string.result_search_by, searchMask));
         return view;
     }
 
@@ -125,7 +131,6 @@ public class VideoListFragment extends NavigationControllerFragment implements L
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         videoAdapter.swapCursor(cursor);
-//        this.cursor = cursor;
         list.setOnScrollListener((receivedCount == 0) ? null : mOnScrollListener);
 
         if (isRequestProceed) {
@@ -147,18 +152,36 @@ public class VideoListFragment extends NavigationControllerFragment implements L
     final ResponseReceiver mResponseReceiver = new ResponseReceiver() {
         @Override
         public void onRequestSuccess(int token, Bundle result) {
-            receivedCount = result.getInt(PopularRespoceHandler.COUNT);
-            updateUI();
+            switch (token) {
+                case ApiHelper.VIDEO_TOKEN:
+                    VideoTypes videoTypes = result.getParcelable(DirectVideoFilesReposeHandler.VIDEO_TYPES);
+                    DialogFragment dialogFragment = new DialogVideoTypeFragment(videoTypes, currentTitle);
+                    dialogFragment.show(getActivity().getSupportFragmentManager(), "dlg1");
+                    break;
+                default:
+                    receivedCount = result.getInt(PopularRespoceHandler.COUNT);
+                    updateUI();
+                    break;
+            }
+
         }
 
         @Override
         public void onRequestFailure(int token, Bundle result) {
-            updateUI();
+            switch (token) {
+                default:
+                    updateUI();
+                    break;
+            }
         }
 
         @Override
         public void onError(int token, Exception e) {
-            updateUI();
+            switch (token) {
+                default:
+                    updateUI();
+                    break;
+            }
         }
     };
 
@@ -193,12 +216,23 @@ public class VideoListFragment extends NavigationControllerFragment implements L
 //        intent.setAction(PlaybackService.SERVICE_PLAY_SINGLE);
 //        intent.putExtra(PlaybackService.EXTRA_POSITION, position);
 //        getActivity().startService(intent);
+
+        Intent intent = new Intent(getActivity(), PlaybackService.class);
+        intent.setAction(PlaybackService.SERVICE_STOP);
+        getActivity().startService(intent);
+
+        getSherlockActivity().setTitle("ololol");
+
 //
         Cursor cursor = ((VideoAdapter) parent.getAdapter()).getCursor();
         if (cursor != null && cursor.moveToPosition(position)) {
             final String player = cursor.getString(cursor.getColumnIndex(VideoColumns.PLAYER.getName()));
-
+            final String title = cursor.getString(cursor.getColumnIndex(VideoColumns.TITLE.getName()));
+            currentTitle = title;
             mApiHelper.getVideoDirectFiles(player);
+
+//            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://rutube.ru/player.swf?hash=5925153")));
+
 //            final String title = cursor.getString(cursor.getColumnIndex(MusicColumns.TITLE.getName()));
 
 //            Intent i = new Intent(Intent.ACTION_VIEW);
