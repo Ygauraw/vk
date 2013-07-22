@@ -33,13 +33,13 @@ public class VideoRespoceHandler extends ResponseHandler {
     private static final String THUMB = "thumb";
     private static final String IMAGE_MEDIUM = "image_medium";
     private static final String PLAYER = "player";
-    private static final String FILES = "files";
-
-    private static final String MP4_240 = "mp4_240";
-    private static final String MP4_360 = "mp4_360";
-    private static final String MP4_480 = "mp4_480";
-    private static final String MP4_720 = "mp4_720";
-    private static final String EXTERNAL = "external";
+//    private static final String FILES = "files";
+//
+//    private static final String MP4_240 = "mp4_240";
+//    private static final String MP4_360 = "mp4_360";
+//    private static final String MP4_480 = "mp4_480";
+//    private static final String MP4_720 = "mp4_720";
+//    private static final String EXTERNAL = "external";
 
 
     @Override
@@ -107,36 +107,36 @@ public class VideoRespoceHandler extends ResponseHandler {
                 player = item.getString(PLAYER);
             }
 
-            String mp4_240 = null;
-            String mp4_360 = null;
-            String mp4_480 = null;
-            String mp4_720 = null;
-            String external = null;
+//            String mp4_240 = null;
+//            String mp4_360 = null;
+//            String mp4_480 = null;
+//            String mp4_720 = null;
+//            String external = null;
 
-            if (!item.isNull(FILES)) {
-                JSONObject jsonObject = item.getJSONObject(FILES);
-
-                if (!jsonObject.isNull(MP4_240)) {
-                    mp4_240 = item.getString(MP4_240);
-                }
-
-                if (!jsonObject.isNull(MP4_360)) {
-                    mp4_360 = item.getString(MP4_360);
-                }
-
-
-                if (!jsonObject.isNull(MP4_480)) {
-                    mp4_480 = item.getString(MP4_480);
-                }
-
-                if (!jsonObject.isNull(MP4_720)) {
-                    mp4_720 = item.getString(MP4_720);
-                }
-
-                if (!jsonObject.isNull(EXTERNAL)) {
-                    external = item.getString(EXTERNAL);
-                }
-            }
+//            if (!item.isNull(FILES)) {
+//                JSONObject jsonObject = item.getJSONObject(FILES);
+//
+//                if (!jsonObject.isNull(MP4_240)) {
+//                    mp4_240 = item.getString(MP4_240);
+//                }
+//
+//                if (!jsonObject.isNull(MP4_360)) {
+//                    mp4_360 = item.getString(MP4_360);
+//                }
+//
+//
+//                if (!jsonObject.isNull(MP4_480)) {
+//                    mp4_480 = item.getString(MP4_480);
+//                }
+//
+//                if (!jsonObject.isNull(MP4_720)) {
+//                    mp4_720 = item.getString(MP4_720);
+//                }
+//
+//                if (!jsonObject.isNull(EXTERNAL)) {
+//                    external = item.getString(EXTERNAL);
+//                }
+//            }
 
             insertOperations.add(ContentProviderOperation.newInsert(VideoObject.CONTENT_URI)
                     .withValue(VideoColumns.ID.getName(), id)
@@ -148,11 +148,11 @@ public class VideoRespoceHandler extends ResponseHandler {
                     .withValue(VideoColumns.THUMB.getName(), thumb)
                     .withValue(VideoColumns.IMAGE_MEDIUM.getName(), image_medium)
                     .withValue(VideoColumns.PLAYER.getName(), player)
-                    .withValue(VideoColumns.MP4_240.getName(), mp4_240)
-                    .withValue(VideoColumns.MP4_360.getName(), mp4_360)
-                    .withValue(VideoColumns.MP4_480.getName(), mp4_480)
-                    .withValue(VideoColumns.MP4_720.getName(), mp4_720)
-                    .withValue(VideoColumns.EXTERNAL.getName(), external)
+//                    .withValue(VideoColumns.MP4_240.getName(), mp4_240)
+//                    .withValue(VideoColumns.MP4_360.getName(), mp4_360)
+//                    .withValue(VideoColumns.MP4_480.getName(), mp4_480)
+//                    .withValue(VideoColumns.MP4_720.getName(), mp4_720)
+//                    .withValue(VideoColumns.EXTERNAL.getName(), external)
                     .build());
         }
 

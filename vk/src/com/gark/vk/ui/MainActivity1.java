@@ -22,7 +22,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
@@ -36,6 +35,7 @@ import com.gark.vk.model.SuggestionObject;
 import com.gark.vk.navigation.NavigationController;
 import com.gark.vk.services.PlaybackService;
 import com.gark.vk.utils.PlayerUtils;
+import com.viewpagerindicator.TitlePageIndicator;
 
 public class MainActivity1 extends SherlockFragmentActivity implements SearchView.OnQueryTextListener, SearchView.OnSuggestionListener {
 
@@ -44,6 +44,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     private SuggestionsAdapter mSuggestionsAdapter;
     private SearchView searchView;
     private ControlsFragment controlsFragment;
+    private String[] titles;
 
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -54,6 +55,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     private Animation animSlideOut;
 
     private MyFragmentPagerAdapter fragmentPagerAdapter;
+    private TitlePageIndicator mIndicator;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -67,7 +69,9 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         viewPager = (ViewPager) findViewById(R.id.view_pager);
         controlsFrame = findViewById(R.id.controls_frame);
 
-        setTitle("");
+        titles = new String[]{getString(R.string.music), getString(R.string.video)};
+
+//        setTitle("");
         setSupportProgressBarIndeterminateVisibility(false);
 
         mAsyncQueryHandler = new AsyncQueryHandler(getContentResolver()) {
@@ -88,8 +92,12 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         fragmentPagerAdapter = new MyFragmentPagerAdapter(getSupportFragmentManager());
 
         viewPager.setAdapter(fragmentPagerAdapter);
-        viewPager.setOnPageChangeListener(onPageChangeListener);
         int currentPosition = PlayerUtils.getLastPosition(this);
+
+        mIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
+        mIndicator.setOnPageChangeListener(onPageChangeListener);
+        mIndicator.setViewPager(viewPager);
+
         viewPager.setCurrentItem(currentPosition);
 
 
@@ -232,6 +240,10 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     protected void onDestroy() {
         int currentPosition = viewPager.getCurrentItem();
         PlayerUtils.setLastPosition(this, currentPosition);
+//        PlayerUtils.setLastQuery(this, searchView.getQuery().toString());
+
+//        Toast.makeText(this, searchView.getQuery(), Toast.LENGTH_SHORT).show();
+
         super.onDestroy();
 //        if (list != null) {
 //            getSupportActionBar().setListNavigationCallbacks(list, null);
@@ -270,9 +282,10 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
                 .setActionView(searchView)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 //                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+//        searchView.onActionViewExpanded();
+//        searchView.setQuery(PlayerUtils.getLastQuery(this), false);
         return true;
     }
-
 
 
 //    @Override
@@ -363,6 +376,11 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 
         public MyFragmentPagerAdapter(FragmentManager fm) {
             super(fm);
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return titles[position];
         }
 
         @Override

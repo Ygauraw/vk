@@ -5,10 +5,23 @@ import android.content.SharedPreferences;
 
 public class PlayerUtils {
 
+    private static final String LAST_QUERY = "LAST_QUERY";
     private static final String SHUFFLE = "SHUFFLE";
     private static final String REPEAT = "REPEAT";
     private static final String LAST_POSITION = "LAST_POSITION";
     public static final String PLAY_OPTIONS = "PLAY_OPTIONS";
+
+    public static void setLastQuery(Context context, String query) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PLAY_OPTIONS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(LAST_QUERY, query);
+        editor.commit();
+    }
+
+    public static String getLastQuery(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PLAY_OPTIONS, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(LAST_QUERY, "");
+    }
 
 
     public static void setLastPosition(Context context, int position) {

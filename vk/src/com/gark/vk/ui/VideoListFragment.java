@@ -45,7 +45,7 @@ public class VideoListFragment extends NavigationControllerFragment implements L
     private static int offset = 0;
     private int receivedCount;
     private TextView mNoResult;
-    private TextView searchResult;
+//    private TextView searchResult;
     private boolean isRequestProceed = false;
     private String searchMask = null;
     private String currentTitle = "";
@@ -69,19 +69,19 @@ public class VideoListFragment extends NavigationControllerFragment implements L
 
 
     public void updateSearchFilter(String mask) {
-        if (searchResult != null && mask != null) {
+        if (/*searchResult != null && */mask != null) {
             offset = 0;
             searchMask = mask;
             mAsyncQueryHandler.startDelete(0, null, VideoObject.CONTENT_URI, null, null);
             mApiHelper.getVideoList(offset, searchMask);
-            searchResult.setText(getString(R.string.result_search_by, mask));
+//            searchResult.setText(getString(R.string.result_search_by, mask));
         }
     }
 
 
-    public void updateList(String newQuery) {
-        mApiHelper.getVideoList(offset, newQuery);
-    }
+//    public void updateList(String newQuery) {
+//        mApiHelper.getVideoList(offset, newQuery);
+//    }
 
 
     @Override
@@ -113,8 +113,8 @@ public class VideoListFragment extends NavigationControllerFragment implements L
         View view = inflater.inflate(R.layout.audio_list, null);
         list = (ListView) view.findViewById(R.id.audio_list);
         mNoResult = (TextView) view.findViewById(R.id.no_result);
-        searchResult = (TextView) view.findViewById(R.id.search_result_filter);
-        searchResult.setText((searchMask == null) ? getString(R.string.video_search) : getString(R.string.result_search_by, searchMask));
+//        searchResult = (TextView) view.findViewById(R.id.search_result_filter);
+//        searchResult.setText((searchMask == null) ? getString(R.string.video_search) : getString(R.string.result_search_by, searchMask));
         return view;
     }
 
@@ -221,7 +221,7 @@ public class VideoListFragment extends NavigationControllerFragment implements L
         intent.setAction(PlaybackService.SERVICE_STOP);
         getActivity().startService(intent);
 
-        getSherlockActivity().setTitle("ololol");
+//        getSherlockActivity().setTitle("ololol");
 
 //
         Cursor cursor = ((VideoAdapter) parent.getAdapter()).getCursor();

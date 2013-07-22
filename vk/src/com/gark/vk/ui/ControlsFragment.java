@@ -264,10 +264,10 @@ public class ControlsFragment extends NavigationControllerFragment {
             String totalDurationValue = String.format(Locale.getDefault(), MusicAdapter.TIME_FORMATTER, duration / 60, duration % 60);
             totalDuration.setText(totalDurationValue);
 
-            if (artist != null && title != null && ((MainActivity1) getActivity()).getViewPager().getCurrentItem() == 0) {
-                String header = String.format(Locale.getDefault(), "%s \"%s\"", artist, title);
-                getSherlockActivity().getSupportActionBar().setTitle(Html.fromHtml(header));
-            }
+//            if (artist != null && title != null && ((MainActivity1) getActivity()).getViewPager().getCurrentItem() == 0) {
+//                String header = String.format(Locale.getDefault(), "%s \"%s\"", artist, title);
+//                getSherlockActivity().getSupportActionBar().setTitle(Html.fromHtml(header));
+//            }
 
         }
     }

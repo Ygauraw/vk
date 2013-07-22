@@ -286,7 +286,9 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
                 mPlayList.moveToNextTrack();
                 playCurrent(0, 1);
             } else if (action.equals(SERVICE_PLAY_PREVIOUS)) {
-                mPlayList.moveToPreviousTrack();
+                if (mMediaPlayer != null && mMediaPlayer.getCurrentPosition() < 10 * 1000) {
+                    mPlayList.moveToPreviousTrack();
+                }
                 playCurrent(0, 1);
             } else if (action.equals(SERVICE_STOP_PLAYBACK)) {
                 stopSelfResult(startId);

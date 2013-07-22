@@ -4,7 +4,7 @@
         android:layout_height="match_parent">
 
 
-    <TextView
+<!--    <TextView
             android:id="@+id/search_result_filter"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -15,7 +15,7 @@
             android:padding="5dp"
             android:singleLine="true"
             android:background="@color/semi_darker_gray"
-            android:text="@string/result_search_by"/>
+            android:text="@string/result_search_by"/>-->
 
 
     <ListView

@@ -1,10 +1,7 @@
 package com.gark.vk.adapters;
 
-import android.app.DownloadManager;
 import android.content.Context;
 import android.database.Cursor;
-import android.net.Uri;
-import android.os.Environment;
 import android.support.v4.widget.CursorAdapter;
 import android.text.Html;
 import android.view.LayoutInflater;
@@ -12,21 +9,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
 import com.gark.vk.R;
-import com.gark.vk.db.MusicColumns;
 import com.gark.vk.db.VideoColumns;
 import com.gark.vk.utils.BitmapLruCache;
+
+import java.util.Locale;
 
 
 public class VideoAdapter extends CursorAdapter {
 
     private LayoutInflater mInflater;
+    public static final String VIDEO_TIME_FORMATTER_FULL = "%01d:%02d:%02d";
+    public static final String VIDEO_TIME_FORMATTER_MIDDLE = "%02d:%02d";
+    public static final String VIDEO_TIME_FORMATTER_SHORT = "%1d:%02d";
+
     private ImageLoader mImageLoader;
     private RequestQueue mRequestQ;
 
@@ -48,8 +49,6 @@ public class VideoAdapter extends CursorAdapter {
         final String title = getCursor().getString(cursor.getColumnIndex(VideoColumns.TITLE.getName()));
         final long duration = getCursor().getLong(cursor.getColumnIndex(VideoColumns.DURATION.getName()));
         final String image_url = getCursor().getString(cursor.getColumnIndex(VideoColumns.IMAGE_MEDIUM.getName()));
-        final String player = getCursor().getString(cursor.getColumnIndex(VideoColumns.PLAYER.getName()));
-
 
         mImageLoader.get(image_url, new ImageLoader.ImageListener() {
             @Override
@@ -59,33 +58,13 @@ public class VideoAdapter extends CursorAdapter {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-
+                listItem.imgVideo.setImageResource(R.drawable.ic_movie_default);
             }
         });
 
         listItem.txtTitle.setText(Html.fromHtml(title));
-        listItem.txtDuration.setText(String.valueOf(duration));
         listItem.txtArtist.setText(Html.fromHtml(description));
-
-//        listItem.imgVideoDownloader.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-//
-//                request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
-//                request.setAllowedOverRoaming(false);
-//                request.setTitle(title);
-//                request.setDescription(description);
-//                request.setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, title + ".mp4");
-//
-//                dm.enqueue(request);
-//
-//                String downloadToastMessage = context.getString(R.string.downloading_started, artist, title);
-//                Toast.makeText(context, downloadToastMessage, Toast.LENGTH_SHORT).show();
-//
-//            }
-//        });
-
+        listItem.txtDuration.setText(getDuration(duration));
     }
 
     @Override
@@ -108,6 +87,25 @@ public class VideoAdapter extends CursorAdapter {
         TextView txtArtist;
         TextView txtDuration;
 
+    }
+
+    private String getDuration(long duration) {
+        int seconds = (int) (duration % 60);
+        duration /= 60;
+        int minutes = (int) (duration % 60);
+        duration /= 60;
+        int hours = (int) (duration % 24);
+
+        String result = null;
+
+        if (hours > 0) {
+            result = String.format(Locale.getDefault(), VIDEO_TIME_FORMATTER_FULL, hours, minutes, seconds);
+        } else if (hours <= 0 && minutes >= 10) {
+            result = String.format(Locale.getDefault(), VIDEO_TIME_FORMATTER_MIDDLE, minutes, seconds);
+        } else if (hours <= 0 && minutes < 10) {
+            result = String.format(Locale.getDefault(), VIDEO_TIME_FORMATTER_SHORT, minutes, seconds);
+        }
+        return result;
     }
 
 }
