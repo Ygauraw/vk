@@ -18,7 +18,21 @@
     <string name="download">Download</string>
     <string name="video_search">Search video</string>
 
-    <string name="drawer_open">Open navigation drawer</string>
-    <string name="drawer_close">Close navigation drawer</string>
+    <string name="drawer_open" translatable="false">Open navigation drawer</string>
+    <string name="drawer_close" translatable="false">Close navigation drawer</string>
+
+    <string name="foreground_service_started" translatable="false">Service is in the foreground
+    </string>
+    <string name="foreground_service_label" translatable="false">Sample Foreground Service</string>
+
+
+    <!-- not for translate -->
+    <!--<string name="ga_trackingId" translatable="false">UA-42642540-1</string>-->
+
+    <!-- Enable automatic activity tracking -->
+    <bool name="ga_autoActivityTracking" translatable="false">true</bool>
+    <!-- Enable automatic exception tracking -->
+    <bool name="ga_reportUncaughtExceptions" translatable="false">true</bool>
+    <string name="admob_id" translatable="false">a151b1c8e9cc555</string>
 
 </resources>

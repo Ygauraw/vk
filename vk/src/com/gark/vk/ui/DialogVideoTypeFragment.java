@@ -123,8 +123,6 @@ public class DialogVideoTypeFragment extends DialogFragment implements DialogInt
                     url = videoTypes.getVkVideo240();
                     break;
             }
-
-//            Toast.makeText(getActivity(), "i = " + adapterView.getAdapter().getItem(i).toString(), Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -147,7 +145,11 @@ public class DialogVideoTypeFragment extends DialogFragment implements DialogInt
             case Dialog.BUTTON_POSITIVE:
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(Uri.parse(url), "video/*");
-                startActivity(intent);
+                try {
+                    startActivity(intent);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
             case Dialog.BUTTON_NEUTRAL:
                 DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));

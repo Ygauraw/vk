@@ -39,7 +39,6 @@ import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
 import android.widget.RemoteViews;
-import android.widget.Toast;
 
 import com.gark.vk.R;
 import com.gark.vk.db.MusicColumns;
@@ -582,7 +581,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     @Override
     public void onCompletion(MediaPlayer mp) {
 //        Log.w(LOG_TAG, "onComplete()");
-        Toast.makeText(this, "onComplete", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "onComplete", Toast.LENGTH_SHORT).show();
 
 
         mPlayList.moveToNextTrack();
@@ -634,7 +633,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
 
-        Toast.makeText(this, "onError", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "onError", Toast.LENGTH_SHORT).show();
 
         Log.w(LOG_TAG, "onError(" + what + ", " + extra + ")");
         if (!isPrepared) {

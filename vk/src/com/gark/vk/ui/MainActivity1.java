@@ -35,6 +35,7 @@ import com.gark.vk.model.SuggestionObject;
 import com.gark.vk.navigation.NavigationController;
 import com.gark.vk.services.PlaybackService;
 import com.gark.vk.utils.PlayerUtils;
+import com.google.analytics.tracking.android.EasyTracker;
 import com.viewpagerindicator.TitlePageIndicator;
 
 public class MainActivity1 extends SherlockFragmentActivity implements SearchView.OnQueryTextListener, SearchView.OnSuggestionListener {
@@ -156,6 +157,18 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         String[] leftListContent = getResources().getStringArray(R.array.left_list);
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, leftListContent));
         mDrawerList.setOnItemClickListener(onItemClickListener);
+
+
+        //Create the search view
+        searchView = new SearchView(getSupportActionBar().getThemedContext());
+        searchView.setQueryHint(getString(R.string.search_for));
+        searchView.setOnQueryTextListener(this);
+        searchView.setOnSuggestionListener(this);
+//        searchView.setOnCloseListener(onCloseListener);
+
+        if (mSuggestionsAdapter == null) {
+            mSuggestionsAdapter = new SuggestionsAdapter(getSupportActionBar().getThemedContext(), null);
+        }
     }
 
     final ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
@@ -168,7 +181,6 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         @Override
         public void onPageSelected(int i) {
             FragmentTransaction fmt = getSupportFragmentManager().beginTransaction();
-//            controlsFragment = new ControlsFragment();
             switch (i) {
                 case 0:
                     controlsFrame.setAnimation(animSlideOut);
@@ -230,7 +242,15 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         Intent intent = new Intent(this, PlaybackService.class);
         intent.setAction(PlaybackService.NOTIFICATION_CLOSE_APPLICATION);
         startService(intent);
+        EasyTracker.getInstance().activityStop(this); // Add this method.
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EasyTracker.getInstance().activityStart(this); // Add this method.
+    }
+
 
     public ViewPager getViewPager() {
         return viewPager;
@@ -262,28 +282,40 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 //        return super.onMenuItemSelected(featureId, item);
 //    }
 
+
+//    boolean needToCloseSearch = false;
+//    final SearchView.OnCloseListener onCloseListener = new SearchView.OnCloseListener() {
+//        @Override
+//        public boolean onClose() {
+//            needToCloseSearch = true;
+//            Toast.makeText(MainActivity1.this, "close", Toast.LENGTH_SHORT).show();
+//            invalidateOptionsMenu();
+//            return false;
+//        }
+//    };
+
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(final Menu menu) {
 
-        //Create the search view
-        searchView = new SearchView(getSupportActionBar().getThemedContext());
-        searchView.setQueryHint(getString(R.string.search_for));
-        searchView.setOnQueryTextListener(this);
-        searchView.setOnSuggestionListener(this);
-
-        if (mSuggestionsAdapter == null) {
-            mSuggestionsAdapter = new SuggestionsAdapter(getSupportActionBar().getThemedContext(), null);
-        }
 
         searchView.setSuggestionsAdapter(mSuggestionsAdapter);
 
-        menu.add(R.string.search)
+        menu.add(0, 1, 0, R.string.search)
                 .setIcon(R.drawable.abs__ic_search)
                 .setActionView(searchView)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
 //                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
 //        searchView.onActionViewExpanded();
 //        searchView.setQuery(PlayerUtils.getLastQuery(this), false);
+
+//        menu.add(0, 2, 0, R.string.search)
+//                .setIcon(R.drawable.abs__ic_search)
+//                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+//
+//        if (needToCloseSearch){
+//            menu.findItem(2).setVisible(false);
+//        }
+
         return true;
     }
 
@@ -403,4 +435,6 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
             return 2;
         }
     }
+
+
 }
