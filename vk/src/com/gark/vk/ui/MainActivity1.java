@@ -159,12 +159,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         mDrawerList.setOnItemClickListener(onItemClickListener);
 
 
-        //Create the search view
-        searchView = new SearchView(getSupportActionBar().getThemedContext());
-        searchView.setQueryHint(getString(R.string.search_for));
-        searchView.setOnQueryTextListener(this);
-        searchView.setOnSuggestionListener(this);
-//        searchView.setOnCloseListener(onCloseListener);
+
 
         if (mSuggestionsAdapter == null) {
             mSuggestionsAdapter = new SuggestionsAdapter(getSupportActionBar().getThemedContext(), null);
@@ -297,10 +292,16 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
 
+        //Create the search view
+        searchView = new SearchView(getSupportActionBar().getThemedContext());
+        searchView.setQueryHint(getString(R.string.search_for));
+        searchView.setOnQueryTextListener(this);
+        searchView.setOnSuggestionListener(this);
+//        searchView.setOnCloseListener(onCloseListener);
 
         searchView.setSuggestionsAdapter(mSuggestionsAdapter);
 
-        menu.add(0, 1, 0, R.string.search)
+        menu.add(R.string.search)
                 .setIcon(R.drawable.abs__ic_search)
                 .setActionView(searchView)
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
