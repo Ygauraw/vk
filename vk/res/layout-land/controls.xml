@@ -7,10 +7,11 @@
     <!--style="@style/SeekBar"-->
 
     <SeekBar
-            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/player_controls"
             android:id="@+id/seekBar"
             style="@style/SeekBar"
-            android:layout_marginBottom="-5dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
@@ -28,13 +29,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/seekBar"
-            android:layout_alignParentRight="true"
+            android:layout_alignRight="@+id/seekBar"
             android:textColor="@android:color/black"/>
 
 
     <LinearLayout
+            android:layout_centerVertical="true"
+            android:id="@+id/player_controls"
+            android:layout_alignParentRight="true"
             android:layout_centerHorizontal="true"
-            android:layout_below="@+id/seekBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -46,8 +49,8 @@
                 android:id="@+id/repeat"
                 android:adjustViewBounds="true"
                 android:scaleType="centerInside"
-                android:layout_width="48dp"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
                 android:gravity="center"
                 android:layout_gravity="center"
                 android:clickable="true"/>
@@ -72,7 +75,6 @@
                 android:scaleType="centerInside"
                 android:adjustViewBounds="true"/>
 
-        <!--android:background="@drawable/ic_play_stop"-->
 
         <ImageButton
                 android:gravity="center"

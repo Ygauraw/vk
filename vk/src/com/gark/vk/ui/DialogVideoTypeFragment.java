@@ -154,10 +154,12 @@ public class DialogVideoTypeFragment extends DialogFragment implements DialogInt
             case Dialog.BUTTON_NEUTRAL:
                 DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
 
+                request.allowScanningByMediaScanner();
                 request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
                 request.setAllowedOverRoaming(false);
                 request.setTitle(currentTitle);
                 request.setDestinationInExternalFilesDir(getActivity(), Environment.DIRECTORY_DOWNLOADS, currentTitle + ".mp4");
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE | DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 
                 dm.enqueue(request);
 

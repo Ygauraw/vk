@@ -37,28 +37,16 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-<!--        <com.google.ads.AdView
-                android:layout_alignParentTop="true"
-                android:id="@+id/ads"
-                android:layout_alignParentBottom="true"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                ads:adSize="SMART_BANNER"
-                ads:adUnitId="a151ed8f622db1f"
-                ads:loadAdOnCreate="true"/>-->
-
-
         <com.viewpagerindicator.TitlePageIndicator
                 android:id="@+id/indicator"
-                android:layout_alignParentBottom="true"
+                android:layout_alignParentTop="true"
                 android:background="@android:color/white"
                 android:textColor="@color/yellow_bg"
                 app:footerColor="@color/yellow_bg"
                 app:footerIndicatorStyle="underline"
                 app:selectedColor="@android:color/black"
                 android:layout_height="wrap_content"
-                android:layout_width="fill_parent"
-                />
+                android:layout_width="fill_parent"/>
 
         <!--app:selectedColor="@android:color/black"-->
         <!--app:selectedBold="true"-->
@@ -68,13 +56,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/indicator"
-                android:layout_above="@+id/controls_frame"/>
+                android:layout_above="@+id/controls_frame"
+                />
 
         <FrameLayout
                 android:id="@+id/controls_frame"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"/>
+                android:layout_above="@+id/ads"
+                android:layout_alignParentBottom="true"
+                />
+
+
+        <!--<com.google.ads.AdView
+                android:id="@+id/ads"
+                android:layout_alignParentBottom="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                ads:adSize="SMART_BANNER"
+                ads:adUnitId="a151ed8f622db1f"
+                ads:loadAdOnCreate="true"/>-->
 
 
     </RelativeLayout>

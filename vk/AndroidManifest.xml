@@ -47,11 +47,11 @@
 
         <service android:name=".services.PlaybackService"/>
 
-        <receiver android:name=".receiver.DownloaderReceiver">
+<!--        <receiver android:name=".receiver.DownloaderReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.DOWNLOAD_COMPLETE"/>
             </intent-filter>
-        </receiver>
+        </receiver>-->
 
     </application>
 

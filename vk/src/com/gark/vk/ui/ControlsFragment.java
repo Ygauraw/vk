@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.ToggleButton;
 
 import com.gark.vk.R;
 import com.gark.vk.adapters.MusicAdapter;
@@ -37,8 +35,8 @@ public class ControlsFragment extends NavigationControllerFragment {
     private ImageButton btnPrevTrack;
     private SeekBar mSeekBar;
     private ServiceConnection sConn;
-    private ToggleButton tgShuffle;
-    private ToggleButton tgRepeat;
+    private ImageView imgShuffle;
+    private ImageView imgRepeat;
 
     private TextView currentDuration;
     private TextView totalDuration;
@@ -73,13 +71,13 @@ public class ControlsFragment extends NavigationControllerFragment {
         imgPlayStop = (ImageView) view.findViewById(R.id.play_stop);
         imgPlayStop.setOnClickListener(onClickListener);
 
-        tgShuffle = (ToggleButton) view.findViewById(R.id.shuffle);
-        tgShuffle.setChecked(PlayerUtils.getShuffle(getActivity()));
-        tgShuffle.setOnCheckedChangeListener(onCheckedChangeListener);
+        imgShuffle = (ImageView) view.findViewById(R.id.shuffle);
+        updateShuffleButton();
+        imgShuffle.setOnClickListener(onClickListener);
 
-        tgRepeat = (ToggleButton) view.findViewById(R.id.repeat);
-        tgRepeat.setChecked(PlayerUtils.getRepeat(getActivity()));
-        tgRepeat.setOnCheckedChangeListener(onCheckedChangeListener);
+        imgRepeat = (ImageView) view.findViewById(R.id.repeat);
+        updateRepeatButton();
+        imgRepeat.setOnClickListener(onClickListener);
 
         return view;
     }
@@ -88,12 +86,12 @@ public class ControlsFragment extends NavigationControllerFragment {
         @Override
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             switch (buttonView.getId()) {
-                case R.id.shuffle:
-                    PlayerUtils.setShuffle(getActivity(), isChecked);
-                    break;
-                case R.id.repeat:
-                    PlayerUtils.setRepeat(getActivity(), isChecked);
-                    break;
+//                case R.id.shuffle:
+//                    PlayerUtils.setShuffle(getActivity(), isChecked);
+//                    break;
+//                case R.id.repeat:
+//                    PlayerUtils.setRepeat(getActivity(), isChecked);
+//                    break;
                 case R.id.play_stop:
                     if (buttonView.isPressed()) {
                         intent = new Intent(getActivity(), PlaybackService.class);
@@ -126,6 +124,16 @@ public class ControlsFragment extends NavigationControllerFragment {
                     intent = new Intent(getActivity(), PlaybackService.class);
                     intent.setAction(PlaybackService.SERVICE_PLAY_PREVIOUS);
                     getActivity().startService(intent);
+                    break;
+                case R.id.repeat:
+                    boolean isActive = PlayerUtils.getRepeat(getActivity());
+                    PlayerUtils.setRepeat(getActivity(), !isActive);
+                    updateRepeatButton();
+                    break;
+                case R.id.shuffle:
+                    boolean isShuffle = PlayerUtils.getShuffle(getActivity());
+                    PlayerUtils.setShuffle(getActivity(), !isShuffle);
+                    updateShuffleButton();
                     break;
             }
         }
@@ -316,5 +324,15 @@ public class ControlsFragment extends NavigationControllerFragment {
 
     private void showPlay() {
         imgPlayStop.setImageResource(R.drawable.ic_play_dark_tablet);
+    }
+
+    private void updateRepeatButton() {
+        boolean isActive = PlayerUtils.getRepeat(getActivity());
+        imgRepeat.setImageResource(isActive ? R.drawable.ic_repeat_one_song_dark_tablet : R.drawable.ic_repeat_dark_tablet);
+    }
+
+    private void updateShuffleButton() {
+        boolean isActive = PlayerUtils.getShuffle(getActivity());
+        imgShuffle.setImageResource(isActive ? R.drawable.ic_shuffle_dark_selected_tablet : R.drawable.ic_shuffle_dark_tablet);
     }
 }
