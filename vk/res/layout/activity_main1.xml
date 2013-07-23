@@ -64,18 +64,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_above="@+id/ads"
-                android:layout_alignParentBottom="true"
                 />
 
 
-        <!--<com.google.ads.AdView
+        <com.google.ads.AdView
                 android:id="@+id/ads"
                 android:layout_alignParentBottom="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 ads:adSize="SMART_BANNER"
                 ads:adUnitId="a151ed8f622db1f"
-                ads:loadAdOnCreate="true"/>-->
+                ads:loadAdOnCreate="true"/>
 
 
     </RelativeLayout>

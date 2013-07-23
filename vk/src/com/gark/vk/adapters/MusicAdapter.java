@@ -135,13 +135,16 @@ public class MusicAdapter extends CursorAdapter {
             public void onClick(View v) {
                 DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
 
-                request.allowScanningByMediaScanner();
                 request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
                 request.setAllowedOverRoaming(false);
                 request.setTitle(title);
                 request.setDescription(artist);
                 request.setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, title + " " + artist + ".mp3");
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE | DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+                    request.allowScanningByMediaScanner();
+                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE | DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                }
 
                 dm.enqueue(request);
 

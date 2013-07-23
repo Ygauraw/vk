@@ -17,5 +17,7 @@
     <string name="play">Воспроизвести</string>
     <string name="download">Загрузить</string>
     <string name="video_search">Поиск видео</string>
+    <string name="rate_me">Оцени меня</string>
+    <string name="more_app">Больше приложений</string>
 
 </resources>

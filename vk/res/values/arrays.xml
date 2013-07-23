@@ -7,6 +7,8 @@
 
     <string-array name="left_list">
         <item>@string/clear_search_history</item>
+        <item>@string/rate_me</item>
+        <item>@string/more_app</item>
     </string-array>
 
 

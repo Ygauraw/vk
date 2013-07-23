@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
@@ -159,8 +160,6 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         mDrawerList.setOnItemClickListener(onItemClickListener);
 
 
-
-
         if (mSuggestionsAdapter == null) {
             mSuggestionsAdapter = new SuggestionsAdapter(getSupportActionBar().getThemedContext(), null);
         }
@@ -301,6 +300,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 
         searchView.setSuggestionsAdapter(mSuggestionsAdapter);
 
+
         menu.add(R.string.search)
                 .setIcon(R.drawable.abs__ic_search)
                 .setActionView(searchView)
@@ -364,7 +364,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
             query = cursor.getString(cursor.getColumnIndex(SuggestionColumns.TEXT.getName()));
         }
         updateSearchMaskValue(query);
-//        searchView.setQuery("", false);
+        searchView.setQuery(query, false);
         searchView.clearFocus();
 
         return false;
@@ -392,12 +392,31 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     }
 
     final AdapterView.OnItemClickListener onItemClickListener = new AdapterView.OnItemClickListener() {
+
+        String appName;
+
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             switch (position) {
                 case 0:
                     getContentResolver().delete(SuggestionObject.CONTENT_URI, null, null);
                     Toast.makeText(MainActivity1.this, R.string.history_was_erased, Toast.LENGTH_SHORT).show();
+                    break;
+                case 1:
+                    appName = "com.gark.vk";
+                    try {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appName)));
+                    } catch (android.content.ActivityNotFoundException anfe) {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + appName)));
+                    }
+                    break;
+                case 2:
+                    appName = "Modest Fish";
+                    try {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://developer?id=" + appName)));
+                    } catch (android.content.ActivityNotFoundException anfe) {
+                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/developer?id=" + appName)));
+                    }
                     break;
             }
 
