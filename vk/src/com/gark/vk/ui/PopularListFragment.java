@@ -49,7 +49,7 @@ public class PopularListFragment extends NavigationControllerFragment implements
     private MusicAdapter musicAdapter;
     private ListView list;
     private TextView mNoResult;
-//    private TextView searchResult;
+    //    private TextView searchResult;
     private AsyncQueryHandler mAsyncQueryHandler;
     private ApiHelper mApiHelper;
     private static int offset = 0;
@@ -190,7 +190,9 @@ public class PopularListFragment extends NavigationControllerFragment implements
 
     private void updateUI() {
         isRequestProceed = true;
-        getSherlockActivity().setSupportProgressBarIndeterminateVisibility(false);
+        if (getSherlockActivity() != null) {
+            getSherlockActivity().setSupportProgressBarIndeterminateVisibility(false);
+        }
     }
 
     final AbsListView.OnScrollListener mOnScrollListener = new AbsListView.OnScrollListener() {

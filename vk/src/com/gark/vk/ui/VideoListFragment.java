@@ -45,7 +45,7 @@ public class VideoListFragment extends NavigationControllerFragment implements L
     private static int offset = 0;
     private int receivedCount;
     private TextView mNoResult;
-//    private TextView searchResult;
+    //    private TextView searchResult;
     private boolean isRequestProceed = false;
     private String searchMask = null;
     private String currentTitle = "";
@@ -71,6 +71,7 @@ public class VideoListFragment extends NavigationControllerFragment implements L
     public void updateSearchFilter(String mask) {
         if (/*searchResult != null && */mask != null) {
             offset = 0;
+            isRequestProceed = false;
             searchMask = mask;
             mAsyncQueryHandler.startDelete(0, null, VideoObject.CONTENT_URI, null, null);
             mApiHelper.getVideoList(offset, searchMask);
@@ -141,7 +142,9 @@ public class VideoListFragment extends NavigationControllerFragment implements L
 
     private void updateUI() {
         isRequestProceed = true;
-        getSherlockActivity().setSupportProgressBarIndeterminateVisibility(false);
+        if (getSherlockActivity() != null) {
+            getSherlockActivity().setSupportProgressBarIndeterminateVisibility(false);
+        }
     }
 
     @Override
