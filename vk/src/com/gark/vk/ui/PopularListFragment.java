@@ -83,6 +83,7 @@ public class PopularListFragment extends NavigationControllerFragment implements
         if (/*searchResult != null && */mask != null) {
             offset = 0;
             searchMask = mask;
+            isRequestProceed = false;
             mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
             mRequestType = ApiHelper.AUDIO_TOKEN;
             mApiHelper.getSongsList(offset, searchMask, mRequestType);
