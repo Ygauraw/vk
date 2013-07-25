@@ -41,6 +41,7 @@ import com.gark.vk.model.SuggestionObject;
 import com.gark.vk.navigation.NavigationController;
 import com.gark.vk.services.PlaybackService;
 import com.gark.vk.utils.AnalyticsExceptionParser;
+import com.gark.vk.utils.Log;
 import com.gark.vk.utils.PlayerUtils;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.ExceptionReporter;
@@ -65,7 +66,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 
     private MyFragmentPagerAdapter fragmentPagerAdapter;
     private TitlePageIndicator mIndicator;
-    public static final int SEARCH_TOKEN = 444;
+//    public static final int SEARCH_TOKEN = 444;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -74,6 +75,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 
 
         EasyTracker.getInstance().setContext(this);
+        PlayerUtils.motifyIfNoInternet(this);
 
         // Change uncaught exception parser...
         // Note: Checking uncaughtExceptionHandler type can be useful if clearing ga_trackingId during development to disable analytics - avoid NullPointerException.
@@ -259,9 +261,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         startService(intent);
         EasyTracker.getInstance().activityStop(this); // Add this method.
 
-        if (mSuggestionsAdapter != null) {
-            mSuggestionsAdapter.swapCursor(null);
-        }
+
     }
 
     @Override
@@ -279,6 +279,9 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     protected void onDestroy() {
         int currentPosition = viewPager.getCurrentItem();
         PlayerUtils.setLastPosition(this, currentPosition);
+//        if (mSuggestionsAdapter != null) {
+//            mSuggestionsAdapter.swapCursor(null);
+//        }
 //        PlayerUtils.setLastQuery(this, searchView.getQuery().toString());
 
 //        Toast.makeText(this, searchView.getQuery(), Toast.LENGTH_SHORT).show();
@@ -369,12 +372,29 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     }
 
 
+    private final static String SEARCH = "search";
+
     @Override
     public boolean onQueryTextChange(String newText) {
         try {
-            mAsyncQueryHandler.startQuery(0, null, SuggestionObject.CONTENT_URI, SuggestionQuery.PROJECTION, SuggestionColumns.TEXT.getName() + " LIKE ?", new String[]{"%" + newText + "%"}, null);
+//            Bundle bundle = new Bundle();
+//            bundle.putString(SEARCH, newText);
+//            getSupportLoaderManager().restartLoader(SEARCH_TOKEN, bundle, this);
+//            mAsyncQueryHandler.startQuery(0, null, SuggestionObject.CONTENT_URI, SuggestionQuery.PROJECTION, SuggestionColumns.TEXT.getName() + " LIKE ?", new String[]{"%" + newText + "%"}, null);
 //            Cursor cursor = getContentResolver().query(SuggestionObject.CONTENT_URI, SuggestionQuery.PROJECTION, SuggestionColumns.TEXT.getName() + " LIKE ?", new String[]{"%" + newText + "%"}, null);
 //            mSuggestionsAdapter.swapCursor(cursor);
+
+            CursorLoader cursorLoader = new CursorLoader(
+                    this,
+                    SuggestionObject.CONTENT_URI,
+                    SuggestionQuery.PROJECTION,
+                    SuggestionColumns.TEXT.getName() + " LIKE ?",
+                    new String[]{"%" + newText + "%"},
+                    null);
+            Cursor cursor = cursorLoader.loadInBackground();
+            mSuggestionsAdapter.swapCursor(cursor);
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -391,10 +411,16 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     public boolean onSuggestionClick(int position) {
         String query = null;
         try {
-            Cursor cursor = mSuggestionsAdapter.getCursor();
-            if (cursor != null && cursor.moveToPosition(position)) {
+//            Cursor cursor = myCursorAdapter.getItem(position)
+            Cursor cursor = (Cursor) mSuggestionsAdapter.getItem(position);
+            if (cursor != null && !cursor.isClosed()) {
                 query = cursor.getString(cursor.getColumnIndex(SuggestionColumns.TEXT.getName()));
             }
+
+//            Cursor cursor = mSuggestionsAdapter.getCursor();
+//            if (cursor != null && !cursor.isClosed() && cursor.moveToPosition(position)) {
+//                query = cursor.getString(cursor.getColumnIndex(SuggestionColumns.TEXT.getName()));
+//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -462,7 +488,8 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 //    public Loader<Cursor> onCreateLoader(int token, Bundle bundle) {
 //        switch (token) {
 //            case SEARCH_TOKEN:
-//                return new CursorLoader(this, MusicObject.CONTENT_URI, MusicQuery.PROJECTION, null, null, MusicObject.DEFAULT_SORT);
+//                String filter = bundle.getString(SEARCH);
+//                return new CursorLoader(this, SuggestionObject.CONTENT_URI, SuggestionQuery.PROJECTION, SuggestionColumns.TEXT.getName() + " LIKE ?", new String[]{"%" + filter + "%"}, null);
 //            default:
 //                return null;
 //        }
@@ -471,7 +498,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 //
 //    @Override
 //    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-//        mSuggestionsAdapter.changeCursor(cursor);
+//        mSuggestionsAdapter.swapCursor(cursor);
 //    }
 //
 //    @Override

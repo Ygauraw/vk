@@ -46,7 +46,7 @@ public class VideoListFragment extends NavigationControllerFragment implements L
     private int receivedCount;
     private TextView mNoResult;
     //    private TextView searchResult;
-    private boolean isRequestProceed = false;
+//    private boolean isRequestProceed = false;
     private String searchMask = null;
     private String currentTitle = "";
 
@@ -71,7 +71,7 @@ public class VideoListFragment extends NavigationControllerFragment implements L
     public void updateSearchFilter(String mask) {
         if (/*searchResult != null && */mask != null) {
             offset = 0;
-            isRequestProceed = false;
+//            isRequestProceed = false;
             searchMask = mask;
             mAsyncQueryHandler.startDelete(0, null, VideoObject.CONTENT_URI, null, null);
             mApiHelper.getVideoList(offset, searchMask);
@@ -134,17 +134,18 @@ public class VideoListFragment extends NavigationControllerFragment implements L
         videoAdapter.swapCursor(cursor);
         list.setOnScrollListener((receivedCount == 0) ? null : mOnScrollListener);
 
-        if (isRequestProceed) {
-            mNoResult.setVisibility((cursor.getCount() == 0) ? View.VISIBLE : View.GONE);
-        }
+//        if (isRequestProceed) {
+//            mNoResult.setVisibility((cursor.getCount() == 0) ? View.VISIBLE : View.GONE);
+//        }
 
     }
 
     private void updateUI() {
-        isRequestProceed = true;
+//        isRequestProceed = true;
         if (getSherlockActivity() != null) {
             getSherlockActivity().setSupportProgressBarIndeterminateVisibility(false);
         }
+        mNoResult.setVisibility((videoAdapter.getCount() == 0 && receivedCount == 0) ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -173,6 +174,7 @@ public class VideoListFragment extends NavigationControllerFragment implements L
         public void onRequestFailure(int token, Bundle result) {
             switch (token) {
                 default:
+                    receivedCount = 0;
                     updateUI();
                     break;
             }
@@ -182,6 +184,7 @@ public class VideoListFragment extends NavigationControllerFragment implements L
         public void onError(int token, Exception e) {
             switch (token) {
                 default:
+                    receivedCount = 0;
                     updateUI();
                     break;
             }

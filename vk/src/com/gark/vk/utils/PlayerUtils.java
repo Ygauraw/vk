@@ -2,6 +2,11 @@ package com.gark.vk.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.widget.Toast;
+
+import com.gark.vk.R;
 
 public class PlayerUtils {
 
@@ -60,5 +65,14 @@ public class PlayerUtils {
     public static boolean getShuffle(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PLAY_OPTIONS, Context.MODE_PRIVATE);
         return sharedPreferences.getBoolean(SHUFFLE, false);
+    }
+
+    public static void motifyIfNoInternet(Context context) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        boolean isInternetPresent = activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        if (!isInternetPresent) {
+            Toast.makeText(context, R.string.no_internet_connection, Toast.LENGTH_SHORT).show();
+        }
     }
 }

@@ -55,7 +55,7 @@ public class PopularListFragment extends NavigationControllerFragment implements
     private static int offset = 0;
     private int receivedCount;
     private BroadcastReceiver onPrepareReceiver;
-    private boolean isRequestProceed = false;
+    //    private boolean isRequestProceed = false;
     private int mRequestType = ApiHelper.POPULAR_TOKEN;
     private String searchMask = null;
 
@@ -83,7 +83,7 @@ public class PopularListFragment extends NavigationControllerFragment implements
         if (/*searchResult != null && */mask != null) {
             offset = 0;
             searchMask = mask;
-            isRequestProceed = false;
+//            isRequestProceed = false;
             mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
             mRequestType = ApiHelper.AUDIO_TOKEN;
             mApiHelper.getSongsList(offset, searchMask, mRequestType);
@@ -159,9 +159,9 @@ public class PopularListFragment extends NavigationControllerFragment implements
             getActivity().startService(intent);
         }
 
-        if (isRequestProceed) {
-            mNoResult.setVisibility((cursor.getCount() == 0) ? View.VISIBLE : View.GONE);
-        }
+//        if (isRequestProceed) {
+//            mNoResult.setVisibility((cursor.getCount() == 0) ? View.VISIBLE : View.GONE);
+//        }
 
     }
 
@@ -180,20 +180,24 @@ public class PopularListFragment extends NavigationControllerFragment implements
 
         @Override
         public void onRequestFailure(int token, Bundle result) {
+            receivedCount = 0;
             updateUI();
         }
 
         @Override
         public void onError(int token, Exception e) {
+            receivedCount = 0;
             updateUI();
         }
     };
 
     private void updateUI() {
-        isRequestProceed = true;
+//        isRequestProceed = true;
         if (getSherlockActivity() != null) {
             getSherlockActivity().setSupportProgressBarIndeterminateVisibility(false);
         }
+
+        mNoResult.setVisibility((musicAdapter.getCount() == 0 && receivedCount == 0) ? View.VISIBLE : View.GONE);
     }
 
     final AbsListView.OnScrollListener mOnScrollListener = new AbsListView.OnScrollListener() {
@@ -206,7 +210,7 @@ public class PopularListFragment extends NavigationControllerFragment implements
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
             if (firstVisibleItem + 3 >= totalItemCount - visibleItemCount) {
                 offset += ApiHelper.COUNT;
-                isRequestProceed = false;
+//                isRequestProceed = false;
                 mApiHelper.getSongsList(offset, searchMask, mRequestType);
                 getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
                 list.setOnScrollListener(null);

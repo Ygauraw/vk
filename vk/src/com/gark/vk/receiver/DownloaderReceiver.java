@@ -29,49 +29,48 @@ public class DownloaderReceiver extends BroadcastReceiver {
             m_notificationMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
 
-            String action = intent.getAction();
-            if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-                Bundle extras = intent.getExtras();
+            try {
+                String action = intent.getAction();
+                if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
+                    Bundle extras = intent.getExtras();
 
-                final long id = extras.getLong(DownloadManager.EXTRA_DOWNLOAD_ID);
+                    final long id = extras.getLong(DownloadManager.EXTRA_DOWNLOAD_ID);
 
-                DownloadManager.Query query = new DownloadManager.Query();
+                    DownloadManager.Query query = new DownloadManager.Query();
 
-                query.setFilterById(id);
-                Cursor c = dm.query(query);
-                if (c != null && c.moveToFirst()) {
+                    query.setFilterById(id);
+                    Cursor c = dm.query(query);
+                    if (c != null && c.moveToFirst()) {
 
-                    int columnIndex = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                        int columnIndex = c.getColumnIndex(DownloadManager.COLUMN_STATUS);
 
-                    if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(columnIndex)) {
-                        String path = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
-                        String title = c.getString(c.getColumnIndex(DownloadManager.COLUMN_TITLE));
-                        String description = c.getString(c.getColumnIndex(DownloadManager.COLUMN_DESCRIPTION));
+                        if (DownloadManager.STATUS_SUCCESSFUL == c.getInt(columnIndex)) {
+                            String path = c.getString(c.getColumnIndex(DownloadManager.COLUMN_LOCAL_FILENAME));
+                            String title = c.getString(c.getColumnIndex(DownloadManager.COLUMN_TITLE));
+                            String description = c.getString(c.getColumnIndex(DownloadManager.COLUMN_DESCRIPTION));
 
-                        Bitmap bitmap = null;
-                        try {
+                            Bitmap bitmap = null;
+
                             MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
                             mediaMetadataRetriever.setDataSource(path);
                             byte[] img = mediaMetadataRetriever.getEmbeddedPicture();
                             bitmap = BitmapFactory.decodeByteArray(img, 0, img.length);
-                        } catch (Exception e) {
-                            e.printStackTrace();
+
+
+                            NotificationCompat.Builder nb = new NotificationCompat.Builder(context)
+                                    .setContentTitle(title + " " + description)
+                                    .setContentText(context.getString(R.string.downloading_complete))
+                                    .setTicker(context.getString(R.string.downloading_complete))
+                                    .setSmallIcon(R.drawable.download_icon_2)
+                                    .setLargeIcon(bitmap)
+                                    .setOngoing(false);
+
+                            m_notificationMgr.notify((int) id, nb.build());
                         }
-
-
-                        NotificationCompat.Builder nb = new NotificationCompat.Builder(context)
-                                .setContentTitle(title + " " + description)
-                                .setContentText(context.getString(R.string.downloading_complete))
-                                .setTicker(context.getString(R.string.downloading_complete))
-                                .setSmallIcon(R.drawable.download_icon_2)
-                                .setLargeIcon(bitmap)
-                                .setOngoing(false);
-
-                        m_notificationMgr.notify((int) id, nb.build());
                     }
-
-
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

@@ -1,6 +1,8 @@
 package com.gark.vk.network;
 
 import android.content.Context;
+import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 
 import com.the111min.android.api.BaseApiHelper;
 import com.the111min.android.api.request.Request;
@@ -11,6 +13,7 @@ import org.apache.http.protocol.HTTP;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class ApiHelper extends BaseApiHelper {
@@ -21,6 +24,8 @@ public class ApiHelper extends BaseApiHelper {
     public static final int VIDEO_TOKEN = 3;
     public static final int COUNT = 30;
     private Random random;
+    private int englishResultsFlag = 0;
+    private Context context;
     //    private static final String ACCESS_TOKEN = "37176714256e377a408a2478728e7c06fc0586dcff56aed28d6b1dd1e3598f3af7e7a9268bb1b3ffd2c6d";
     private static final String[] ACCESS_TOKENS = new String[]{
             "37176714256e377a408a2478728e7c06fc0586dcff56aed28d6b1dd1e3598f3af7e7a9268bb1b3ffd2c6d", "74e37c7cae5fe2f9d48f5533686cd0979f4e44fd070979ae9dd5d26b42b591161fdefd95396850d0ffde9",
@@ -37,17 +42,18 @@ public class ApiHelper extends BaseApiHelper {
     public ApiHelper(Context context, ResponseReceiver receiver) {
         super(context, receiver);
         random = new Random();
+        this.context = context;
 
     }
-
 
 
     public void getSongsList(int offset, String query, int token) {
         String URL = null;
         switch (token) {
             case POPULAR_TOKEN:
-                URL = "https://api.vk.com/method/audio.getPopular.json?&count=%s&offset=%s&access_token=" + getToken();
-                URL = String.format(URL, COUNT, offset);
+                setEnglishFitterByCountryISO(context);
+                URL = "https://api.vk.com/method/audio.getPopular.json?&count=%s&offset=%s&only_eng=%s&access_token=" + getToken();
+                URL = String.format(URL, COUNT, offset, englishResultsFlag);
                 break;
             case AUDIO_TOKEN:
                 URL = "https://api.vk.com/method/audio.search.json?&q=%s&count=%s&offset=%s&access_token=" + getToken();
@@ -82,6 +88,24 @@ public class ApiHelper extends BaseApiHelper {
 
     private String getToken() {
         return ACCESS_TOKENS[random.nextInt(ACCESS_TOKENS.length)];
+    }
+
+    private void setEnglishFitterByCountryISO(Context context) {
+        TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        String countryCode = tm.getSimCountryIso();
+
+        ArrayList<String> countyIsoList = new ArrayList<String>();
+        countyIsoList.add("ua");
+        countyIsoList.add("ru");
+        countyIsoList.add("by");
+        countyIsoList.add("kz");
+        countyIsoList.add("ee");
+        countyIsoList.add("lv");
+
+        if (countryCode != null && !TextUtils.isEmpty(countryCode) && !countyIsoList.contains(countryCode)) {
+            englishResultsFlag = 1;
+        }
+
     }
 
 }

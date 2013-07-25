@@ -19,5 +19,6 @@
     <string name="video_search">Поиск видео</string>
     <string name="rate_me">Оцени меня</string>
     <string name="more_app">Больше приложений</string>
+    <string name="no_internet_connection">Нет подключения к сети</string>
 
 </resources>

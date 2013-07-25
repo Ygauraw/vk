@@ -143,32 +143,31 @@ public class DialogVideoTypeFragment extends DialogFragment implements DialogInt
     public void onClick(DialogInterface dialogInterface, int i) {
         switch (i) {
             case Dialog.BUTTON_POSITIVE:
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(Uri.parse(url), "video/*");
                 try {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(Uri.parse(url), "video/*");
                     startActivity(intent);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 break;
             case Dialog.BUTTON_NEUTRAL:
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-
-                request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
-                request.setAllowedOverRoaming(false);
-                request.setTitle(currentTitle);
-                request.setDestinationInExternalFilesDir(getActivity(), Environment.DIRECTORY_DOWNLOADS, currentTitle + ".mp4");
-
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
-                    request.allowScanningByMediaScanner();
-                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE | DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                try {
+                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                    request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
+                    request.setAllowedOverRoaming(false);
+                    request.setTitle(currentTitle);
+                    request.setDestinationInExternalFilesDir(getActivity(), Environment.DIRECTORY_DOWNLOADS, currentTitle + ".mp4");
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+                        request.allowScanningByMediaScanner();
+                        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE | DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                    }
+                    dm.enqueue(request);
+                    String downloadToastMessage = getActivity().getString(R.string.downloading_started, "", currentTitle);
+                    Toast.makeText(getActivity(), downloadToastMessage, Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-
-                dm.enqueue(request);
-
-                String downloadToastMessage = getActivity().getString(R.string.downloading_started, "", currentTitle);
-                Toast.makeText(getActivity(), downloadToastMessage, Toast.LENGTH_SHORT).show();
                 break;
         }
     }
