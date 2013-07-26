@@ -282,7 +282,7 @@ public class PopularListFragment extends NavigationControllerFragment implements
         @Override
         public void onReceive(Context context, Intent intent) {
             int position = intent.getIntExtra(PlaybackService.SERVICE_ON_PREPARE, 0);
-            list.smoothScrollToPosition(position);
+            list.setSelection(position);
         }
     }
 
