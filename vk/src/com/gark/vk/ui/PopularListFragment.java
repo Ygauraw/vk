@@ -1,32 +1,23 @@
 package com.gark.vk.ui;
 
-import android.app.SearchManager;
 import android.content.AsyncQueryHandler;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.os.Bundle;
-import android.provider.BaseColumns;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.widget.SearchView;
 import com.gark.vk.R;
 import com.gark.vk.adapters.MusicAdapter;
 import com.gark.vk.db.MusicColumns;
@@ -86,7 +77,8 @@ public class PopularListFragment extends NavigationControllerFragment implements
 //            isRequestProceed = false;
             mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
             mRequestType = ApiHelper.AUDIO_TOKEN;
-            mApiHelper.getSongsList(offset, searchMask, mRequestType);
+//            mApiHelper.getSongsList(offset, searchMask, mRequestType);
+            mApiHelper.getSongsEX(mask);
 //            searchResult.setText(getString(R.string.result_search_by, mask));
         }
     }
