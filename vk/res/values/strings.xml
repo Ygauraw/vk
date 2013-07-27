@@ -30,7 +30,7 @@
 
 
     <!-- not for translate -->
-    <!--<string name="ga_trackingId" translatable="false">UA-42642540-1</string>-->
+    <string name="ga_trackingId" translatable="false">UA-42642540-1</string>
 
     <!-- Enable automatic activity tracking -->
     <bool name="ga_autoActivityTracking" translatable="false">true</bool>

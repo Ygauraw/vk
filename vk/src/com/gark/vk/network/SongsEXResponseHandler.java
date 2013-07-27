@@ -42,38 +42,42 @@ public class SongsEXResponseHandler extends ResponseHandler {
         final ArrayList<ContentProviderOperation> insertOperations = new ArrayList<ContentProviderOperation>();
 
         final JSONObject jsonObj = new JSONObject(text);
-        JSONArray jsonArray = jsonObj.getJSONArray(SONGS);
 
-        for (int i = 0; i < jsonArray.length(); i++) {
-
-            JSONObject item;
-            try {
-                item = jsonArray.getJSONObject(i);
-            } catch (Exception e) {
-                e.printStackTrace();
-                continue;
-            }
+        if (!jsonObj.isNull(SONGS)) {
 
 
-            String aid = null;
-            if (!item.isNull(ID)) {
-                aid = item.getString(ID);
-            }
+            JSONArray jsonArray = jsonObj.getJSONArray(SONGS);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+
+                JSONObject item;
+                try {
+                    item = jsonArray.getJSONObject(i);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    continue;
+                }
+
+
+                String aid = null;
+                if (!item.isNull(ID)) {
+                    aid = item.getString(ID);
+                }
 //
 //            String ownerId = null;
 //            if (!item.isNull(OWNER_ID)) {
 //                ownerId = item.getString(OWNER_ID);
 //            }
 
-            String artist = null;
-            if (!item.isNull(ARTIST)) {
-                artist = item.getString(ARTIST);
-            }
+                String artist = null;
+                if (!item.isNull(ARTIST)) {
+                    artist = item.getString(ARTIST);
+                }
 
-            String title = null;
-            if (!item.isNull(TITLE)) {
-                title = item.getString(TITLE);
-            }
+                String title = null;
+                if (!item.isNull(TITLE)) {
+                    title = item.getString(TITLE);
+                }
 
 
 //            String duration = null;
@@ -81,10 +85,10 @@ public class SongsEXResponseHandler extends ResponseHandler {
 //                duration = item.getString(DURATION);
 //            }
 
-            String url = null;
-            if (!item.isNull(URL)) {
-                url = item.getString(URL);
-            }
+                String url = null;
+                if (!item.isNull(URL)) {
+                    url = item.getString(URL);
+                }
 
 //            String lyrics_id = null;
 //            if (!item.isNull(LYRICS_ID)) {
@@ -101,20 +105,21 @@ public class SongsEXResponseHandler extends ResponseHandler {
 //                album = item.getString(ALBUM);
 //            }
 
-            if (url.endsWith(HOST_AUDIO)) {
+                if (url.endsWith(HOST_AUDIO)) {
 
 
-                insertOperations.add(ContentProviderOperation.newInsert(MusicObject.CONTENT_URI)
-                        .withValue(MusicColumns.AID.getName(), aid)
-                        .withValue(MusicColumns.ARTIST.getName(), artist)
-                        .withValue(MusicColumns.TITLE.getName(), title)
+                    insertOperations.add(ContentProviderOperation.newInsert(MusicObject.CONTENT_URI)
+                            .withValue(MusicColumns.AID.getName(), aid)
+                            .withValue(MusicColumns.ARTIST.getName(), artist)
+                            .withValue(MusicColumns.TITLE.getName(), title)
 //                    .withValue(MusicColumns.DURATION.getName(), duration)
-                        .withValue(MusicColumns.URL.getName(), url)
+                            .withValue(MusicColumns.URL.getName(), url)
 //                    .withValue(MusicColumns.LYRICS_ID.getName(), lyrics_id)
 //                    .withValue(MusicColumns.GENRE.getName(), genre)
-                        .withValue(MusicColumns.IS_ACTIVE.getName(), 0)
+                            .withValue(MusicColumns.IS_ACTIVE.getName(), 0)
 //                    .withValue(MusicColumns.ALBUM.getName(), album)
-                        .build());
+                            .build());
+                }
             }
         }
 

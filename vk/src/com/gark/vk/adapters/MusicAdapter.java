@@ -24,6 +24,7 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -123,33 +124,44 @@ public class MusicAdapter extends CursorAdapter {
             }
         }
 
+        if (title != null) {
+            listItem.txtTitle.setText(Html.fromHtml(title));
+        }
 
-        listItem.txtTitle.setText(Html.fromHtml(title));
 
         String durationValue = String.format(Locale.getDefault(), TIME_FORMATTER, duration / 60, duration % 60);
+        listItem.txtDuration.setText((duration == 0) ? "" : durationValue);
 
-        listItem.txtDuration.setText(durationValue);
-        listItem.txtArtist.setText(Html.fromHtml(artist));
+        if (artist != null) {
+            listItem.txtArtist.setText(Html.fromHtml(artist));
+        }
         listItem.downloader.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
 
-                request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
-                request.setAllowedOverRoaming(false);
-                request.setTitle(title);
-                request.setDescription(artist);
-                request.setDestinationInExternalFilesDir(context, Environment.DIRECTORY_DOWNLOADS, title + " " + artist + ".mp3");
+                try {
+                    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
 
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
-                    request.allowScanningByMediaScanner();
-                    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE | DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                    request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
+                    request.setAllowedOverRoaming(false);
+                    request.setTitle(title);
+                    request.setDescription(artist);
+//                    MimeTypeMap.getSingleton().ge
+
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, title + " " + artist + ".mp3");
+
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+                        request.allowScanningByMediaScanner();
+                        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE | DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+                    }
+
+                    dm.enqueue(request);
+
+                    String downloadToastMessage = context.getString(R.string.downloading_started, artist, title);
+                    Toast.makeText(context, downloadToastMessage, Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-                dm.enqueue(request);
-
-                String downloadToastMessage = context.getString(R.string.downloading_started, artist, title);
-                Toast.makeText(context, downloadToastMessage, Toast.LENGTH_SHORT).show();
 
             }
         });

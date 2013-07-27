@@ -14,6 +14,7 @@ import org.apache.http.protocol.HTTP;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Random;
 
 public class ApiHelper extends BaseApiHelper {
@@ -69,8 +70,9 @@ public class ApiHelper extends BaseApiHelper {
         sendRequest(builder.create());
     }
 
-    public void getSongsEX(String query) {
-        String URL = "http://ex.fm/api/v3/song/search/" + query;
+    public void getSongsEX(String query, int offset) {
+        String URL = "http://ex.fm/api/v3/song/search/%s?results=%s&start=%s";
+        URL = String.format(URL, query, COUNT, offset);
 //        try {
 //            URL = URLEncoder.encode(URL, HTTP.UTF_8);
 //        } catch (UnsupportedEncodingException e) {

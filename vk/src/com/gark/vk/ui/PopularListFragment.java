@@ -77,8 +77,8 @@ public class PopularListFragment extends NavigationControllerFragment implements
 //            isRequestProceed = false;
             mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
             mRequestType = ApiHelper.AUDIO_TOKEN;
-//            mApiHelper.getSongsList(offset, searchMask, mRequestType);
-            mApiHelper.getSongsEX(mask);
+            mApiHelper.getSongsList(offset, searchMask, mRequestType);
+//            mApiHelper.getSongsEX(mask, offset);
 //            searchResult.setText(getString(R.string.result_search_by, mask));
         }
     }
@@ -204,6 +204,7 @@ public class PopularListFragment extends NavigationControllerFragment implements
                 offset += ApiHelper.COUNT;
 //                isRequestProceed = false;
                 mApiHelper.getSongsList(offset, searchMask, mRequestType);
+//                mApiHelper.getSongsEX(searchMask, offset);
                 getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
                 list.setOnScrollListener(null);
             }
@@ -273,8 +274,14 @@ public class PopularListFragment extends NavigationControllerFragment implements
 
         @Override
         public void onReceive(Context context, Intent intent) {
-//            int position = intent.getIntExtra(PlaybackService.SERVICE_ON_PREPARE, 0);
-//            list.setSelection(position);
+            int position = intent.getIntExtra(PlaybackService.SERVICE_ON_PREPARE, 0);
+            int last = list.getLastVisiblePosition();
+            int first = list.getFirstVisiblePosition();
+
+            if (last <= position || position <= first) {
+                list.setSelection(position);
+
+            }
         }
     }
 
