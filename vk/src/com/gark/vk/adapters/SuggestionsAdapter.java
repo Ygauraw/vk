@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.gark.vk.db.SuggestionColumns;
+
 /**
  * Created by Gark on 14.07.13.
  */
@@ -28,7 +30,7 @@ public class SuggestionsAdapter extends CursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         TextView tv = (TextView) view;
-        final int textIndex = cursor.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1);
+        final int textIndex = cursor.getColumnIndex(SuggestionColumns.TEXT.getName());
         tv.setText(cursor.getString(textIndex));
     }
 }

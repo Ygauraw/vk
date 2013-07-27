@@ -1,9 +1,11 @@
 package com.gark.vk.ui;
 
+import android.app.SearchManager;
 import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,11 +20,13 @@ import android.support.v4.content.Loader;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -51,7 +55,8 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 
     private NavigationController navigationController;
     private AsyncQueryHandler mAsyncQueryHandler;
-    private SuggestionsAdapter mSuggestionsAdapter;
+    //    private SuggestionsAdapter mSuggestionsAdapter;
+    private SimpleCursorAdapter mSuggestionsAdapter;
     private SearchView searchView;
     private ControlsFragment controlsFragment;
     private String[] titles;
@@ -182,7 +187,10 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 
 
         if (mSuggestionsAdapter == null) {
-            mSuggestionsAdapter = new SuggestionsAdapter(getSupportActionBar().getThemedContext(), null);
+//            mSuggestionsAdapter = new SuggestionsAdapter(getSupportActionBar().getThemedContext(), null);
+            String[] from = new String[]{SuggestionColumns.TEXT.getName()};
+            int[] to = new int[]{android.R.id.text1};
+            mSuggestionsAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, null, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         }
 
 //        getSupportLoaderManager().initLoader(SEARCH_TOKEN, Bundle.EMPTY, this);
@@ -372,7 +380,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     }
 
 
-    private final static String SEARCH = "search";
+//    private final static String SEARCH = "search";
 
     @Override
     public boolean onQueryTextChange(String newText) {
@@ -384,6 +392,9 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 //            Cursor cursor = getContentResolver().query(SuggestionObject.CONTENT_URI, SuggestionQuery.PROJECTION, SuggestionColumns.TEXT.getName() + " LIKE ?", new String[]{"%" + newText + "%"}, null);
 //            mSuggestionsAdapter.swapCursor(cursor);
 
+
+//            String[] COLUMNS = new String[]{SuggestionColumns.TEXT.getName()};
+
             CursorLoader cursorLoader = new CursorLoader(
                     this,
                     SuggestionObject.CONTENT_URI,
@@ -393,6 +404,21 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
                     null);
             Cursor cursor = cursorLoader.loadInBackground();
             mSuggestionsAdapter.swapCursor(cursor);
+
+//            MatrixCursor matrixCursor = new MatrixCursor(COLUMNS);
+//
+//            if (cursor != null && cursor.moveToFirst()) {
+//                do {
+//                    String text = cursor.getString(cursor.getColumnIndex(SuggestionColumns.TEXT.getName()));
+//                    matrixCursor.addRow(new String[]{text});
+//                } while (cursor.moveToNext());
+//
+//            }
+//            if (cursor != null) {
+//                cursor.close();
+//            }
+//
+//            mSuggestionsAdapter.swapCursor(matrixCursor);
 
 
         } catch (Exception e) {

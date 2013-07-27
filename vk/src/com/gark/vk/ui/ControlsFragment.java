@@ -183,6 +183,7 @@ public class ControlsFragment extends NavigationControllerFragment {
                         showPlay();
                     }
                 }
+                mSeekBar.setEnabled((mService != null && mService.isPlaying()) ? true : false);
             }
 
             public void onServiceDisconnected(ComponentName name) {
@@ -208,6 +209,7 @@ public class ControlsFragment extends NavigationControllerFragment {
 
         onStopReceiver = new OnPauseReceiver();
         getActivity().registerReceiver(onStopReceiver, new IntentFilter(PlaybackService.SERVICE_ON_PAUSE));
+
 
     }
 
@@ -253,8 +255,8 @@ public class ControlsFragment extends NavigationControllerFragment {
                 return;
             }
 
-            final String artist = intent.getStringExtra(PlaybackService.EXTRA_ARTIST);
-            final String title = intent.getStringExtra(PlaybackService.EXTRA_TITLE);
+//            final String artist = intent.getStringExtra(PlaybackService.EXTRA_ARTIST);
+//            final String title = intent.getStringExtra(PlaybackService.EXTRA_TITLE);
             int secondary = intent.getIntExtra(PlaybackService.SECONDARY_PROGRESS, 0);
             int position = intent.getIntExtra(PlaybackService.EXTRA_POSITION, 0);
 //            int downloaded = intent.getIntExtra(PlaybackService.EXTRA_DOWNLOADED, 1);
@@ -290,6 +292,7 @@ public class ControlsFragment extends NavigationControllerFragment {
             } else {
                 getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
             }
+            mSeekBar.setEnabled(true);
 
 
         }
@@ -313,6 +316,7 @@ public class ControlsFragment extends NavigationControllerFragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             showPlay();
+            mSeekBar.setEnabled(false);
         }
     }
 
