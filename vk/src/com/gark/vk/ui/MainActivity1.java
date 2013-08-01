@@ -1,11 +1,9 @@
 package com.gark.vk.ui;
 
-import android.app.SearchManager;
 import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,13 +12,16 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -30,28 +31,19 @@ import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
-import com.actionbarsherlock.widget.SearchView;
 import com.gark.vk.R;
-import com.gark.vk.adapters.SuggestionsAdapter;
-import com.gark.vk.db.MusicQuery;
 import com.gark.vk.db.SuggestionColumns;
 import com.gark.vk.db.SuggestionQuery;
-import com.gark.vk.model.MusicObject;
 import com.gark.vk.model.SuggestionObject;
 import com.gark.vk.navigation.NavigationController;
 import com.gark.vk.services.PlaybackService;
 import com.gark.vk.utils.AnalyticsExceptionParser;
-import com.gark.vk.utils.Log;
 import com.gark.vk.utils.PlayerUtils;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.ExceptionReporter;
 import com.viewpagerindicator.TitlePageIndicator;
 
-public class MainActivity1 extends SherlockFragmentActivity implements SearchView.OnQueryTextListener, SearchView.OnSuggestionListener/*, LoaderManager.LoaderCallbacks<Cursor> */ {
+public class MainActivity1 extends ActionBarActivity implements SearchView.OnQueryTextListener, SearchView.OnSuggestionListener/*, LoaderManager.LoaderCallbacks<Cursor> */ {
 
     private NavigationController navigationController;
     private AsyncQueryHandler mAsyncQueryHandler;
@@ -75,7 +67,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        requestWindowFeature(getWindow().FEATURE_INDETERMINATE_PROGRESS);
         super.onCreate(savedInstanceState);
 
 
@@ -128,26 +120,6 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 
         viewPager.setCurrentItem(currentPosition);
 
-
-//            Fragment fragment = new PopularListFragment();
-//            getNavigationController().pushView(this, R.id.main_frame, fragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
-//
-//            controlsFragment = new ControlsFragment();
-//            getNavigationController().pushView(this, R.id.controls_frame, controlsFragment, NavigationController.Transition.NO_EFFECT, NavigationController.Backstack.DO_NOT_ADD);
-
-//            ArrayAdapter<CharSequence> list = ArrayAdapter.createFromResource(this, R.array.search_list, R.layout.sherlock_spinner_item);
-//            list.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
-//
-//            getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-//            getSupportActionBar().setListNavigationCallbacks(list, this);
-
-
-//            list = ArrayAdapter.createFromResource(this, R.array.search_list, R.layout.sherlock_spinner_item);
-//            list.setDropDownViewResource(R.layout.sherlock_spinner_dropdown_item);
-//            getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-//            getSupportActionBar().setListNavigationCallbacks(list, this);
-
-//        }
 
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -246,6 +218,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         mDrawerToggle.syncState();
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
@@ -260,6 +233,7 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
         }
         return super.onOptionsItemSelected(item);
     }
+
 
     @Override
     protected void onStop() {
@@ -279,56 +253,20 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     }
 
 
-//    public ViewPager getViewPager() {
-//        return viewPager;
-//    }
-
     @Override
     protected void onDestroy() {
         int currentPosition = viewPager.getCurrentItem();
         PlayerUtils.setLastPosition(this, currentPosition);
-//        if (mSuggestionsAdapter != null) {
-//            mSuggestionsAdapter.swapCursor(null);
-//        }
-//        PlayerUtils.setLastQuery(this, searchView.getQuery().toString());
-
-//        Toast.makeText(this, searchView.getQuery(), Toast.LENGTH_SHORT).show();
-
         super.onDestroy();
-//        if (list != null) {
-//            getSupportActionBar().setListNavigationCallbacks(list, null);
-//        }
     }
 
-    //    @Override
-//    public boolean onMenuItemSelected(int featureId, MenuItem item) {
-//
-//        int itemId = item.getItemId();
-//        switch (itemId) {
-//            case android.R.id.home:
-////                toggle();
-//                break;
-//        }
-//        return super.onMenuItemSelected(featureId, item);
-//    }
-
-
-//    boolean needToCloseSearch = false;
-//    final SearchView.OnCloseListener onCloseListener = new SearchView.OnCloseListener() {
-//        @Override
-//        public boolean onClose() {
-//            needToCloseSearch = true;
-//            Toast.makeText(MainActivity1.this, "close", Toast.LENGTH_SHORT).show();
-//            invalidateOptionsMenu();
-//            return false;
-//        }
-//    };
 
     @Override
-    public boolean onCreateOptionsMenu(final Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        MenuItem searchItem = menu.findItem(R.id.menu_search);
 
-        //Create the search view
-        searchView = new SearchView(getSupportActionBar().getThemedContext());
+        searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
         searchView.setQueryHint(getString(R.string.search_for));
         searchView.setOnQueryTextListener(this);
         searchView.setOnSuggestionListener(this);
@@ -336,34 +274,13 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 
         searchView.setSuggestionsAdapter(mSuggestionsAdapter);
 
-
-        menu.add(R.string.search)
-                .setIcon(R.drawable.abs__ic_search)
-                .setActionView(searchView)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-//                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM | MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-//        searchView.onActionViewExpanded();
-//        searchView.setQuery(PlayerUtils.getLastQuery(this), false);
-
-//        menu.add(0, 2, 0, R.string.search)
-//                .setIcon(R.drawable.abs__ic_search)
+//        menu.add(R.string.search)
+//                .setIcon(R.drawable.search_black)
+//                .setActionView(searchView)
 //                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-//
-//        if (needToCloseSearch){
-//            menu.findItem(2).setVisible(false);
-//        }
 
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
-
-
-//    @Override
-//    public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-//        currentPosition = itemPosition;
-//
-////        Toast.makeText(this, "" + itemPosition + " " + itemId, Toast.LENGTH_SHORT).show();
-//        return true;
-//    }
 
 
     @Override
@@ -437,16 +354,10 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
     public boolean onSuggestionClick(int position) {
         String query = null;
         try {
-//            Cursor cursor = myCursorAdapter.getItem(position)
             Cursor cursor = (Cursor) mSuggestionsAdapter.getItem(position);
             if (cursor != null && !cursor.isClosed()) {
                 query = cursor.getString(cursor.getColumnIndex(SuggestionColumns.TEXT.getName()));
             }
-
-//            Cursor cursor = mSuggestionsAdapter.getCursor();
-//            if (cursor != null && !cursor.isClosed() && cursor.moveToPosition(position)) {
-//                query = cursor.getString(cursor.getColumnIndex(SuggestionColumns.TEXT.getName()));
-//            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -509,28 +420,6 @@ public class MainActivity1 extends SherlockFragmentActivity implements SearchVie
 
         }
     };
-
-//    @Override
-//    public Loader<Cursor> onCreateLoader(int token, Bundle bundle) {
-//        switch (token) {
-//            case SEARCH_TOKEN:
-//                String filter = bundle.getString(SEARCH);
-//                return new CursorLoader(this, SuggestionObject.CONTENT_URI, SuggestionQuery.PROJECTION, SuggestionColumns.TEXT.getName() + " LIKE ?", new String[]{"%" + filter + "%"}, null);
-//            default:
-//                return null;
-//        }
-//
-//    }
-//
-//    @Override
-//    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-//        mSuggestionsAdapter.swapCursor(cursor);
-//    }
-//
-//    @Override
-//    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-//        mSuggestionsAdapter.swapCursor(null);
-//    }
 
 
     public class MyFragmentPagerAdapter extends FragmentPagerAdapter {

@@ -1,10 +1,8 @@
 package com.gark.vk.ui;
 
-import android.app.Dialog;
 import android.content.AsyncQueryHandler;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
@@ -22,7 +20,6 @@ import com.gark.vk.R;
 import com.gark.vk.adapters.VideoAdapter;
 import com.gark.vk.db.VideoColumns;
 import com.gark.vk.db.VideoQuery;
-import com.gark.vk.model.MusicObject;
 import com.gark.vk.model.VideoObject;
 import com.gark.vk.model.VideoTypes;
 import com.gark.vk.navigation.NavigationControllerFragment;
@@ -30,6 +27,8 @@ import com.gark.vk.network.ApiHelper;
 import com.gark.vk.network.DirectVideoFilesReposeHandler;
 import com.gark.vk.network.PopularRespoceHandler;
 import com.gark.vk.services.PlaybackService;
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Tracker;
 import com.the111min.android.api.response.ResponseReceiver;
 
 /**
@@ -45,10 +44,9 @@ public class VideoListFragment extends NavigationControllerFragment implements L
     private static int offset = 0;
     private int receivedCount;
     private TextView mNoResult;
-    //    private TextView searchResult;
-//    private boolean isRequestProceed = false;
     private String searchMask = null;
     private String currentTitle = "";
+    private Tracker myTracker = EasyTracker.getTracker();
 
 
     @Override
@@ -142,8 +140,8 @@ public class VideoListFragment extends NavigationControllerFragment implements L
 
     private void updateUI() {
 //        isRequestProceed = true;
-        if (getSherlockActivity() != null) {
-            getSherlockActivity().setSupportProgressBarIndeterminateVisibility(false);
+        if (getActivity() != null) {
+            getActivity().setProgressBarIndeterminateVisibility(false);
         }
         mNoResult.setVisibility((videoAdapter.getCount() == 0 && receivedCount == 0) ? View.VISIBLE : View.GONE);
     }
@@ -158,9 +156,13 @@ public class VideoListFragment extends NavigationControllerFragment implements L
         public void onRequestSuccess(int token, Bundle result) {
             switch (token) {
                 case ApiHelper.VIDEO_TOKEN:
-                    VideoTypes videoTypes = result.getParcelable(DirectVideoFilesReposeHandler.VIDEO_TYPES);
-                    DialogFragment dialogFragment = new DialogVideoTypeFragment(videoTypes, currentTitle);
-                    dialogFragment.show(getActivity().getSupportFragmentManager(), "dlg1");
+                    try {
+                        VideoTypes videoTypes = result.getParcelable(DirectVideoFilesReposeHandler.VIDEO_TYPES);
+                        DialogFragment dialogFragment = new DialogVideoTypeFragment(videoTypes, currentTitle);
+                        dialogFragment.show(getActivity().getSupportFragmentManager(), "dlg1");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     break;
                 default:
                     receivedCount = result.getInt(PopularRespoceHandler.COUNT);
@@ -186,6 +188,7 @@ public class VideoListFragment extends NavigationControllerFragment implements L
                 default:
                     receivedCount = 0;
                     updateUI();
+                    myTracker.sendException(e.getMessage() + "\n" + VideoListFragment.class.getSimpleName(), false);
                     break;
             }
         }
@@ -203,7 +206,7 @@ public class VideoListFragment extends NavigationControllerFragment implements L
                 offset += ApiHelper.COUNT;
                 mApiHelper.getVideoList(offset, searchMask);
                 list.setOnScrollListener(null);
-                getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
+                getActivity().setProgressBarIndeterminateVisibility(true);
             }
         }
     };

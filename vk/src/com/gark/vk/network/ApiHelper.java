@@ -70,18 +70,18 @@ public class ApiHelper extends BaseApiHelper {
         sendRequest(builder.create());
     }
 
-    public void getSongsEX(String query, int offset) {
-        String URL = "http://ex.fm/api/v3/song/search/%s?results=%s&start=%s";
-        URL = String.format(URL, query, COUNT, offset);
-//        try {
-//            URL = URLEncoder.encode(URL, HTTP.UTF_8);
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
-
-        Request.Builder builder = new Request.Builder(URL, RequestMethod.GET).setResponseHandler(SongsEXResponseHandler.class);
-        sendRequest(builder.create());
-    }
+//    public void getSongsEX(String query, int offset) {
+//        String URL = "http://ex.fm/api/v3/song/search/%s?results=%s&start=%s";
+//        URL = String.format(URL, query, COUNT, offset);
+////        try {
+////            URL = URLEncoder.encode(URL, HTTP.UTF_8);
+////        } catch (UnsupportedEncodingException e) {
+////            e.printStackTrace();
+////        }
+//
+//        Request.Builder builder = new Request.Builder(URL, RequestMethod.GET).setResponseHandler(SongsEXResponseHandler.class);
+//        sendRequest(builder.create());
+//    }
 
 
     public void getVideoList(int offset, String query) {

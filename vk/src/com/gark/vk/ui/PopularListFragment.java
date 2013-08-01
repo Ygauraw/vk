@@ -27,6 +27,8 @@ import com.gark.vk.navigation.NavigationControllerFragment;
 import com.gark.vk.network.ApiHelper;
 import com.gark.vk.network.PopularRespoceHandler;
 import com.gark.vk.services.PlaybackService;
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Tracker;
 import com.the111min.android.api.response.ResponseReceiver;
 
 import java.util.ArrayList;
@@ -49,6 +51,7 @@ public class PopularListFragment extends NavigationControllerFragment implements
     //    private boolean isRequestProceed = false;
     private int mRequestType = ApiHelper.POPULAR_TOKEN;
     private String searchMask = null;
+    private Tracker myTracker = EasyTracker.getTracker();
 
 
     @Override
@@ -65,7 +68,7 @@ public class PopularListFragment extends NavigationControllerFragment implements
         mApiHelper.getSongsList(offset, null, mRequestType);
 
 
-        getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
+        getActivity().setProgressBarIndeterminateVisibility(true);
         musicAdapter = new MusicAdapter(getActivity(), null);
     }
 
@@ -180,13 +183,14 @@ public class PopularListFragment extends NavigationControllerFragment implements
         public void onError(int token, Exception e) {
             receivedCount = 0;
             updateUI();
+            myTracker.sendException(e.getCause().getMessage() + " " + e.getLocalizedMessage() + " " + e.getMessage() + "\n" + PopularListFragment.class.getSimpleName(), false);
         }
     };
 
     private void updateUI() {
 //        isRequestProceed = true;
-        if (getSherlockActivity() != null) {
-            getSherlockActivity().setSupportProgressBarIndeterminateVisibility(false);
+        if (getActivity() != null) {
+            getActivity().setProgressBarIndeterminateVisibility(false);
         }
 
         mNoResult.setVisibility((musicAdapter.getCount() == 0 && receivedCount == 0) ? View.VISIBLE : View.GONE);
@@ -205,7 +209,7 @@ public class PopularListFragment extends NavigationControllerFragment implements
 //                isRequestProceed = false;
                 mApiHelper.getSongsList(offset, searchMask, mRequestType);
 //                mApiHelper.getSongsEX(searchMask, offset);
-                getSherlockActivity().setSupportProgressBarIndeterminateVisibility(true);
+                getActivity().setProgressBarIndeterminateVisibility(true);
                 list.setOnScrollListener(null);
             }
         }

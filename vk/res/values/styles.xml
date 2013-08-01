@@ -12,8 +12,8 @@
         -->
     </style>
 
-    <style name="AppCombineTheme" parent="Theme.Sherlock.Light">
-    </style>
+    <!--<style name="AppCombineTheme" parent="Theme.Sherlock.Light">-->
+    <!--</style>-->
 
     <!-- Application theme. -->
     <style name="AppTheme" parent="AppBaseTheme">
