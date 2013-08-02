@@ -263,7 +263,9 @@ public class ControlsFragment extends NavigationControllerFragment {
 
             mSeekBar.setSecondaryProgress(secondary);
 //            mSeekBar.setProgress(((int) (position / duration)) * 100);
-            mSeekBar.setProgress((position * 100 / duration));
+            if (duration != 0) {
+                mSeekBar.setProgress((position * 100 / duration));
+            }
 
             position /= 1000;
             duration /= 1000;
