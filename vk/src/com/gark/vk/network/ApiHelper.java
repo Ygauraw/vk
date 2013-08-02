@@ -70,6 +70,11 @@ public class ApiHelper extends BaseApiHelper {
         sendRequest(builder.create());
     }
 
+    public void getRequestCaptcha (String url){
+        Request.Builder builder = new Request.Builder(url, RequestMethod.GET).setResponseHandler(PopularRespoceHandler.class);
+        sendRequest(builder.create());
+    }
+
 //    public void getSongsEX(String query, int offset) {
 //        String URL = "http://ex.fm/api/v3/song/search/%s?results=%s&start=%s";
 //        URL = String.format(URL, query, COUNT, offset);

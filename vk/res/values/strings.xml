@@ -20,6 +20,10 @@
     <string name="rate_me">Rate me</string>
     <string name="more_app">More applications</string>
     <string name="no_internet_connection">No internet connection</string>
+    <string name="choose_quality">Choose quality</string>
+
+    <string name="captcha_text">Type the captcha text</string>
+    <string name="apply">Apply</string>
 
     <string name="drawer_open" translatable="false">Open navigation drawer</string>
     <string name="drawer_close" translatable="false">Close navigation drawer</string>

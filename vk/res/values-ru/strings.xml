@@ -20,5 +20,7 @@
     <string name="rate_me">Оцени меня</string>
     <string name="more_app">Больше приложений</string>
     <string name="no_internet_connection">Нет подключения к сети</string>
+    <string name="captcha_text">Введите текст с картинки</string>
+    <string name="apply">Отправить</string>
 
 </resources>

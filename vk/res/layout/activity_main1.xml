@@ -63,7 +63,8 @@
                 android:id="@+id/controls_frame"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/ads"/>
+                android:layout_above="@+id/ads"
+                />
 
         <!--android:layout_above="@+id/ads"-->
 

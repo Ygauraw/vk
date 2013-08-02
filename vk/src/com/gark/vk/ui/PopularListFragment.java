@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -153,11 +154,6 @@ public class PopularListFragment extends NavigationControllerFragment implements
             intent.putExtra(PlaybackService.SERVICE_PLAY_PLAYLIST, getPlaylist(cursor));
             getActivity().startService(intent);
         }
-
-//        if (isRequestProceed) {
-//            mNoResult.setVisibility((cursor.getCount() == 0) ? View.VISIBLE : View.GONE);
-//        }
-
     }
 
     @Override
@@ -171,6 +167,13 @@ public class PopularListFragment extends NavigationControllerFragment implements
         public void onRequestSuccess(int token, Bundle result) {
             receivedCount = result.getInt(PopularRespoceHandler.COUNT);
             updateUI();
+
+            if (result.containsKey(PopularRespoceHandler.CAPTCHA)) {
+                DialogFragment dialogFragment = new DialogCaptchaFragment(result.getString(PopularRespoceHandler.CAPTCHA), mApiHelper);
+                dialogFragment.show(getActivity().getSupportFragmentManager(), "dlg2");
+
+            }
+
         }
 
         @Override
@@ -183,6 +186,8 @@ public class PopularListFragment extends NavigationControllerFragment implements
         public void onError(int token, Exception e) {
             receivedCount = 0;
             updateUI();
+
+
             StringBuffer sb = new StringBuffer();
             if (e != null && e.getMessage() != null) {
                 sb.append(e.getMessage());

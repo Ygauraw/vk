@@ -141,12 +141,12 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
         ) {
             public void onDrawerClosed(View view) {
                 getSupportActionBar().setTitle(getTitle());
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                supportInvalidateOptionsMenu();
             }
 
             public void onDrawerOpened(View drawerView) {
                 getSupportActionBar().setTitle(getTitle());
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                supportInvalidateOptionsMenu();
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
@@ -159,7 +159,6 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
 
 
         if (mSuggestionsAdapter == null) {
-//            mSuggestionsAdapter = new SuggestionsAdapter(getSupportActionBar().getThemedContext(), null);
             String[] from = new String[]{SuggestionColumns.TEXT.getName()};
             int[] to = new int[]{android.R.id.text1};
             mSuggestionsAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, null, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
@@ -302,16 +301,6 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
     @Override
     public boolean onQueryTextChange(String newText) {
         try {
-//            Bundle bundle = new Bundle();
-//            bundle.putString(SEARCH, newText);
-//            getSupportLoaderManager().restartLoader(SEARCH_TOKEN, bundle, this);
-//            mAsyncQueryHandler.startQuery(0, null, SuggestionObject.CONTENT_URI, SuggestionQuery.PROJECTION, SuggestionColumns.TEXT.getName() + " LIKE ?", new String[]{"%" + newText + "%"}, null);
-//            Cursor cursor = getContentResolver().query(SuggestionObject.CONTENT_URI, SuggestionQuery.PROJECTION, SuggestionColumns.TEXT.getName() + " LIKE ?", new String[]{"%" + newText + "%"}, null);
-//            mSuggestionsAdapter.swapCursor(cursor);
-
-
-//            String[] COLUMNS = new String[]{SuggestionColumns.TEXT.getName()};
-
             CursorLoader cursorLoader = new CursorLoader(
                     this,
                     SuggestionObject.CONTENT_URI,
@@ -321,23 +310,6 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
                     null);
             Cursor cursor = cursorLoader.loadInBackground();
             mSuggestionsAdapter.swapCursor(cursor);
-
-//            MatrixCursor matrixCursor = new MatrixCursor(COLUMNS);
-//
-//            if (cursor != null && cursor.moveToFirst()) {
-//                do {
-//                    String text = cursor.getString(cursor.getColumnIndex(SuggestionColumns.TEXT.getName()));
-//                    matrixCursor.addRow(new String[]{text});
-//                } while (cursor.moveToNext());
-//
-//            }
-//            if (cursor != null) {
-//                cursor.close();
-//            }
-//
-//            mSuggestionsAdapter.swapCursor(matrixCursor);
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,0 +1,29 @@
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+    <ImageView
+            android:layout_weight="2"
+            android:id="@+id/captcha_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            android:adjustViewBounds="true"
+            android:gravity="center"
+            android:layout_gravity="center"
+            />
+
+    <EditText
+            android:layout_weight="1"
+            android:id="@+id/captcha_text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="left|center_vertical"
+            android:layout_gravity="center"
+            android:inputType="text"
+            />
+
+
+</LinearLayout>
