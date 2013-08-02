@@ -183,7 +183,16 @@ public class PopularListFragment extends NavigationControllerFragment implements
         public void onError(int token, Exception e) {
             receivedCount = 0;
             updateUI();
-            myTracker.sendException(e.getCause().getMessage() + " " + e.getLocalizedMessage() + " " + e.getMessage() + "\n" + PopularListFragment.class.getSimpleName(), false);
+            StringBuffer sb = new StringBuffer();
+            if (e != null && e.getMessage() != null) {
+                sb.append(e.getMessage());
+            }
+
+            if (e != null && e.getLocalizedMessage() != null) {
+                sb.append(e.getLocalizedMessage());
+            }
+
+            myTracker.sendException(sb.toString() + "\n" + PopularListFragment.class.getSimpleName(), false);
         }
     };
 

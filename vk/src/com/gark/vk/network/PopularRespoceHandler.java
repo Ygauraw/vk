@@ -124,7 +124,17 @@ public class PopularRespoceHandler extends ResponseHandler {
 
         } catch (Exception e) {
             e.printStackTrace();
-            myTracker.sendException(e.getCause().getMessage() + " " + e.getLocalizedMessage() + " " + e.getMessage() + "\n" + text, false);
+
+            StringBuffer sb = new StringBuffer();
+            if (e != null && e.getMessage() != null) {
+                sb.append(e.getMessage());
+            }
+
+            if (e != null && e.getLocalizedMessage() != null) {
+                sb.append(e.getLocalizedMessage());
+            }
+
+            myTracker.sendException(sb.toString() + "\n" + text, false);
         }
 
         return true;

@@ -188,7 +188,15 @@ public class VideoListFragment extends NavigationControllerFragment implements L
                 default:
                     receivedCount = 0;
                     updateUI();
-                    myTracker.sendException(e.getMessage() + "\n" + VideoListFragment.class.getSimpleName(), false);
+                    StringBuffer sb = new StringBuffer();
+                    if (e != null && e.getMessage() != null) {
+                        sb.append(e.getMessage());
+                    }
+
+                    if (e != null && e.getLocalizedMessage() != null) {
+                        sb.append(e.getLocalizedMessage());
+                    }
+                    myTracker.sendException(sb.toString() + "\n" + VideoListFragment.class.getSimpleName(), false);
                     break;
             }
         }
