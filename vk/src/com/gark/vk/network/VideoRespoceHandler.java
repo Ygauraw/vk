@@ -3,18 +3,22 @@ package com.gark.vk.network;
 import android.content.ContentProviderOperation;
 import android.content.Context;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 
 import com.gark.vk.db.MusicColumns;
 import com.gark.vk.db.VKDBSchema;
 import com.gark.vk.db.VideoColumns;
 import com.gark.vk.model.MusicObject;
 import com.gark.vk.model.VideoObject;
+import com.google.analytics.tracking.android.EasyTracker;
+import com.google.analytics.tracking.android.Tracker;
 import com.the111min.android.api.request.Request;
 import com.the111min.android.api.response.ResponseHandler;
 import com.the111min.android.api.util.HttpUtils;
 
 import org.apache.http.HttpResponse;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -45,6 +49,11 @@ public class VideoRespoceHandler extends ResponseHandler {
     @Override
     public boolean handleResponse(Context context, HttpResponse response, Request request, Bundle result) throws Exception {
         final String text = HttpUtils.readHttpResponse(response);
+
+        Tracker myTracker = EasyTracker.getTracker();
+        if (checkCaptcha(text, result, myTracker, context)) {
+            return true;
+        }
 
         final ArrayList<ContentProviderOperation> insertOperations = new ArrayList<ContentProviderOperation>();
 
@@ -161,6 +170,40 @@ public class VideoRespoceHandler extends ResponseHandler {
         result.putInt(COUNT, insertOperations.size());
 
         return true;
+    }
+
+    public static String ERROR = "error";
+    public static String ERROR_CODE = "error_code";
+    public static String CAPTCHA_CODE = "14";
+    public static final String CAPTCHA = "captcha";
+
+
+    private boolean checkCaptcha(String response, Bundle bundle, Tracker myTracker, Context context) throws Exception {
+        final JSONObject jsonObj;
+        try {
+            jsonObj = new JSONObject(response);
+            if (!jsonObj.isNull(ERROR)) {
+                JSONObject jSubObject = jsonObj.getJSONObject(ERROR);
+                if (!jSubObject.isNull(ERROR_CODE) && CAPTCHA_CODE.equals(jSubObject.getString(ERROR_CODE))) {
+                    bundle.putString(CAPTCHA, response);
+
+                    try {
+                        TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+                        if (manager != null && manager.getNetworkCountryIso() != null) {
+                            myTracker.sendException(manager.getNetworkCountryIso() + " network country ISO", false);
+                        }
+                    } catch (Exception e) {
+
+                    }
+
+
+                    return false;
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
 }

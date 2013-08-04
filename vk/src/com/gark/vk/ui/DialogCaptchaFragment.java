@@ -21,6 +21,7 @@ import com.gark.vk.R;
 import com.gark.vk.network.ApiHelper;
 import com.gark.vk.utils.BitmapLruCache;
 import com.gark.vk.utils.Log;
+import com.the111min.android.api.response.ResponseReceiver;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,7 +50,12 @@ public class DialogCaptchaFragment extends DialogFragment implements DialogInter
     public static final String ACCESS_TOKEN = "access_token";
     public static final String VALUE = "value";
 
+    public static final String METHOD = "method";
+    public static final String QUERY = "q";
 
+
+    private String query;
+    private String method;
     private String token;
     private String captchaUrl;
     private String captchaSig;
@@ -67,9 +73,8 @@ public class DialogCaptchaFragment extends DialogFragment implements DialogInter
         Log.e("");
     }
 
-    public DialogCaptchaFragment(String captchaResponce, ApiHelper mApiHelper) {
-        this.captchaResponse = captchaResponce;
-        this.mApiHelper = mApiHelper;
+    public DialogCaptchaFragment(String captchaResponse) {
+        this.captchaResponse = captchaResponse;
         parseCaptcha();
     }
 
@@ -80,7 +85,25 @@ public class DialogCaptchaFragment extends DialogFragment implements DialogInter
 
         mRequestQ = Volley.newRequestQueue(getActivity());
         mImageLoader = new ImageLoader(mRequestQ, new BitmapLruCache(getActivity()));
+        mApiHelper = new ApiHelper(getActivity(), responseReceiver);
     }
+
+    final ResponseReceiver responseReceiver = new ResponseReceiver() {
+        @Override
+        public void onRequestSuccess(int token, Bundle result) {
+
+        }
+
+        @Override
+        public void onRequestFailure(int token, Bundle result) {
+
+        }
+
+        @Override
+        public void onError(int token, Exception e) {
+
+        }
+    };
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -140,7 +163,7 @@ public class DialogCaptchaFragment extends DialogFragment implements DialogInter
         switch (which) {
             case Dialog.BUTTON_POSITIVE:
                 String captcha_key = captchaText.getText().toString().trim();
-                String url = String.format("https://api.vk.com/method/audio.getPopular.json?&count=%s&offset=%s&only_eng=%s&access_token=%s&captcha_sid=%s&captcha_key=%s", 30, 0, 1, token, captchaSig, captcha_key);
+                String url = String.format("https://api.vk.com/method/%s?&q=%s&count=%s&offset=%s&only_eng=%s&access_token=%s&captcha_sid=%s&captcha_key=%s", method, query, 30, 0, 1, token, captchaSig, captcha_key);
                 mApiHelper.getRequestCaptcha(url);
                 break;
         }
@@ -169,6 +192,14 @@ public class DialogCaptchaFragment extends DialogFragment implements DialogInter
                         JSONObject j = (JSONObject) jsonArray.get(i);
                         String key = j.getString(KEY);
                         String value = j.getString(VALUE);
+
+                        if (QUERY.equals(key)) {
+                            query = value;
+                        }
+
+                        if (METHOD.equals(key)) {
+                            method = value;
+                        }
 
                         if (ACCESS_TOKEN.equals(key)) {
                             token = value;

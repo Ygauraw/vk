@@ -67,7 +67,8 @@ public class ApiHelper extends BaseApiHelper {
         }
 
         Request.Builder builder = new Request.Builder(URL, RequestMethod.GET).setResponseHandler(PopularRespoceHandler.class);
-        sendRequest(builder.create());
+        sendRequest(builder.create(), AUDIO_TOKEN);
+
     }
 
     public void getRequestCaptcha (String url){

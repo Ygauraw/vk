@@ -52,13 +52,15 @@ public class PopularListFragment extends NavigationControllerFragment implements
     //    private boolean isRequestProceed = false;
     private int mRequestType = ApiHelper.POPULAR_TOKEN;
     private String searchMask = null;
-    private Tracker myTracker = EasyTracker.getTracker();
+    private Tracker myTracker;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+
+        myTracker = EasyTracker.getTracker();
 
         offset = 0;
         mAsyncQueryHandler = new AsyncQueryHandler(getActivity().getContentResolver()) {
@@ -165,14 +167,26 @@ public class PopularListFragment extends NavigationControllerFragment implements
 
         @Override
         public void onRequestSuccess(int token, Bundle result) {
-            receivedCount = result.getInt(PopularRespoceHandler.COUNT);
-            updateUI();
 
-            if (result.containsKey(PopularRespoceHandler.CAPTCHA)) {
-                DialogFragment dialogFragment = new DialogCaptchaFragment(result.getString(PopularRespoceHandler.CAPTCHA), mApiHelper);
-                dialogFragment.show(getActivity().getSupportFragmentManager(), "dlg2");
 
+            switch (token) {
+                case ApiHelper.AUDIO_TOKEN:
+
+                    receivedCount = result.getInt(PopularRespoceHandler.COUNT);
+                    updateUI();
+                    try {
+                        if (result.containsKey(PopularRespoceHandler.CAPTCHA)) {
+                            DialogFragment dialogFragment = new DialogCaptchaFragment(result.getString(PopularRespoceHandler.CAPTCHA));
+                            dialogFragment.show(getActivity().getSupportFragmentManager(), "dlg2");
+
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    break;
             }
+
 
         }
 

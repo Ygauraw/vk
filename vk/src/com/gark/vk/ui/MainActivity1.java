@@ -1,23 +1,28 @@
 package com.gark.vk.ui;
 
+import android.app.SearchManager;
 import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
@@ -27,13 +32,15 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.gark.vk.R;
+import com.gark.vk.adapters.MySuggestionsAdapter;
+import com.gark.vk.db.MusicQuery;
 import com.gark.vk.db.SuggestionColumns;
 import com.gark.vk.db.SuggestionQuery;
+import com.gark.vk.model.MusicObject;
 import com.gark.vk.model.SuggestionObject;
 import com.gark.vk.navigation.NavigationController;
 import com.gark.vk.services.PlaybackService;
@@ -43,12 +50,12 @@ import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.ExceptionReporter;
 import com.viewpagerindicator.TitlePageIndicator;
 
-public class MainActivity1 extends ActionBarActivity implements SearchView.OnQueryTextListener, SearchView.OnSuggestionListener/*, LoaderManager.LoaderCallbacks<Cursor> */ {
+public class MainActivity1 extends ActionBarActivity implements SearchView.OnQueryTextListener, SearchView.OnSuggestionListener, LoaderManager.LoaderCallbacks<Cursor> {
 
     private NavigationController navigationController;
     private AsyncQueryHandler mAsyncQueryHandler;
-    //    private SuggestionsAdapter mSuggestionsAdapter;
-    private SimpleCursorAdapter mSuggestionsAdapter;
+    //    private MySuggestionsAdapter mSuggestionsAdapter;
+//    private SimpleCursorAdapter mSuggestionsAdapter;
     private SearchView searchView;
     private ControlsFragment controlsFragment;
     private String[] titles;
@@ -63,7 +70,7 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
 
     private MyFragmentPagerAdapter fragmentPagerAdapter;
     private TitlePageIndicator mIndicator;
-//    public static final int SEARCH_TOKEN = 444;
+    public static final int SEARCH_TOKEN = 444;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -98,7 +105,7 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
             @Override
             protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
                 super.onQueryComplete(token, cookie, cursor);
-                mSuggestionsAdapter.swapCursor(cursor);
+//                mSuggestionsAdapter.swapCursor(cursor);
             }
         };
 
@@ -158,11 +165,11 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
         mDrawerList.setOnItemClickListener(onItemClickListener);
 
 
-        if (mSuggestionsAdapter == null) {
-            String[] from = new String[]{SuggestionColumns.TEXT.getName()};
-            int[] to = new int[]{android.R.id.text1};
-            mSuggestionsAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, null, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
-        }
+//        if (mSuggestionsAdapter == null) {
+//            String[] from = new String[]{SuggestionColumns.TEXT.getName()};
+//            int[] to = new int[]{android.R.id.text1};
+//            mSuggestionsAdapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, null, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+//        }
 
 //        getSupportLoaderManager().initLoader(SEARCH_TOKEN, Bundle.EMPTY, this);
     }
@@ -259,24 +266,52 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
         super.onDestroy();
     }
 
+    private static final String[] COLUMNS = {
+            BaseColumns._ID,
+            SearchManager.SUGGEST_COLUMN_TEXT_1,
+    };
+
+
+    private MySuggestionsAdapter mSuggestionsAdapter;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         MenuItem searchItem = menu.findItem(R.id.menu_search);
 
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+
         searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
         searchView.setQueryHint(getString(R.string.search_for));
         searchView.setOnQueryTextListener(this);
         searchView.setOnSuggestionListener(this);
-//        searchView.setOnCloseListener(onCloseListener);
+        searchView.setSubmitButtonEnabled(true);
+//        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
-        searchView.setSuggestionsAdapter(mSuggestionsAdapter);
+//        searchView.setSuggestionsAdapter(mSuggestionsAdapter);
 
-//        menu.add(R.string.search)
-//                .setIcon(R.drawable.search_black)
-//                .setActionView(searchView)
-//                .setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        if (mSuggestionsAdapter == null) {
+//            MatrixCursor cursor = new MatrixCursor(COLUMNS);
+//            cursor.addRow(new String[]{"1", "'Murica"});
+//            cursor.addRow(new String[]{"2", "Canada"});
+//            cursor.addRow(new String[]{"3", "Denmark"});
+
+//            CursorLoader cursorLoader = new CursorLoader(
+//                    this,
+//                    SuggestionObject.CONTENT_URI,
+//                    SuggestionQuery.PROJECTION,
+//                    null,
+//                    null,
+//                    null);
+//            Cursor cursor = cursorLoader.loadInBackground();
+
+
+            mSuggestionsAdapter = new MySuggestionsAdapter(getSupportActionBar().getThemedContext(), null);
+            searchView.setSuggestionsAdapter(mSuggestionsAdapter);
+
+            getSupportLoaderManager().initLoader(SEARCH_TOKEN, Bundle.EMPTY, this);
+        }
+
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -292,6 +327,14 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
         updateSearchMaskValue(query);
         searchView.clearFocus();
 
+
+        try {
+            mSuggestionsAdapter.notifyDataSetChanged();
+            mSuggestionsAdapter.notifyDataSetInvalidated();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return false;
     }
 
@@ -300,19 +343,22 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        try {
-            CursorLoader cursorLoader = new CursorLoader(
-                    this,
-                    SuggestionObject.CONTENT_URI,
-                    SuggestionQuery.PROJECTION,
-                    SuggestionColumns.TEXT.getName() + " LIKE ?",
-                    new String[]{"%" + newText + "%"},
-                    null);
-            Cursor cursor = cursorLoader.loadInBackground();
-            mSuggestionsAdapter.swapCursor(cursor);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+
+//        searchView.getSuggestionsAdapter().getFilter().filter(newText);
+//        try {
+//            CursorLoader cursorLoader = new CursorLoader(
+//                    this,
+//                    SuggestionObject.CONTENT_URI,
+//                    SuggestionQuery.PROJECTION,
+//                    SuggestionColumns.TEXT.getName() + " LIKE ?",
+//                    new String[]{"%" + newText + "%"},
+//                    null);
+//            Cursor cursor = cursorLoader.loadInBackground();
+//            mSuggestionsAdapter.swapCursor(cursor);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         return false;
     }
 
@@ -392,6 +438,30 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
 
         }
     };
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        switch (i) {
+            case SEARCH_TOKEN:
+                return new CursorLoader(this, SuggestionObject.CONTENT_URI, SuggestionQuery.PROJECTION, null, null, SuggestionColumns._ID.getName() + " DESC");
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        if (mSuggestionsAdapter != null) {
+            mSuggestionsAdapter.swapCursor(cursor);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        if (mSuggestionsAdapter != null) {
+            mSuggestionsAdapter.swapCursor(null);
+        }
+    }
 
 
     public class MyFragmentPagerAdapter extends FragmentPagerAdapter {

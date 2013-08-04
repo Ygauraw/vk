@@ -46,12 +46,14 @@ public class VideoListFragment extends NavigationControllerFragment implements L
     private TextView mNoResult;
     private String searchMask = null;
     private String currentTitle = "";
-    private Tracker myTracker = EasyTracker.getTracker();
+    private Tracker myTracker;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        myTracker = EasyTracker.getTracker();
 
         setRetainInstance(true);
 
@@ -167,6 +169,15 @@ public class VideoListFragment extends NavigationControllerFragment implements L
                 default:
                     receivedCount = result.getInt(PopularRespoceHandler.COUNT);
                     updateUI();
+                    try {
+                        if (result.containsKey(PopularRespoceHandler.CAPTCHA)) {
+                            DialogFragment dialogFragment = new DialogCaptchaFragment(result.getString(PopularRespoceHandler.CAPTCHA));
+                            dialogFragment.show(getActivity().getSupportFragmentManager(), "dlg2");
+
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     break;
             }
 

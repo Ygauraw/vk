@@ -185,10 +185,7 @@ public class PopularRespoceHandler extends ResponseHandler {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         return false;
-
-
     }
 
 

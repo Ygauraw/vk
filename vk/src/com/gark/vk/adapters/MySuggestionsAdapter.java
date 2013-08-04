@@ -14,9 +14,9 @@ import com.gark.vk.db.SuggestionColumns;
 /**
  * Created by Gark on 14.07.13.
  */
-public class SuggestionsAdapter extends CursorAdapter {
+public class MySuggestionsAdapter extends CursorAdapter {
 
-    public SuggestionsAdapter(Context context, Cursor c) {
+    public MySuggestionsAdapter(Context context, Cursor c) {
         super(context, c, 0);
     }
 
