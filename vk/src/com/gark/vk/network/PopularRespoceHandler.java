@@ -161,6 +161,7 @@ public class PopularRespoceHandler extends ResponseHandler {
 
 
     private boolean checkCaptcha(String response, Bundle bundle, Tracker myTracker, Context context) throws Exception {
+        boolean result = false;
         final JSONObject jsonObj;
         try {
             jsonObj = new JSONObject(response);
@@ -168,6 +169,7 @@ public class PopularRespoceHandler extends ResponseHandler {
                 JSONObject jSubObject = jsonObj.getJSONObject(ERROR);
                 if (!jSubObject.isNull(ERROR_CODE) && CAPTCHA_CODE.equals(jSubObject.getString(ERROR_CODE))) {
                     bundle.putString(CAPTCHA, response);
+                    result = true;
 
                     try {
                         TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -179,13 +181,12 @@ public class PopularRespoceHandler extends ResponseHandler {
                     }
 
 
-                    return false;
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return false;
+        return result;
     }
 
 

@@ -48,7 +48,9 @@ public class VideoRespoceHandler extends ResponseHandler {
 
     @Override
     public boolean handleResponse(Context context, HttpResponse response, Request request, Bundle result) throws Exception {
-        final String text = HttpUtils.readHttpResponse(response);
+        String text = HttpUtils.readHttpResponse(response);
+
+//        text = "{\"error\":{\"error_code\":14,\"error_msg\":\"Captcha needed\",\"request_params\":[{\"key\":\"oauth\",\"value\":\"1\"},{\"key\":\"method\",\"value\":\"audio.getPopular.json\"},{\"key\":\"\",\"value\":\"\"},{\"key\":\"count\",\"value\":\"30\"},{\"key\":\"offset\",\"value\":\"0\"},{\"key\":\"only_eng\",\"value\":\"0\"},{\"key\":\"access_token\",\"value\":\"03328309b844c9cc0b6ad716238ac8d583562d0dccc56ff2fcd755913bf021c4ca5d64b164ada2869ada1\"}],\"captcha_sid\":\"450495329930\",\"captcha_img\":\"http:\\/\\/api.vk.com\\/captcha.php?sid=450495329930\",\"need_validation\":1}}";
 
         Tracker myTracker = EasyTracker.getTracker();
         if (checkCaptcha(text, result, myTracker, context)) {
@@ -179,6 +181,7 @@ public class VideoRespoceHandler extends ResponseHandler {
 
 
     private boolean checkCaptcha(String response, Bundle bundle, Tracker myTracker, Context context) throws Exception {
+        boolean result = false;
         final JSONObject jsonObj;
         try {
             jsonObj = new JSONObject(response);
@@ -186,6 +189,7 @@ public class VideoRespoceHandler extends ResponseHandler {
                 JSONObject jSubObject = jsonObj.getJSONObject(ERROR);
                 if (!jSubObject.isNull(ERROR_CODE) && CAPTCHA_CODE.equals(jSubObject.getString(ERROR_CODE))) {
                     bundle.putString(CAPTCHA, response);
+                    result = true;
 
                     try {
                         TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -195,15 +199,12 @@ public class VideoRespoceHandler extends ResponseHandler {
                     } catch (Exception e) {
 
                     }
-
-
-                    return false;
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return false;
+        return result;
     }
 
 }
