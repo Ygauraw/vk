@@ -60,7 +60,7 @@ public class PopularListFragment extends NavigationControllerFragment implements
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
 
-        myTracker = EasyTracker.getTracker();
+//        myTracker = EasyTracker.getTracker();
 
         offset = 0;
         mAsyncQueryHandler = new AsyncQueryHandler(getActivity().getContentResolver()) {
@@ -93,6 +93,10 @@ public class PopularListFragment extends NavigationControllerFragment implements
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        EasyTracker.getInstance().setContext(getActivity());
+        myTracker = EasyTracker.getTracker();
+
         list.setAdapter(musicAdapter);
         list.setOnItemClickListener(this);
 

@@ -53,7 +53,6 @@ public class VideoListFragment extends NavigationControllerFragment implements L
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        myTracker = EasyTracker.getTracker();
 
         setRetainInstance(true);
 
@@ -88,6 +87,9 @@ public class VideoListFragment extends NavigationControllerFragment implements L
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        EasyTracker.getInstance().setContext(getActivity());
+        myTracker = EasyTracker.getTracker();
 
         list.setAdapter(videoAdapter);
         list.setOnItemClickListener(this);

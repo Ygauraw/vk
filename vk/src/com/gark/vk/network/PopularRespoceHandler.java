@@ -48,6 +48,7 @@ public class PopularRespoceHandler extends ResponseHandler {
         String text = HttpUtils.readHttpResponse(response);
 //        text = "{\"error\":{\"error_code\":14,\"error_msg\":\"Captcha needed\",\"request_params\":[{\"key\":\"oauth\",\"value\":\"1\"},{\"key\":\"method\",\"value\":\"audio.getPopular.json\"},{\"key\":\"\",\"value\":\"\"},{\"key\":\"count\",\"value\":\"30\"},{\"key\":\"offset\",\"value\":\"0\"},{\"key\":\"only_eng\",\"value\":\"0\"},{\"key\":\"access_token\",\"value\":\"03328309b844c9cc0b6ad716238ac8d583562d0dccc56ff2fcd755913bf021c4ca5d64b164ada2869ada1\"}],\"captcha_sid\":\"450495329930\",\"captcha_img\":\"http:\\/\\/api.vk.com\\/captcha.php?sid=450495329930\",\"need_validation\":1}}";
 
+        EasyTracker.getInstance().setContext(context);
         Tracker myTracker = EasyTracker.getTracker();
 
 
