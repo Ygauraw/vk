@@ -115,7 +115,7 @@ public class ApiHelper extends BaseApiHelper {
 
     private void setEnglishFitterByCountryISO(Context context) {
         TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-        String countryCode = tm.getSimCountryIso();
+        String countryCode = tm.getNetworkCountryIso();
 
         ArrayList<String> countyIsoList = new ArrayList<String>();
         countyIsoList.add("ua");
