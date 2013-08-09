@@ -50,17 +50,7 @@ public class VideoAdapter extends CursorAdapter {
         final long duration = getCursor().getLong(cursor.getColumnIndex(VideoColumns.DURATION.getName()));
         final String image_url = getCursor().getString(cursor.getColumnIndex(VideoColumns.IMAGE_MEDIUM.getName()));
 
-        mImageLoader.get(image_url, new ImageLoader.ImageListener() {
-            @Override
-            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                listItem.imgVideo.setImageBitmap(response.getBitmap());
-            }
-
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                listItem.imgVideo.setImageResource(R.drawable.ic_movie_default);
-            }
-        });
+        mImageLoader.get(image_url, ImageLoader.getImageListener(listItem.imgVideo, R.drawable.item_bg, R.drawable.item_bg_fail));
 
         listItem.txtTitle.setText(Html.fromHtml(title));
         listItem.txtArtist.setText(Html.fromHtml(description));

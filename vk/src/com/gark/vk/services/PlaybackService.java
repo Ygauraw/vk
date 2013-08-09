@@ -541,7 +541,11 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
         if (isPrepared) {
 
             if (lastUpdateBroadcast != null) {
-                getApplicationContext().removeStickyBroadcast(lastUpdateBroadcast);
+                try {
+                    this.removeStickyBroadcast(lastUpdateBroadcast);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 lastUpdateBroadcast = null;
             }
 
@@ -559,7 +563,7 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             tempUpdateBroadcast.putExtra(SECONDARY_PROGRESS, lastBufferPercent);
             tempUpdateBroadcast.putExtra(EXTRA_POSITION, seekToPosition);
             tempUpdateBroadcast.putExtra(EXTRA_IS_PLAYING, mMediaPlayer.isPlaying());
-            if (mPlayList.getCurrentItem() != null) {
+            if (mPlayList != null && mPlayList.getCurrentItem() != null) {
                 tempUpdateBroadcast.putExtra(EXTRA_ARTIST, mPlayList.getCurrentItem().getArtist());
                 tempUpdateBroadcast.putExtra(EXTRA_TITLE, mPlayList.getCurrentItem().getTitle());
             }

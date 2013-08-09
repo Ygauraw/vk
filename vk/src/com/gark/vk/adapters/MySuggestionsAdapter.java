@@ -10,14 +10,19 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.gark.vk.db.SuggestionColumns;
+import com.gark.vk.db.SuggestionQuery;
+import com.gark.vk.model.SuggestionObject;
 
 /**
  * Created by Gark on 14.07.13.
  */
 public class MySuggestionsAdapter extends CursorAdapter {
 
+    private Context context;
+
     public MySuggestionsAdapter(Context context, Cursor c) {
         super(context, c, 0);
+        this.context = context;
     }
 
     @Override
@@ -32,5 +37,17 @@ public class MySuggestionsAdapter extends CursorAdapter {
         TextView tv = (TextView) view;
         final int textIndex = cursor.getColumnIndex(SuggestionColumns.TEXT.getName());
         tv.setText(cursor.getString(textIndex));
+    }
+
+    @Override
+    public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
+        Cursor cursor = context.getContentResolver().query(
+                SuggestionObject.CONTENT_URI,
+                SuggestionQuery.PROJECTION,
+                SuggestionColumns.TEXT.getName() + " LIKE ?",
+                new String[]{"%" + constraint.toString() + "%"},
+                null);
+
+        return cursor;
     }
 }

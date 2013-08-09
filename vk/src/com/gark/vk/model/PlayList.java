@@ -54,37 +54,38 @@ public class PlayList {
     }
 
     public void moveToNextTrack() {
+        try {
+            if (playList != null) {
+                boolean isRepeat = PlayerUtils.getRepeat(context);
+                boolean isShuffle = PlayerUtils.getShuffle(context);
 
-        if (playList != null) {
+                // - -
+                if (!isRepeat && !isShuffle) {
+                    if (currentPosition == (playList.size() - 1)) {
+                        currentPosition = 0;
+                    } else {
+                        currentPosition++;
+                    }
+                }
+                // + -
+                else if (isRepeat && !isShuffle) {
 
+                }
+                // - +
+                else if (!isRepeat && isShuffle) {
+                    Random random = new Random();
+                    currentPosition = random.nextInt(playList.size() - 1);
+                }
 
-            boolean isRepeat = PlayerUtils.getRepeat(context);
-            boolean isShuffle = PlayerUtils.getShuffle(context);
-
-            // - -
-            if (!isRepeat && !isShuffle) {
-                if (currentPosition == (playList.size() - 1)) {
-                    currentPosition = 0;
-                } else {
-                    currentPosition++;
+                // + +
+                else if (!isRepeat && isShuffle) {
+                    Random random = new Random();
+                    currentPosition = random.nextInt(playList.size() - 1);
                 }
             }
-            // + -
-            else if (isRepeat && !isShuffle) {
-
-            }
-            // - +
-            else if (!isRepeat && isShuffle) {
-                Random random = new Random();
-                currentPosition = random.nextInt(playList.size() - 1);
-            }
-
-            // + +
-            else if (!isRepeat && isShuffle) {
-                Random random = new Random();
-                currentPosition = random.nextInt(playList.size() - 1);
-            }
-
+        } catch (Exception e) {
+            currentPosition = 0;
+            e.printStackTrace();
         }
     }
 

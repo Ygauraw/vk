@@ -292,7 +292,9 @@ public class ControlsFragment extends NavigationControllerFragment {
             showPause();
             if (intent.getExtras() != null && intent.getExtras().containsKey(PlaybackService.SERVICE_PRESS_PLAY)) {
             } else {
-                getActivity().setProgressBarIndeterminateVisibility(true);
+                if (getActivity() != null) {
+                    getActivity().setProgressBarIndeterminateVisibility(true);
+                }
             }
             mSeekBar.setEnabled(true);
 
@@ -307,7 +309,9 @@ public class ControlsFragment extends NavigationControllerFragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             showPause();
-            getActivity().setProgressBarIndeterminateVisibility(false);
+            if (getActivity() != null) {
+                getActivity().setProgressBarIndeterminateVisibility(false);
+            }
         }
     }
 
