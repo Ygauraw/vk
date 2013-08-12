@@ -32,6 +32,13 @@ import android.widget.FilterQueryProvider;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.gark.vk.R;
 import com.gark.vk.adapters.MySuggestionsAdapter;
 import com.gark.vk.db.SuggestionColumns;
@@ -44,6 +51,8 @@ import com.gark.vk.utils.PlayerUtils;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.ExceptionReporter;
 import com.viewpagerindicator.TitlePageIndicator;
+
+import org.json.JSONObject;
 
 public class MainActivity1 extends ActionBarActivity implements SearchView.OnQueryTextListener, SearchView.OnSuggestionListener {
 
@@ -65,7 +74,6 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
 
     private MyFragmentPagerAdapter fragmentPagerAdapter;
     private TitlePageIndicator mIndicator;
-    public static final int SEARCH_TOKEN = 444;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -167,6 +175,41 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
             }
         });
 
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = "https://www.googleapis.com/customsearch/v1?key=AIzaSyBmSXUzVZBKQv9FJkTpZXn0dObKgEQOIFU&cx=014099860786446192319:t5mr0xnusiy&q=AndroidDev&alt=json&searchType=image";
+
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        }
+        );
+        queue.add(stringRequest);
+//
+
+//        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+//
+//            @Override
+//            public void onResponse(JSONObject response) {
+//
+//            }
+//        }, new Response.ErrorListener() {
+//
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//
+//            }
+//        }
+//        );
+
     }
 
     final ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
@@ -266,8 +309,6 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         MenuItem searchItem = menu.findItem(R.id.menu_search);
-
-//        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 
         searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
         searchView.setQueryHint(getString(R.string.search_for));
