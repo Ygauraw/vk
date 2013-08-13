@@ -15,6 +15,7 @@ import com.google.analytics.tracking.android.Tracker;
 import com.the111min.android.api.request.Request;
 import com.the111min.android.api.response.ResponseHandler;
 import com.the111min.android.api.util.HttpUtils;
+import com.the111min.android.api.util.ToManyRequestException;
 
 import org.apache.http.HttpResponse;
 import org.json.JSONArray;
@@ -37,13 +38,6 @@ public class VideoRespoceHandler extends ResponseHandler {
     private static final String THUMB = "thumb";
     private static final String IMAGE_MEDIUM = "image_medium";
     private static final String PLAYER = "player";
-//    private static final String FILES = "files";
-//
-//    private static final String MP4_240 = "mp4_240";
-//    private static final String MP4_360 = "mp4_360";
-//    private static final String MP4_480 = "mp4_480";
-//    private static final String MP4_720 = "mp4_720";
-//    private static final String EXTERNAL = "external";
 
 
     @Override
@@ -51,6 +45,7 @@ public class VideoRespoceHandler extends ResponseHandler {
         String text = HttpUtils.readHttpResponse(response);
 
 //        text = "{\"error\":{\"error_code\":14,\"error_msg\":\"Captcha needed\",\"request_params\":[{\"key\":\"oauth\",\"value\":\"1\"},{\"key\":\"method\",\"value\":\"audio.getPopular.json\"},{\"key\":\"\",\"value\":\"\"},{\"key\":\"count\",\"value\":\"30\"},{\"key\":\"offset\",\"value\":\"0\"},{\"key\":\"only_eng\",\"value\":\"0\"},{\"key\":\"access_token\",\"value\":\"03328309b844c9cc0b6ad716238ac8d583562d0dccc56ff2fcd755913bf021c4ca5d64b164ada2869ada1\"}],\"captcha_sid\":\"450495329930\",\"captcha_img\":\"http:\\/\\/api.vk.com\\/captcha.php?sid=450495329930\",\"need_validation\":1}}";
+//        text = "{\"error\":{\"error_code\":6,\"error_msg\":\"Too many requests per second\",\"request_params\":[{\"key\":\"oauth\",\"value\":\"1\"},{\"key\":\"method\",\"value\":\"audio.search.json\"},{\"key\":\"\",\"value\":\"\"},{\"key\":\"q\",\"value\":\"south africa\"},{\"key\":\"count\",\"value\":\"20\"},{\"key\":\"offset\",\"value\":\"100\"},{\"key\":\"access_token\",\"value\":\"a10b720def064f31ffd3e06e8966aad4faac465f0a4c6be4c8576e3354c008bac6cf7c38d8fdf8a530b9c\"}]}}";
 
         EasyTracker.getInstance().setContext(context);
         Tracker myTracker = EasyTracker.getTracker();
@@ -119,36 +114,6 @@ public class VideoRespoceHandler extends ResponseHandler {
                 player = item.getString(PLAYER);
             }
 
-//            String mp4_240 = null;
-//            String mp4_360 = null;
-//            String mp4_480 = null;
-//            String mp4_720 = null;
-//            String external = null;
-
-//            if (!item.isNull(FILES)) {
-//                JSONObject jsonObject = item.getJSONObject(FILES);
-//
-//                if (!jsonObject.isNull(MP4_240)) {
-//                    mp4_240 = item.getString(MP4_240);
-//                }
-//
-//                if (!jsonObject.isNull(MP4_360)) {
-//                    mp4_360 = item.getString(MP4_360);
-//                }
-//
-//
-//                if (!jsonObject.isNull(MP4_480)) {
-//                    mp4_480 = item.getString(MP4_480);
-//                }
-//
-//                if (!jsonObject.isNull(MP4_720)) {
-//                    mp4_720 = item.getString(MP4_720);
-//                }
-//
-//                if (!jsonObject.isNull(EXTERNAL)) {
-//                    external = item.getString(EXTERNAL);
-//                }
-//            }
 
             insertOperations.add(ContentProviderOperation.newInsert(VideoObject.CONTENT_URI)
                     .withValue(VideoColumns.ID.getName(), id)
@@ -179,6 +144,7 @@ public class VideoRespoceHandler extends ResponseHandler {
     public static String ERROR_CODE = "error_code";
     public static String CAPTCHA_CODE = "14";
     public static final String CAPTCHA = "captcha";
+    public static String TO_MANY_REQUEST = "6";
 
 
     private boolean checkCaptcha(String response, Bundle bundle, Tracker myTracker, Context context) throws Exception {
@@ -200,6 +166,8 @@ public class VideoRespoceHandler extends ResponseHandler {
                     } catch (Exception e) {
 
                     }
+                } else if (!jSubObject.isNull(ERROR_CODE) && TO_MANY_REQUEST.equals(jSubObject.getString(ERROR_CODE))) {
+                    throw new ToManyRequestException();
                 }
             }
         } catch (JSONException e) {

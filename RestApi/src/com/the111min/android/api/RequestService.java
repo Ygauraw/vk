@@ -17,8 +17,12 @@ import com.the111min.android.api.util.Logger;
 import com.commonsware.cwac.wakeful.WakefulIntentService;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.protocol.BasicHttpContext;
 
+import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 /**
@@ -55,6 +59,8 @@ public class RequestService extends WakefulIntentService {
     static final int STATUS_REQUEST_FAILED = 2;
     static final int STATUS_ERROR = 3;
 
+    private int executionCount;
+
     private ResultReceiver mReceiver;
 
     public RequestService() {
@@ -75,18 +81,33 @@ public class RequestService extends WakefulIntentService {
 
         Bundle lastResultData = null;
         boolean lastResult = true;
-        for (Request request : requests) {
-            try {
-                final RequestComposer composer = request.getRequestComposer();
-                final HttpRequestBase httpRequest = composer.composeRequest(this, request);
-                final HttpResponse httpResponse = HttpRequestSender.sendRequest(httpRequest);
-                final ResponseHandler handler = request.getResponseHandler();
 
-                lastResultData = new Bundle();
-                lastResult = handler.handleResponse(this, httpResponse, request, lastResultData);
-            } catch (Exception e) {
-                sendError(token, e);
-                return;
+        boolean retry = true;
+        HttpRequestRetryHandler retryHandler = HttpRequestSender.getHttpClient().getHttpRequestRetryHandler();
+
+        for (Request request : requests) {
+            while (retry) {
+                try {
+                    final RequestComposer composer = request.getRequestComposer();
+                    final HttpRequestBase httpRequest = composer.composeRequest(this, request);
+                    final HttpResponse httpResponse = HttpRequestSender.sendRequest(httpRequest);
+                    final ResponseHandler handler = request.getResponseHandler();
+
+                    lastResultData = new Bundle();
+                    lastResult = handler.handleResponse(this, httpResponse, request, lastResultData);
+
+                    retry = false;
+
+                } catch (IOException ex) {
+                    retry = retryHandler.retryRequest(ex, ++executionCount, null);
+                    if (!retry) {
+                        sendError(token, ex);
+                        return;
+                    }
+                } catch (Exception e) {
+                    sendError(token, e);
+                    return;
+                }
             }
         }
 

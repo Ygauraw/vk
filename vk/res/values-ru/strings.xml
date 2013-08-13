@@ -22,5 +22,7 @@
     <string name="no_internet_connection">Нет подключения к сети</string>
     <string name="captcha_text">Введите текст с картинки</string>
     <string name="apply">Отправить</string>
+    <string name="open_downloads">Открыть загрузки</string>
+    <string name="download_error">Ошибка загрузки</string>
 
 </resources>

@@ -1,5 +1,6 @@
 package com.gark.vk.ui;
 
+import android.app.DownloadManager;
 import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -393,10 +394,19 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             switch (position) {
                 case 0:
+                    Intent dm = new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS);
+                    dm.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    try {
+                        startActivity(dm);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                case 1:
                     getContentResolver().delete(SuggestionObject.CONTENT_URI, null, null);
                     Toast.makeText(MainActivity1.this, R.string.history_was_erased, Toast.LENGTH_SHORT).show();
                     break;
-                case 1:
+                case 2:
                     appName = "com.gark.vk";
                     try {
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appName)));
@@ -404,7 +414,7 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + appName)));
                     }
                     break;
-                case 2:
+                case 3:
                     appName = "Modest Fish";
                     try {
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://developer?id=" + appName)));

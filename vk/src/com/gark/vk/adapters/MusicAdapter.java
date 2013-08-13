@@ -148,7 +148,9 @@ public class MusicAdapter extends CursorAdapter {
                     request.setDescription(artist);
 //                    MimeTypeMap.getSingleton().ge
 
-                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, title + " " + artist + ".mp3");
+                    if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+                        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, title + " " + artist + ".mp3");
+                    }
 
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
                         request.allowScanningByMediaScanner();
@@ -161,6 +163,7 @@ public class MusicAdapter extends CursorAdapter {
                     Toast.makeText(context, downloadToastMessage, Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    Toast.makeText(context, R.string.download_error, Toast.LENGTH_SHORT).show();
                 }
 
             }

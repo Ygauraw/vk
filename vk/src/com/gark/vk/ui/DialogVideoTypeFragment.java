@@ -157,7 +157,9 @@ public class DialogVideoTypeFragment extends DialogFragment implements DialogInt
                     request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
                     request.setAllowedOverRoaming(false);
                     request.setTitle(currentTitle);
-                    request.setDestinationInExternalFilesDir(getActivity(), Environment.DIRECTORY_DOWNLOADS, currentTitle + ".mp4");
+                    if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+                        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, currentTitle + ".mp4");
+                    }
                     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
                         request.allowScanningByMediaScanner();
                         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE | DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
@@ -167,6 +169,7 @@ public class DialogVideoTypeFragment extends DialogFragment implements DialogInt
                     Toast.makeText(getActivity(), downloadToastMessage, Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    Toast.makeText(getActivity(), R.string.download_error, Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
