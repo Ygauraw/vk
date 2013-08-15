@@ -163,9 +163,10 @@ public class MusicAdapter extends CursorAdapter {
                     Toast.makeText(context, downloadToastMessage, Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Toast.makeText(context, R.string.download_error, Toast.LENGTH_SHORT).show();
+                    if (context != null) {
+                        Toast.makeText(context, R.string.download_error, Toast.LENGTH_SHORT).show();
+                    }
                 }
-
             }
         });
 

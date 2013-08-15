@@ -169,7 +169,9 @@ public class DialogVideoTypeFragment extends DialogFragment implements DialogInt
                     Toast.makeText(getActivity(), downloadToastMessage, Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Toast.makeText(getActivity(), R.string.download_error, Toast.LENGTH_SHORT).show();
+                    if (getActivity() != null) {
+                        Toast.makeText(getActivity(), R.string.download_error, Toast.LENGTH_SHORT).show();
+                    }
                 }
                 break;
         }
