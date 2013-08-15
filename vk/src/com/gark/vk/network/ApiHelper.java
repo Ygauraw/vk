@@ -14,7 +14,6 @@ import org.apache.http.protocol.HTTP;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Random;
 
 public class ApiHelper extends BaseApiHelper {
@@ -100,7 +99,7 @@ public class ApiHelper extends BaseApiHelper {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        Request.Builder builder = new Request.Builder(URL, RequestMethod.GET).setResponseHandler(VideoRespoceHandler.class);
+        Request.Builder builder = new Request.Builder(URL, RequestMethod.GET).setResponseHandler(VideoResponseHandler.class);
         sendRequest(builder.create());
     }
 

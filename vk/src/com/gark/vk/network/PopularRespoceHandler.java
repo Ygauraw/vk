@@ -138,6 +138,7 @@ public class PopularRespoceHandler extends ResponseHandler {
         } catch (Exception e) {
             e.printStackTrace();
 
+
             StringBuffer sb = new StringBuffer();
             if (e != null && e.getMessage() != null) {
                 sb.append(e.getMessage());
@@ -145,6 +146,11 @@ public class PopularRespoceHandler extends ResponseHandler {
 
             if (e != null && e.getLocalizedMessage() != null) {
                 sb.append(e.getLocalizedMessage());
+            }
+
+            try {
+                sb.append(e.getClass().getName());
+            } catch (Exception ex) {
             }
 
             myTracker.sendException(sb.toString() + "\n" + text, false);

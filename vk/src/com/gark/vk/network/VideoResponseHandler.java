@@ -24,7 +24,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class VideoRespoceHandler extends ResponseHandler {
+public class VideoResponseHandler extends ResponseHandler {
     private static final String RESPONSE = "response";
 
     public static final String COUNT = "count";
