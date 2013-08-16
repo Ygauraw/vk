@@ -175,42 +175,6 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
                 return mSuggestionsAdapter.runQueryOnBackgroundThread(charSequence);
             }
         });
-
-
-        RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "https://www.googleapis.com/customsearch/v1?key=AIzaSyBmSXUzVZBKQv9FJkTpZXn0dObKgEQOIFU&cx=014099860786446192319:t5mr0xnusiy&q=AndroidDev&alt=json&searchType=image";
-
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-
-            }
-        }
-        );
-        queue.add(stringRequest);
-//
-
-//        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-//
-//            @Override
-//            public void onResponse(JSONObject response) {
-//
-//            }
-//        }, new Response.ErrorListener() {
-//
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//
-//            }
-//        }
-//        );
-
     }
 
     final ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
