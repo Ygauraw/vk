@@ -24,5 +24,10 @@
     <string name="apply">Отправить</string>
     <string name="open_downloads">Открыть загрузки</string>
     <string name="download_error">Ошибка загрузки</string>
+    <string name="login_to_vk">Войти в Вконтакте для большей производительности</string>
+    <string name="already_logged">Вы уже залогинены, спасибо.</string>
+    <string name="not_necessarily">Не обязательно</string>
+    <string name="enter">Войти</string>
+    <string name="cancel">Отмена</string>
 
 </resources>

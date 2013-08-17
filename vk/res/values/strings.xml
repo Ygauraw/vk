@@ -23,6 +23,11 @@
     <string name="choose_quality">Choose quality</string>
     <string name="open_downloads">Open downloads</string>
     <string name="download_error">Download error</string>
+    <string name="login_to_vk">Login to VK for better performance</string>
+    <string name="already_logged">You are already logged in, thank you.</string>
+    <string name="not_necessarily">Not necessarily</string>
+    <string name="enter">Enter</string>
+    <string name="cancel">Cancel</string>
 
     <string name="captcha_text">Type the captcha text</string>
     <string name="apply">Apply</string>

@@ -25,7 +25,7 @@ import com.gark.vk.model.VideoTypes;
 import com.gark.vk.navigation.NavigationControllerFragment;
 import com.gark.vk.network.ApiHelper;
 import com.gark.vk.network.DirectVideoFilesReposeHandler;
-import com.gark.vk.network.PopularRespoceHandler;
+import com.gark.vk.network.PopularResponceHandler;
 import com.gark.vk.services.PlaybackService;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Tracker;
@@ -169,11 +169,11 @@ public class VideoListFragment extends NavigationControllerFragment implements L
                     }
                     break;
                 default:
-                    receivedCount = result.getInt(PopularRespoceHandler.COUNT);
+                    receivedCount = result.getInt(PopularResponceHandler.COUNT);
                     updateUI();
                     try {
-                        if (result.containsKey(PopularRespoceHandler.CAPTCHA)) {
-                            DialogFragment dialogFragment = new DialogCaptchaFragment(result.getString(PopularRespoceHandler.CAPTCHA));
+                        if (result.containsKey(PopularResponceHandler.CAPTCHA)) {
+                            DialogFragment dialogFragment = new DialogCaptchaFragment(result.getString(PopularResponceHandler.CAPTCHA));
                             dialogFragment.show(getActivity().getSupportFragmentManager(), "dlg2");
 
                         }

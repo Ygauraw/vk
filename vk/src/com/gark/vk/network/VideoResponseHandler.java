@@ -13,6 +13,7 @@ import com.gark.vk.db.VideoColumns;
 import com.gark.vk.model.BlockedTokensObject;
 import com.gark.vk.model.MusicObject;
 import com.gark.vk.model.VideoObject;
+import com.gark.vk.utils.StorageUtils;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Tracker;
 import com.the111min.android.api.request.Request;
@@ -145,6 +146,7 @@ public class VideoResponseHandler extends ResponseHandler {
     public static final String CAPTCHA = "captcha";
     public static String TO_MANY_REQUEST = "6";
     public static String FLOOD_CONTROL = "9";
+    public static String AUTHORIZATION_ERROR = "5";
 
 
     private boolean checkCaptcha(String response, Bundle bundle, Tracker myTracker, Context context) throws Exception {
@@ -172,15 +174,24 @@ public class VideoResponseHandler extends ResponseHandler {
 
                     try {
                         String badToken = getBadToken(jSubObject);
-                        ContentValues contentValues = new ContentValues();
-                        contentValues.put(BlockedTokensColumns.TOKEN_VALUE.getName(), badToken);
-                        contentValues.put(BlockedTokensColumns.BLOCKED_TIME.getName(), Calendar.getInstance().getTimeInMillis());
-                        context.getContentResolver().insert(BlockedTokensObject.CONTENT_URI, contentValues);
+//                        ContentValues contentValues = new ContentValues();
+//                        contentValues.put(BlockedTokensColumns.TOKEN_VALUE.getName(), badToken);
+//                        contentValues.put(BlockedTokensColumns.BLOCKED_TIME.getName(), Calendar.getInstance().getTimeInMillis());
+//                        context.getContentResolver().insert(BlockedTokensObject.CONTENT_URI, contentValues);
 
                         myTracker.sendEvent("Flood control", badToken, badToken, 3l);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                } else if (!jSubObject.isNull(ERROR_CODE) && AUTHORIZATION_ERROR.equals(jSubObject.getString(ERROR_CODE))) {
+                    try {
+                        String badToken = getBadToken(jSubObject);
+                        myTracker.sendEvent("Authorization error", badToken, badToken, 3254l);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    StorageUtils.updateToken(context);
                 }
             }
         } catch (JSONException e) {

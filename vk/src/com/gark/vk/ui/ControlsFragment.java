@@ -21,7 +21,7 @@ import com.gark.vk.R;
 import com.gark.vk.adapters.MusicAdapter;
 import com.gark.vk.navigation.NavigationControllerFragment;
 import com.gark.vk.services.PlaybackService;
-import com.gark.vk.utils.PlayerUtils;
+import com.gark.vk.utils.StorageUtils;
 
 import java.util.Locale;
 
@@ -87,10 +87,10 @@ public class ControlsFragment extends NavigationControllerFragment {
         public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
             switch (buttonView.getId()) {
 //                case R.id.shuffle:
-//                    PlayerUtils.setShuffle(getActivity(), isChecked);
+//                    StorageUtils.setShuffle(getActivity(), isChecked);
 //                    break;
 //                case R.id.repeat:
-//                    PlayerUtils.setRepeat(getActivity(), isChecked);
+//                    StorageUtils.setRepeat(getActivity(), isChecked);
 //                    break;
                 case R.id.play_stop:
                     if (buttonView.isPressed()) {
@@ -126,13 +126,13 @@ public class ControlsFragment extends NavigationControllerFragment {
                     getActivity().startService(intent);
                     break;
                 case R.id.repeat:
-                    boolean isActive = PlayerUtils.getRepeat(getActivity());
-                    PlayerUtils.setRepeat(getActivity(), !isActive);
+                    boolean isActive = StorageUtils.getRepeat(getActivity());
+                    StorageUtils.setRepeat(getActivity(), !isActive);
                     updateRepeatButton();
                     break;
                 case R.id.shuffle:
-                    boolean isShuffle = PlayerUtils.getShuffle(getActivity());
-                    PlayerUtils.setShuffle(getActivity(), !isShuffle);
+                    boolean isShuffle = StorageUtils.getShuffle(getActivity());
+                    StorageUtils.setShuffle(getActivity(), !isShuffle);
                     updateShuffleButton();
                     break;
             }
@@ -337,12 +337,12 @@ public class ControlsFragment extends NavigationControllerFragment {
     }
 
     private void updateRepeatButton() {
-        boolean isActive = PlayerUtils.getRepeat(getActivity());
+        boolean isActive = StorageUtils.getRepeat(getActivity());
         imgRepeat.setImageResource(isActive ? R.drawable.ic_repeat_one_song_dark_tablet : R.drawable.ic_repeat_dark_tablet);
     }
 
     private void updateShuffleButton() {
-        boolean isActive = PlayerUtils.getShuffle(getActivity());
+        boolean isActive = StorageUtils.getShuffle(getActivity());
         imgShuffle.setImageResource(isActive ? R.drawable.ic_shuffle_dark_selected_tablet : R.drawable.ic_shuffle_dark_tablet);
     }
 }

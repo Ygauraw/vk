@@ -2,7 +2,7 @@ package com.gark.vk.model;
 
 import android.content.Context;
 
-import com.gark.vk.utils.PlayerUtils;
+import com.gark.vk.utils.StorageUtils;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -56,8 +56,8 @@ public class PlayList {
     public void moveToNextTrack() {
         try {
             if (playList != null) {
-                boolean isRepeat = PlayerUtils.getRepeat(context);
-                boolean isShuffle = PlayerUtils.getShuffle(context);
+                boolean isRepeat = StorageUtils.getRepeat(context);
+                boolean isShuffle = StorageUtils.getShuffle(context);
 
                 // - -
                 if (!isRepeat && !isShuffle) {

@@ -26,7 +26,7 @@ import com.gark.vk.db.MusicQuery;
 import com.gark.vk.model.MusicObject;
 import com.gark.vk.navigation.NavigationControllerFragment;
 import com.gark.vk.network.ApiHelper;
-import com.gark.vk.network.PopularRespoceHandler;
+import com.gark.vk.network.PopularResponceHandler;
 import com.gark.vk.services.PlaybackService;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Tracker;
@@ -176,11 +176,11 @@ public class PopularListFragment extends NavigationControllerFragment implements
             switch (token) {
                 case ApiHelper.AUDIO_TOKEN:
 
-                    receivedCount = result.getInt(PopularRespoceHandler.COUNT);
+                    receivedCount = result.getInt(PopularResponceHandler.COUNT);
                     updateUI();
                     try {
-                        if (result.containsKey(PopularRespoceHandler.CAPTCHA)) {
-                            DialogFragment dialogFragment = new DialogCaptchaFragment(result.getString(PopularRespoceHandler.CAPTCHA));
+                        if (result.containsKey(PopularResponceHandler.CAPTCHA)) {
+                            DialogFragment dialogFragment = new DialogCaptchaFragment(result.getString(PopularResponceHandler.CAPTCHA));
                             dialogFragment.show(getActivity().getSupportFragmentManager(), "dlg2");
 
                         }

