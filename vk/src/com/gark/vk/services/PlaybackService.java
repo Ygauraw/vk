@@ -563,9 +563,11 @@ public class PlaybackService extends Service implements OnPreparedListener, OnSe
             tempUpdateBroadcast.putExtra(SECONDARY_PROGRESS, lastBufferPercent);
             tempUpdateBroadcast.putExtra(EXTRA_POSITION, seekToPosition);
             tempUpdateBroadcast.putExtra(EXTRA_IS_PLAYING, mMediaPlayer.isPlaying());
-            if (mPlayList != null && mPlayList.getCurrentItem() != null) {
+            try {
                 tempUpdateBroadcast.putExtra(EXTRA_ARTIST, mPlayList.getCurrentItem().getArtist());
                 tempUpdateBroadcast.putExtra(EXTRA_TITLE, mPlayList.getCurrentItem().getTitle());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
             tempUpdateBroadcast.putExtra(EXTRA_IS_PREPARED, isPrepared);

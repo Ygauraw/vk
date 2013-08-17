@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
+import com.gark.vk.model.BlockedTokensObject;
 import com.gark.vk.model.MusicObject;
 import com.gark.vk.model.SuggestionObject;
 import com.gark.vk.model.VideoObject;
@@ -23,6 +24,7 @@ public class VKProvider extends ContentProvider {
     private static final int MUSIC = 100;
     private static final int SUGGESTION = 200;
     private static final int VIDEO = 300;
+    private static final int BLOCKED_TOKENS = 400;
 
 
     private static UriMatcher buildUriMatcher() {
@@ -32,6 +34,7 @@ public class VKProvider extends ContentProvider {
         matcher.addURI(authority, VKDBSchema.Tables.MUSIC, MUSIC);
         matcher.addURI(authority, VKDBSchema.Tables.SUGGESTION, SUGGESTION);
         matcher.addURI(authority, VKDBSchema.Tables.VIDEO, VIDEO);
+        matcher.addURI(authority, VKDBSchema.Tables.BLOCKED_TOKENS, BLOCKED_TOKENS);
 
         return matcher;
     }
@@ -52,6 +55,8 @@ public class VKProvider extends ContentProvider {
                 return SuggestionObject.CONTENT_TYPE;
             case VIDEO:
                 return VideoObject.CONTENT_TYPE;
+            case BLOCKED_TOKENS:
+                return BlockedTokensObject.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -102,6 +107,8 @@ public class VKProvider extends ContentProvider {
                 return builder.table(VKDBSchema.Tables.SUGGESTION);
             case VIDEO:
                 return builder.table(VKDBSchema.Tables.VIDEO);
+            case BLOCKED_TOKENS:
+                return builder.table(VKDBSchema.Tables.BLOCKED_TOKENS);
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
 
@@ -116,6 +123,8 @@ public class VKProvider extends ContentProvider {
                 return VKDBSchema.Tables.SUGGESTION;
             case VIDEO:
                 return VKDBSchema.Tables.VIDEO;
+            case BLOCKED_TOKENS:
+                return VKDBSchema.Tables.BLOCKED_TOKENS;
             default:
                 throw new UnsupportedOperationException("Unknown query uri: " + uri);
         }

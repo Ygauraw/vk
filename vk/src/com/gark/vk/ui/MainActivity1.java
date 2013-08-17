@@ -13,9 +13,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
@@ -33,17 +30,9 @@ import android.widget.FilterQueryProvider;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.gark.vk.R;
 import com.gark.vk.adapters.MySuggestionsAdapter;
 import com.gark.vk.db.SuggestionColumns;
-import com.gark.vk.db.SuggestionQuery;
 import com.gark.vk.model.SuggestionObject;
 import com.gark.vk.navigation.NavigationController;
 import com.gark.vk.services.PlaybackService;
@@ -52,8 +41,6 @@ import com.gark.vk.utils.PlayerUtils;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.ExceptionReporter;
 import com.viewpagerindicator.TitlePageIndicator;
-
-import org.json.JSONObject;
 
 public class MainActivity1 extends ActionBarActivity implements SearchView.OnQueryTextListener, SearchView.OnSuggestionListener {
 
@@ -83,7 +70,13 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
 
 
         EasyTracker.getInstance().setContext(this);
-        PlayerUtils.motifyIfNoInternet(this);
+        PlayerUtils.notifyIfNoInternet(this);
+
+//        EasyTracker.getInstance().setContext(this);
+//        Tracker myTracker = EasyTracker.getTracker();
+//        myTracker.sendEvent("test1", "test2", "test3", 2l);
+
+        PlayerUtils.manageBlockToken(this);
 
         // Change uncaught exception parser...
         // Note: Checking uncaughtExceptionHandler type can be useful if clearing ga_trackingId during development to disable analytics - avoid NullPointerException.

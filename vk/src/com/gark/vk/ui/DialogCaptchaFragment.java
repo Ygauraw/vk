@@ -128,18 +128,8 @@ public class DialogCaptchaFragment extends DialogFragment implements DialogInter
         if (savedInstanceState != null) {
             captchaUrl = savedInstanceState.getString(CAPTCHA_IMG);
         }
-        mImageLoader.get(captchaUrl, new ImageLoader.ImageListener() {
-            @Override
-            public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                imageCaptcha.setImageBitmap(response.getBitmap());
-            }
 
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                imageCaptcha.setImageResource(R.drawable.ic_movie_default);
-            }
-        });
-
+        mImageLoader.get(captchaUrl, ImageLoader.getImageListener(imageCaptcha, R.drawable.item_bg, R.drawable.item_bg_fail));
 
         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.captcha_text)

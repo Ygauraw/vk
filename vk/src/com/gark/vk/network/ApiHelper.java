@@ -1,9 +1,15 @@
 package com.gark.vk.network;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
+import com.gark.vk.db.BlockedTokensColumns;
+import com.gark.vk.db.BlockedTokensQuery;
+import com.gark.vk.model.BlockedTokensObject;
+import com.gark.vk.utils.Log;
 import com.the111min.android.api.BaseApiHelper;
 import com.the111min.android.api.request.Request;
 import com.the111min.android.api.request.Request.RequestMethod;
@@ -14,6 +20,9 @@ import org.apache.http.protocol.HTTP;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
 import java.util.Random;
 
 public class ApiHelper extends BaseApiHelper {
@@ -28,36 +37,28 @@ public class ApiHelper extends BaseApiHelper {
     private Context context;
     //    private static final String ACCESS_TOKEN = "37176714256e377a408a2478728e7c06fc0586dcff56aed28d6b1dd1e3598f3af7e7a9268bb1b3ffd2c6d";
     private static final String[] ACCESS_TOKENS = new String[]{
-//            "37176714256e377a408a2478728e7c06fc0586dcff56aed28d6b1dd1e3598f3af7e7a9268bb1b3ffd2c6d", "74e37c7cae5fe2f9d48f5533686cd0979f4e44fd070979ae9dd5d26b42b591161fdefd95396850d0ffde9",
-//            "c82cb8591d7cd186916028bb29b3faf289999328ac5482d2a998747e3f116cf16201c3d8be6e9c328c3e5", "4057a57148daca8c3d5fc6e4e10bf37b42ea67bcb0bc059c6fbc74766c35b027d96e95c465d21792932ed",
-//            "a21756528ec71dec8b016b7975b470c708b54535d1d068f130641790795f2a05243f478a6898c82481e91", "d868d0c17e551f0d61f01b0e2cdcbf31908531227dd036e43cb75ce33e66ce3a2eade69a53437dec6272a",
-//            "2b51f6a4e797603ddbe85cdef1de20f872ffe229fc9de87478efe037148793689c320d3b4a5226b0bb220", "03328309b844c9cc0b6ad716238ac8d583562d0dccc56ff2fcd755913bf021c4ca5d64b164ada2869ada1",
-//            "a10b720def064f31ffd3e06e8966aad4faac465f0a4c6be4c8576e3354c008bac6cf7c38d8fdf8a530b9c", "6224917185ff5ae27ce3da74fbceaf7768ebb9df00d46de6aa5ac7f6e7296030d63ce3830f05850429b9b",
-//            "25829f0bb02a0c8cc32905313d6c3a4d7c0025f9423f47ad453edf54fe8b0b258011158407515a71ee934", "f900693cbd1c904c332b28c6bb742101f332d4eb851054fde761329025cdebfab54c46ad4c4fb05cfbc9e",
-//            "30a50334af0b2bc6a4c8833e5a81da0fc1064e628363e8b00597780335e1674d97ad94cf2a5c78443ff57", "4a0494f389ac795e344e6e383e11f7d0394e1922b46b747583dc022432650045337f19486648d230dcf74",
-//            "170653b9b04dd3de60ae743d9ccbed40c5dcd4a2bb57d7beccb629a2f02354ae3afa095be2cf7e56ffda3", "608f6518a6b17218e08a47918393833880795488111a0013a2c0dabbae5c851baf04efab1b6ad0c6f2b5a",
-
-            "d209831e33938b0a39a39bf941795bc7e2c5e364f6d4b3579f470cc15c70bd14c95012353a02203e6d950",
-            "7c4857938de77bb0549f085276d57e568aa34fde33e0f5256a7a046322465df25c7e9247479f7b3054590",
-            "9a26fa7b16069d62472df8c4112684e549b54a7ad6438aba1d20559dfb103d0228d443716ba30f9967037",
-            "ed3a3c7b2e54b7d9ec68cf350dbc937ec3e3e43c14001f40b831146204154f2f6c212dce8d78a0257e2da",
-            "7be005281d1e21e317e2f04cf890acd09ebbeee558a4e23dd1e8d4da8e888fe151caa251a8cacfcd2965d",
-
+            // my
+            "37176714256e377a408a2478728e7c06fc0586dcff56aed28d6b1dd1e3598f3af7e7a9268bb1b3ffd2c6d",
+            // lena
             "7fcb578cc3128dc96579db09e6f088347c2512ac1fd1b5c32931cb6054318203344c06a9b4d629dce0caf",
-            "2d102883c5631bb7ffb95bf0dccfd01ce89e0e4a4c028d479ad5fd517b8367985f017f8c20c995e8a169b",
-            "19ae26a756029be62ca5603854d414d624ae91c748eb0e49f81d8eff088ff09e956f2664d7ec158845920",
-            "8cbcf5cec7d0a6651b85d9359ff8f43e9db5cfd9590528999a1d4c3d1836985125e0985a6e33c4d8fe9e1",
-            "124cf54664e55c41f75f907222fcc8ec6ee6e6cf218af8c4dcf5e3ea4e47077fb9d06c7f7bec37144306e"
+            // John wayne  user_id=220909080
+            "3caa825214103474e13d94a0eabce2c354dba6a7400e22179cf5bf232146dd7c245862a326a6dba8d6ace",
 
+            // Pedoha user_id=3589341 locked
+            // "ffda8c939a0aac0783e262fd98816ab47f0c3910d566ded21a9dd1b4f3a39c953c55c27bff8dabc976697",
 
+            // Mykyta  user_id=5422875
+            "f2e4309ccffc48a4a6a3941aa808ce55ba0499542a3f5e155182fe7ecd029467540e5437483c7dba11703",
 
+            // Dimon makeev
+            "1fef8b7043f37a2aa3a24f3e4a3afb9a304920951a30287f1e8362e65f1a6e8dc00c8a7923510dc51e0e2",
 
-
-
-
-
+            //mama
+            "b370bda148ff9009fef72919c6549e093c5e4b9c60f641ae8dcbe5bbea12e4a679b176097fc31304bb905"
 
     };
+
+
 // Lena
     //    "https://oauth.vk.com/authorize?client_id=3824524&redirect_uri=http://api.vk.com/blank.html&display=page&v=5.0&scope=audio,video,offline&response_type=token"
 
@@ -72,6 +73,18 @@ public class ApiHelper extends BaseApiHelper {
         super(context, receiver);
         random = new Random();
         this.context = context;
+
+//        ArrayList<Integer> list = new ArrayList<Integer>();
+//        list.add(2);
+//        list.add(1);
+//
+//        for (int i = 0; i < 100; i++) {
+////            int position = getRandomWithExclusion(random, 0, ACCESS_TOKENS.length - 1, new int[]{2, 1});
+//            int position = getRandomWithExclusion(random, ACCESS_TOKENS.length, list);
+//            Log.e("" + position);
+//
+//        }
+
 
     }
 
@@ -104,20 +117,6 @@ public class ApiHelper extends BaseApiHelper {
         sendRequest(builder.create());
     }
 
-//    public void getSongsEX(String query, int offset) {
-//        String URL = "http://ex.fm/api/v3/song/search/%s?results=%s&start=%s";
-//        URL = String.format(URL, query, COUNT, offset);
-////        try {
-////            URL = URLEncoder.encode(URL, HTTP.UTF_8);
-////        } catch (UnsupportedEncodingException e) {
-////            e.printStackTrace();
-////        }
-//
-//        Request.Builder builder = new Request.Builder(URL, RequestMethod.GET).setResponseHandler(SongsEXResponseHandler.class);
-//        sendRequest(builder.create());
-//    }
-
-
     public void getVideoList(int offset, String query) {
         String URL = "https://api.vk.com/method/video.search.json?&q=%s&count=%s&offset=%s&adult=1&filters=mp4&access_token=" + getToken();
         try {
@@ -135,7 +134,10 @@ public class ApiHelper extends BaseApiHelper {
     }
 
     private String getToken() {
-        return ACCESS_TOKENS[random.nextInt(ACCESS_TOKENS.length)];
+
+//        int position = getRandomWithExclusion(random, 0, ACCESS_TOKENS.length - 1, getExcludedPosition());
+        int position = getRandomWithExclusion(random, ACCESS_TOKENS.length, getExcludedPosition());
+        return ACCESS_TOKENS[position];
     }
 
     private void setEnglishFitterByCountryISO(Context context) {
@@ -153,7 +155,55 @@ public class ApiHelper extends BaseApiHelper {
         if (countryCode != null && !TextUtils.isEmpty(countryCode) && !countyIsoList.contains(countryCode)) {
             englishResultsFlag = 1;
         }
+    }
 
+    private ArrayList<Integer> getExcludedPosition() {
+        ArrayList<String> list = new ArrayList<String>();
+        Cursor cursor = context.getContentResolver().query(BlockedTokensObject.CONTENT_URI, BlockedTokensQuery.PROJECTION, null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                list.add(cursor.getString(cursor.getColumnIndex(BlockedTokensColumns.TOKEN_VALUE.getName())));
+            }
+            while (cursor.moveToNext());
+        }
+
+        if (cursor != null)
+            cursor.close();
+
+//        int[] excludedPosition = new int[list.size()];
+        ArrayList<Integer> excludedPosition = new ArrayList<Integer>();
+
+        for (int j = 0; j < list.size(); j++) {
+            for (int i = 0; i < ACCESS_TOKENS.length; i++) {
+                if (ACCESS_TOKENS[i].equals(list.get(j))) {
+//                    excludedPosition[j] = i;
+                    excludedPosition.add(i);
+                    break;
+                }
+            }
+
+        }
+
+        return excludedPosition;
+    }
+
+//    private int getRandomWithExclusion(Random rnd, int start, int end, int... exclude) {
+//        int random = start + rnd.nextInt(end - start + 1 - exclude.length);
+//        for (int ex : exclude) {
+//            if (random < ex) {
+//                break;
+//            }
+//            random++;
+//        }
+//        return random;
+//    }
+
+    public int getRandomWithExclusion(Random rnd, int end, ArrayList<Integer> exclude) {
+        int rand;
+        do {
+            rand = rnd.nextInt(end);
+        } while (exclude.contains(rand));
+        return rand;
     }
 
 }

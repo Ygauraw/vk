@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.widget.Toast;
 
 import com.gark.vk.R;
 
@@ -27,7 +28,6 @@ public class DownloaderReceiver extends BroadcastReceiver {
         if (android.os.Build.VERSION.SDK_INT < 11) {
             dm = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
             m_notificationMgr = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
 
             try {
                 String action = intent.getAction();
@@ -49,20 +49,11 @@ public class DownloaderReceiver extends BroadcastReceiver {
                             String title = c.getString(c.getColumnIndex(DownloadManager.COLUMN_TITLE));
                             String description = c.getString(c.getColumnIndex(DownloadManager.COLUMN_DESCRIPTION));
 
-                            Bitmap bitmap = null;
-
-                            MediaMetadataRetriever mediaMetadataRetriever = new MediaMetadataRetriever();
-                            mediaMetadataRetriever.setDataSource(path);
-                            byte[] img = mediaMetadataRetriever.getEmbeddedPicture();
-                            bitmap = BitmapFactory.decodeByteArray(img, 0, img.length);
-
-
                             NotificationCompat.Builder nb = new NotificationCompat.Builder(context)
                                     .setContentTitle(title + " " + description)
                                     .setContentText(context.getString(R.string.downloading_complete))
                                     .setTicker(context.getString(R.string.downloading_complete))
                                     .setSmallIcon(R.drawable.download_icon_2)
-                                    .setLargeIcon(bitmap)
                                     .setOngoing(false);
 
                             m_notificationMgr.notify((int) id, nb.build());
@@ -73,5 +64,47 @@ public class DownloaderReceiver extends BroadcastReceiver {
                 e.printStackTrace();
             }
         }
+
+        Bundle extras = intent.getExtras();
+        int status = extras.getInt(DownloadManager.COLUMN_STATUS);
+        int reason = extras.getInt(DownloadManager.COLUMN_REASON);
+
+        switch (status) {
+            case DownloadManager.STATUS_FAILED:
+                String failedReason = "";
+                switch (reason) {
+                    case DownloadManager.ERROR_CANNOT_RESUME:
+                        failedReason = "ERROR_CANNOT_RESUME";
+                        break;
+                    case DownloadManager.ERROR_DEVICE_NOT_FOUND:
+                        failedReason = "ERROR_DEVICE_NOT_FOUND";
+                        break;
+                    case DownloadManager.ERROR_FILE_ALREADY_EXISTS:
+                        failedReason = "ERROR_FILE_ALREADY_EXISTS";
+                        break;
+                    case DownloadManager.ERROR_FILE_ERROR:
+                        failedReason = "ERROR_FILE_ERROR";
+                        break;
+                    case DownloadManager.ERROR_HTTP_DATA_ERROR:
+                        failedReason = "ERROR_HTTP_DATA_ERROR";
+                        break;
+                    case DownloadManager.ERROR_INSUFFICIENT_SPACE:
+                        failedReason = "ERROR_INSUFFICIENT_SPACE";
+                        break;
+                    case DownloadManager.ERROR_TOO_MANY_REDIRECTS:
+                        failedReason = "ERROR_TOO_MANY_REDIRECTS";
+                        break;
+                    case DownloadManager.ERROR_UNHANDLED_HTTP_CODE:
+                        failedReason = "ERROR_UNHANDLED_HTTP_CODE";
+                        break;
+                    case DownloadManager.ERROR_UNKNOWN:
+                        failedReason = "ERROR_UNKNOWN";
+                        break;
+                }
+
+                Toast.makeText(context, context.getString(R.string.download_error) + " " + failedReason, Toast.LENGTH_LONG).show();
+
+        }
+
     }
 }

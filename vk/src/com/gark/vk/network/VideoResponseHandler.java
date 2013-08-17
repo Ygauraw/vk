@@ -1,13 +1,16 @@
 package com.gark.vk.network;
 
 import android.content.ContentProviderOperation;
+import android.content.ContentValues;
 import android.content.Context;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 
+import com.gark.vk.db.BlockedTokensColumns;
 import com.gark.vk.db.MusicColumns;
 import com.gark.vk.db.VKDBSchema;
 import com.gark.vk.db.VideoColumns;
+import com.gark.vk.model.BlockedTokensObject;
 import com.gark.vk.model.MusicObject;
 import com.gark.vk.model.VideoObject;
 import com.google.analytics.tracking.android.EasyTracker;
@@ -23,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class VideoResponseHandler extends ResponseHandler {
     private static final String RESPONSE = "response";
@@ -125,11 +129,6 @@ public class VideoResponseHandler extends ResponseHandler {
                     .withValue(VideoColumns.THUMB.getName(), thumb)
                     .withValue(VideoColumns.IMAGE_MEDIUM.getName(), image_medium)
                     .withValue(VideoColumns.PLAYER.getName(), player)
-//                    .withValue(VideoColumns.MP4_240.getName(), mp4_240)
-//                    .withValue(VideoColumns.MP4_360.getName(), mp4_360)
-//                    .withValue(VideoColumns.MP4_480.getName(), mp4_480)
-//                    .withValue(VideoColumns.MP4_720.getName(), mp4_720)
-//                    .withValue(VideoColumns.EXTERNAL.getName(), external)
                     .build());
         }
 
@@ -145,6 +144,7 @@ public class VideoResponseHandler extends ResponseHandler {
     public static String CAPTCHA_CODE = "14";
     public static final String CAPTCHA = "captcha";
     public static String TO_MANY_REQUEST = "6";
+    public static String FLOOD_CONTROL = "9";
 
 
     private boolean checkCaptcha(String response, Bundle bundle, Tracker myTracker, Context context) throws Exception {
@@ -168,12 +168,54 @@ public class VideoResponseHandler extends ResponseHandler {
                     }
                 } else if (!jSubObject.isNull(ERROR_CODE) && TO_MANY_REQUEST.equals(jSubObject.getString(ERROR_CODE))) {
                     throw new ToManyRequestException();
+                } else if (!jSubObject.isNull(ERROR_CODE) && FLOOD_CONTROL.equals(jSubObject.getString(ERROR_CODE))) {
+
+                    try {
+                        String badToken = getBadToken(jSubObject);
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(BlockedTokensColumns.TOKEN_VALUE.getName(), badToken);
+                        contentValues.put(BlockedTokensColumns.BLOCKED_TIME.getName(), Calendar.getInstance().getTimeInMillis());
+                        context.getContentResolver().insert(BlockedTokensObject.CONTENT_URI, contentValues);
+
+                        myTracker.sendEvent("Flood control", badToken, badToken, 3l);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return result;
+    }
+
+
+    private String getBadToken(JSONObject jImg) throws JSONException {
+
+        final String KEY = "key";
+        final String ACCESS_TOKEN = "access_token";
+        final String VALUE = "value";
+        final String REQUEST_PARAMS = "request_params";
+        String token = null;
+
+        if (!jImg.isNull(REQUEST_PARAMS)) {
+
+            JSONArray jsonArray = jImg.getJSONArray(REQUEST_PARAMS);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject j = (JSONObject) jsonArray.get(i);
+                String key = j.getString(KEY);
+                String value = j.getString(VALUE);
+
+
+                if (ACCESS_TOKEN.equals(key)) {
+                    token = value;
+                    break;
+                }
+            }
+        }
+
+        return token;
+
     }
 
 }

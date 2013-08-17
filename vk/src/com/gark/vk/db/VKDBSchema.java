@@ -12,6 +12,7 @@ public interface VKDBSchema {
 		String MUSIC = "MusicTable";
         String SUGGESTION = "SuggestionTable";
         String VIDEO = "VideoTable";
+        String BLOCKED_TOKENS = "BlockedTokensTable";
 
 	}
 
