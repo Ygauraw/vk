@@ -76,17 +76,21 @@ public class PopularListFragment extends NavigationControllerFragment implements
     }
 
 
-    public void updateSearchFilter(String mask) {
-        if (/*searchResult != null && */mask != null) {
+    public void updateSearchFilter(String mask, int videoTypeToken) {
+        if (mask != null) {
             offset = 0;
             searchMask = mask;
-//            isRequestProceed = false;
             mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
-            mRequestType = ApiHelper.AUDIO_TOKEN;
+            mRequestType = videoTypeToken;
             mApiHelper.getSongsList(offset, searchMask, mRequestType);
-//            mApiHelper.getSongsEX(mask, offset);
-//            searchResult.setText(getString(R.string.result_search_by, mask));
         }
+    }
+
+    public void updateMyVKMusic(int videoTypeToken) {
+        offset = 0;
+        mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
+        mRequestType = videoTypeToken;
+        mApiHelper.getSongsList(offset, searchMask, mRequestType);
     }
 
 
@@ -131,9 +135,6 @@ public class PopularListFragment extends NavigationControllerFragment implements
         View view = inflater.inflate(R.layout.audio_list, null);
         list = (ListView) view.findViewById(R.id.audio_list);
         mNoResult = (TextView) view.findViewById(R.id.no_result);
-//        searchResult = (TextView) view.findViewById(R.id.search_result_filter);
-//        searchResult.setText(getString(R.string.result_search_by, mask));
-//        searchResult.setText((searchMask == null) ? getString(R.string.popular_list) : getString(R.string.result_search_by, searchMask));
         return view;
     }
 
@@ -177,15 +178,21 @@ public class PopularListFragment extends NavigationControllerFragment implements
                 case ApiHelper.AUDIO_TOKEN:
 
                     receivedCount = result.getInt(PopularResponceHandler.COUNT);
-                    updateUI();
+//                    updateUI();
                     try {
                         if (result.containsKey(PopularResponceHandler.CAPTCHA)) {
                             DialogFragment dialogFragment = new DialogCaptchaFragment(result.getString(PopularResponceHandler.CAPTCHA));
                             dialogFragment.show(getActivity().getSupportFragmentManager(), "dlg2");
 
+                        } else {
+                            updateUI();
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
+                    }
+
+                    if (getActivity() != null) {
+                        getActivity().setProgressBarIndeterminateVisibility(false);
                     }
 
                     break;
@@ -220,7 +227,6 @@ public class PopularListFragment extends NavigationControllerFragment implements
     };
 
     private void updateUI() {
-//        isRequestProceed = true;
         if (getActivity() != null) {
             getActivity().setProgressBarIndeterminateVisibility(false);
         }
@@ -238,21 +244,13 @@ public class PopularListFragment extends NavigationControllerFragment implements
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
             if (firstVisibleItem + 3 >= totalItemCount - visibleItemCount) {
                 offset += ApiHelper.COUNT;
-//                isRequestProceed = false;
                 mApiHelper.getSongsList(offset, searchMask, mRequestType);
-//                mApiHelper.getSongsEX(searchMask, offset);
                 getActivity().setProgressBarIndeterminateVisibility(true);
                 list.setOnScrollListener(null);
             }
         }
     };
 
-//    private void playMusic(String url) {
-//        Intent intent = new Intent(getActivity(), PlaybackService.class);
-//        intent.setAction(PlaybackService.SERVICE_PLAY_ENTRY);
-//        intent.putExtra(PlaybackService.EXTRA_URL, url);
-//        getActivity().startService(intent);
-//    }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

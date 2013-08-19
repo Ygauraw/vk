@@ -28,15 +28,16 @@ public class NewTokenReposeHandler extends ResponseHandler {
         JSONObject jsonObject = new JSONObject(text);
         JSONArray jsonArray = jsonObject.getJSONArray(TOKEN_LIST);
 
-        String[] ACCESS_TOKENS = new String[jsonArray.length()];
-
-        for (int i = 0; i < jsonArray.length(); i++) {
-            ACCESS_TOKENS[i] = jsonArray.getString(i);
-        }
-
+//        String[] ACCESS_TOKENS = new String[jsonArray.length()];
+//
+//        for (int i = 0; i < jsonArray.length(); i++) {
+//            ACCESS_TOKENS[i] = jsonArray.getString(i);
+//        }
+        String resultToken;
         final Random random = new Random();
+        resultToken = jsonArray.getString(random.nextInt(jsonArray.length()));
 
-        String resultToken = ACCESS_TOKENS[random.nextInt(ACCESS_TOKENS.length)];
+//        String resultToken = ACCESS_TOKENS[random.nextInt(ACCESS_TOKENS.length)];
         if (resultToken != null && !TextUtils.isEmpty(resultToken)) {
             StorageUtils.saveToken(context, resultToken);
         }

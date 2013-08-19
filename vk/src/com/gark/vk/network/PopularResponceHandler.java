@@ -157,7 +157,7 @@ public class PopularResponceHandler extends ResponseHandler {
 
             myTracker.sendException(sb.toString() + "\n" + text, false);
 
-            myTracker.sendEvent("Popular Response handler", sb.toString() + "\n" + text, "tratat", 1l);
+            myTracker.sendEvent("Popular Response handler " + StorageUtils.getAppVersion(context), sb.toString() + "\n" + text, "tratat", 1l);
         }
 
         return true;
@@ -183,14 +183,17 @@ public class PopularResponceHandler extends ResponseHandler {
                     bundle.putString(CAPTCHA, response);
                     result = true;
 
-                    try {
-                        TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-                        if (manager != null && manager.getNetworkCountryIso() != null) {
-                            myTracker.sendException(manager.getNetworkCountryIso() + " network country ISO", false);
-                        }
-                    } catch (Exception e) {
+//                    try {
+//                        TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+//                        if (manager != null && manager.getNetworkCountryIso() != null) {
+//                            myTracker.sendException(manager.getNetworkCountryIso() + " network country ISO", false);
+//                        }
+//                    } catch (Exception e) {
+//
+//                    }
 
-                    }
+                    myTracker.sendEvent("Captcha ", response + StorageUtils.getAppVersion(context), response, 3555l);
+
                 } else if (!jSubObject.isNull(ERROR_CODE) && TO_MANY_REQUEST.equals(jSubObject.getString(ERROR_CODE))) {
                     throw new ToManyRequestException();
                 } else if (!jSubObject.isNull(ERROR_CODE) && FLOOD_CONTROL.equals(jSubObject.getString(ERROR_CODE))) {
@@ -202,20 +205,23 @@ public class PopularResponceHandler extends ResponseHandler {
 //                        contentValues.put(BlockedTokensColumns.BLOCKED_TIME.getName(), Calendar.getInstance().getTimeInMillis());
 //                        context.getContentResolver().insert(BlockedTokensObject.CONTENT_URI, contentValues);
 
-                        myTracker.sendEvent("Flood control", badToken, badToken, 3l);
+                        myTracker.sendEvent("Flood control" + StorageUtils.getAppVersion(context), badToken, response, 3l);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
 
+                    StorageUtils.eraseUserID(context);
                     StorageUtils.updateToken(context);
+
                 } else if (!jSubObject.isNull(ERROR_CODE) && AUTHORIZATION_ERROR.equals(jSubObject.getString(ERROR_CODE))) {
                     try {
                         String badToken = getBadToken(jSubObject);
-                        myTracker.sendEvent("Authorization error", badToken, badToken, 3254l);
+                        myTracker.sendEvent("Authorization error" + StorageUtils.getAppVersion(context), badToken, response, 3254l);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
 
+                    StorageUtils.eraseUserID(context);
                     StorageUtils.updateToken(context);
                 }
             }

@@ -87,20 +87,26 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
 
 //        StorageUtils.manageBlockToken(this);
 
+        // first launch only
         int countTimes = StorageUtils.getLaunchCount(this);
         if (countTimes == 0) {
             StorageUtils.updateToken(this);
+            StorageUtils.eraseUserID(this);
 
-            if (StorageUtils.isVKpresents(MainActivity1.this)) {
-                DialogFragment loginFragment = new DialogLoginFragment();
-                loginFragment.show(getSupportFragmentManager(), "dlg5");
-            }
+//            // show fragment for vk present user only 1rst time
+//            if (StorageUtils.isVKpresents(MainActivity1.this)) {
+//                DialogFragment loginFragment = new DialogLoginFragment();
+//                loginFragment.show(getSupportFragmentManager(), "dlg5");
+//            }
 
         }
         StorageUtils.setLaunchCount(this, ++countTimes);
 
-        if (Calendar.getInstance().getTimeInMillis() - StorageUtils.getLastTimeTokenUpdate(this) > 1000 * 60 * 60 * 20) {
-            StorageUtils.updateToken(this);
+        // update token for not logged vk users
+        if (StorageUtils.getUserId(this) == null) {
+            if (Calendar.getInstance().getTimeInMillis() - StorageUtils.getLastTimeTokenUpdate(this) > 1000 * 60 * 60 * 20) {
+                StorageUtils.updateToken(this);
+            }
         }
 
 
@@ -360,7 +366,7 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
             case 0:
                 PopularListFragment popularListFragment = (PopularListFragment) getSupportFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + fragmentPagerAdapter.getItemId(0));
                 if (popularListFragment != null) {
-                    popularListFragment.updateSearchFilter(filter);
+                    popularListFragment.updateSearchFilter(filter, ApiHelper.AUDIO_TOKEN);
                 }
                 break;
             case 1:
@@ -422,7 +428,14 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
             intent.setClass(MainActivity1.this, LoginActivity.class);
             startActivityForResult(intent, REQUEST_LOGIN);
         } else {
-            Toast.makeText(MainActivity1.this, R.string.already_logged, Toast.LENGTH_SHORT).show();
+            getMyVkMusic();
+        }
+    }
+
+    private void getMyVkMusic() {
+        PopularListFragment popularListFragment = (PopularListFragment) getSupportFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + fragmentPagerAdapter.getItemId(0));
+        if (popularListFragment != null) {
+            popularListFragment.updateMyVKMusic(ApiHelper.VK_MUSIC_TOKEN);
         }
     }
 
@@ -467,28 +480,11 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
 
                 EasyTracker.getInstance().setContext(MainActivity1.this);
                 Tracker myTracker = EasyTracker.getTracker();
-                PackageInfo pInfo = null;
-                try {
-                    pInfo = MainActivity1.this.getPackageManager().getPackageInfo(getPackageName(), 0);
-                } catch (PackageManager.NameNotFoundException e) {
-                    e.printStackTrace();
-                }
 
-                String version = "";
+                String version = StorageUtils.getAppVersion(MainActivity1.this);
+                myTracker.sendEvent("New valid TOKEN hurraa", data.getStringExtra("token") + " " + version + " " + StorageUtils.getUserId(this), data.getStringExtra("token") + " " + version, 33l);
 
-                if (pInfo != null && pInfo.versionName != null) {
-                    version = pInfo.versionName;
-                }
-
-                myTracker.sendEvent("New valid TOKEN hurraa", data.getStringExtra("token") + " " + version, data.getStringExtra("token") + " " + version, 33l);
-
-
-//                Toast.makeText(MainActivity1.this, data.getStringExtra("token"), Toast.LENGTH_SHORT).show();
-//                account.access_token = data.getStringExtra("token");
-//                account.user_id = data.getLongExtra("user_id", 0);
-//                account.save(MainActivity.this);
-//                api = new Api(account.access_token, Constants.API_ID);
-//                showButtons();
+                getMyVkMusic();
             }
         }
     }

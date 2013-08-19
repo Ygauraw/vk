@@ -1,31 +1,19 @@
 package com.gark.vk.utils;
 
-import android.content.ContentProviderOperation;
-import android.content.ContentProviderResult;
 import android.content.Context;
-import android.content.OperationApplicationException;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.os.RemoteException;
-import android.preference.PreferenceManager;
 import android.widget.Toast;
 
 import com.gark.vk.R;
-import com.gark.vk.db.BlockedTokensColumns;
-import com.gark.vk.db.BlockedTokensQuery;
-import com.gark.vk.db.MusicColumns;
-import com.gark.vk.db.VKDBSchema;
-import com.gark.vk.model.BlockedTokensObject;
-import com.gark.vk.model.MusicObject;
 import com.gark.vk.network.ApiHelper;
 import com.the111min.android.api.response.ResponseReceiver;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -37,7 +25,8 @@ public class StorageUtils {
     public static final String PLAY_OPTIONS = "PLAY_OPTIONS";
     public static final String ACCESS_TOKEN = "access_token";
     public static final String LAST_TOKEN_UPDATE = "last_update";
-    public static final String IS_FIRST_LAUNCH = "is_first_launch";
+    public static final String IS_FIRST_LAUNCH = "first_launch";
+    public static final String USER_ID = "user_id";
 
 
     public static void setLastPosition(Context context, int position) {
@@ -79,19 +68,24 @@ public class StorageUtils {
     }
 
 
-    public static final String USER_ID = "user_id";
-
     ///////////////////////////////////////////////////////
     public static void saveUserID(Context context, String userID) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        SharedPreferences.Editor editor = prefs.edit();
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PLAY_OPTIONS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(USER_ID, userID);
         editor.commit();
     }
 
+    public static void eraseUserID(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PLAY_OPTIONS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(USER_ID);
+        editor.commit();
+    }
+
     public static String getUserId(Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getString(USER_ID, null);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PLAY_OPTIONS, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(USER_ID, null);
     }
 
 
@@ -206,5 +200,23 @@ public class StorageUtils {
 
             }
         }).getNewToken();
+    }
+
+    public static String getAppVersion(Context context) {
+
+        PackageInfo pInfo = null;
+        try {
+            pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        String version = "";
+
+        if (pInfo != null && pInfo.versionName != null) {
+            version = pInfo.versionName;
+        }
+
+        return version;
     }
 }
