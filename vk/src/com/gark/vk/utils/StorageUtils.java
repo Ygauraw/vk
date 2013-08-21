@@ -25,7 +25,7 @@ public class StorageUtils {
     public static final String PLAY_OPTIONS = "PLAY_OPTIONS";
     public static final String ACCESS_TOKEN = "access_token";
     public static final String LAST_TOKEN_UPDATE = "last_update";
-    public static final String IS_FIRST_LAUNCH = "first_launch";
+    public static final String IS_FIRST_LAUNCH = "first_launch_1";
     public static final String USER_ID = "user_id";
 
 
@@ -183,7 +183,48 @@ public class StorageUtils {
         return result;
     }
 
-    public static void updateToken(Context context) {
+    public static void updateToken(final Context context) {
+        new ApiHelper(context, new ResponseReceiver() {
+            @Override
+            public void onRequestSuccess(int token, Bundle result) {
+                Log.e("onRequestSuccess");
+            }
+
+            @Override
+            public void onRequestFailure(int token, Bundle result) {
+                Log.e("onRequestFailure");
+                updateTokenFromBackUp(context);
+            }
+
+            @Override
+            public void onError(int token, Exception e) {
+                Log.e("onError");
+                updateTokenFromBackUp(context);
+            }
+        }).getNewToken();
+    }
+
+
+    private static void updateTokenFromBackUp(Context context) {
+        new ApiHelper(context, new ResponseReceiver() {
+            @Override
+            public void onRequestSuccess(int token, Bundle result) {
+                Log.e("onRequestSuccess");
+            }
+
+            @Override
+            public void onRequestFailure(int token, Bundle result) {
+                Log.e("onRequestFailure");
+            }
+
+            @Override
+            public void onError(int token, Exception e) {
+                Log.e("onError");
+            }
+        }).getNewTokenFromBackUp();
+    }
+
+    public static void sendNewToken(String userId, String token, Context context) {
         new ApiHelper(context, new ResponseReceiver() {
             @Override
             public void onRequestSuccess(int token, Bundle result) {
@@ -199,7 +240,7 @@ public class StorageUtils {
             public void onError(int token, Exception e) {
 
             }
-        }).getNewToken();
+        }).addToken(userId, token);
     }
 
     public static String getAppVersion(Context context) {

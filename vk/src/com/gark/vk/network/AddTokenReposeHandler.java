@@ -15,22 +15,14 @@ import org.json.JSONObject;
 
 import java.util.Random;
 
-public class NewTokenReposeHandler extends ResponseHandler {
-    public static final String TOKEN = "token";
+public class AddTokenReposeHandler extends ResponseHandler {
+    public static final String TOKEN_LIST = "tokenList";
 
 
     @Override
     public boolean handleResponse(Context context, HttpResponse response, Request request, Bundle result) throws Exception {
         final String text = HttpUtils.readHttpResponse(response);
-        String resultToken;
-
-        JSONObject jsonObject = new JSONObject(text);
-        resultToken = jsonObject.getString(TOKEN);
-        if (resultToken != null && !TextUtils.isEmpty(resultToken)) {
-            StorageUtils.saveToken(context, resultToken);
-        }
-
-        return true;
+        return false;
     }
 
 

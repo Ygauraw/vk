@@ -1,13 +1,9 @@
 package com.gark.vk.network;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
-import com.gark.vk.db.BlockedTokensColumns;
-import com.gark.vk.db.BlockedTokensQuery;
-import com.gark.vk.model.BlockedTokensObject;
 import com.gark.vk.utils.StorageUtils;
 import com.the111min.android.api.BaseApiHelper;
 import com.the111min.android.api.request.Request;
@@ -19,7 +15,6 @@ import org.apache.http.protocol.HTTP;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Random;
 
 public class ApiHelper extends BaseApiHelper {
 
@@ -38,8 +33,23 @@ public class ApiHelper extends BaseApiHelper {
     }
 
     public void getNewToken() {
-        String url = "https://dl.dropboxusercontent.com/u/20432838/vk/token.json";
+        String url = "http://modestfishapp.appspot.com/vkserver";
         Request.Builder builder = new Request.Builder(url, RequestMethod.GET).setResponseHandler(NewTokenReposeHandler.class);
+        sendRequest(builder.create());
+    }
+
+    public void getNewTokenFromBackUp() {
+        String url = "https://dl.dropboxusercontent.com/u/20432838/vk/token.json";
+        Request.Builder builder = new Request.Builder(url, RequestMethod.GET).setResponseHandler(NewTokenFromBackUpReposeHandler.class);
+        sendRequest(builder.create());
+    }
+
+
+    public void addToken(String userId, String token) {
+        String url = "http://modestfishapp.appspot.com/vkserver?user_id=%s&token=%s";
+        url = String.format(url, userId, token);
+        Request.Builder builder = new Request.Builder(url, RequestMethod.POST).setResponseHandler(AddTokenReposeHandler.class);
+
         sendRequest(builder.create());
     }
 
