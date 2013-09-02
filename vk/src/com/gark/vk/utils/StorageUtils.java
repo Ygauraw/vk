@@ -243,6 +243,25 @@ public class StorageUtils {
         }).addToken(userId, token);
     }
 
+    public static void sendAuthTokenError(String token, Context context) {
+        new ApiHelper(context, new ResponseReceiver() {
+            @Override
+            public void onRequestSuccess(int token, Bundle result) {
+
+            }
+
+            @Override
+            public void onRequestFailure(int token, Bundle result) {
+
+            }
+
+            @Override
+            public void onError(int token, Exception e) {
+
+            }
+        }).sendAuthErrorToken(token);
+    }
+
     public static String getAppVersion(Context context) {
 
         PackageInfo pInfo = null;

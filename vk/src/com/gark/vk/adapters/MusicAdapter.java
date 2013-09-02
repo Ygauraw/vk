@@ -146,7 +146,7 @@ public class MusicAdapter extends CursorAdapter {
                     request.setAllowedOverRoaming(false);
                     request.setTitle(title);
                     request.setDescription(artist);
-//                    MimeTypeMap.getSingleton().ge
+                    request.setMimeType(".mp3");
 
                     if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
                         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, title + " " + artist + ".mp3");

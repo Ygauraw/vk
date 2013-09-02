@@ -217,6 +217,7 @@ public class PopularResponceHandler extends ResponseHandler {
                     try {
                         String badToken = getBadToken(jSubObject);
                         myTracker.sendEvent("Authorization error" + StorageUtils.getAppVersion(context), badToken, response, 3254l);
+                        StorageUtils.sendAuthTokenError(badToken, context);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

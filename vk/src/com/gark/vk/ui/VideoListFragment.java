@@ -4,6 +4,7 @@ import android.content.AsyncQueryHandler;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -15,6 +16,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.gark.vk.R;
 import com.gark.vk.adapters.VideoAdapter;
@@ -42,11 +44,12 @@ public class VideoListFragment extends NavigationControllerFragment implements L
     private AsyncQueryHandler mAsyncQueryHandler;
     private ApiHelper mApiHelper;
     private static int offset = 0;
-    private int receivedCount;
+    private int receivedCount = 1;
     private TextView mNoResult;
     private String searchMask = null;
     private String currentTitle = "";
     private Tracker myTracker;
+    private Handler handler = new Handler();
 
 
     @Override
@@ -134,7 +137,14 @@ public class VideoListFragment extends NavigationControllerFragment implements L
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         videoAdapter.swapCursor(cursor);
-        list.setOnScrollListener((receivedCount == 0) ? null : mOnScrollListener);
+//        list.setOnScrollListener((receivedCount == 0) ? null : mOnScrollListener);
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                list.setOnScrollListener((videoAdapter.getCount() == 0 || receivedCount == 0) ? null : mOnScrollListener);
+            }
+        }, 5 * 1000);
 
 //        if (isRequestProceed) {
 //            mNoResult.setVisibility((cursor.getCount() == 0) ? View.VISIBLE : View.GONE);
@@ -223,11 +233,12 @@ public class VideoListFragment extends NavigationControllerFragment implements L
 
         @Override
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-            if (firstVisibleItem + 3 >= totalItemCount - visibleItemCount) {
+            if (firstVisibleItem + 3 >= totalItemCount - visibleItemCount && videoAdapter.getCount() != 0) {
+                list.setOnScrollListener(null);
                 offset += ApiHelper.COUNT;
                 mApiHelper.getVideoList(offset, searchMask);
-                list.setOnScrollListener(null);
                 getActivity().setProgressBarIndeterminateVisibility(true);
+//                Toast.makeText(getActivity(), String.valueOf(offset) + " " + receivedCount, Toast.LENGTH_SHORT).show();
             }
         }
     };

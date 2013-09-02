@@ -29,6 +29,11 @@
     <string name="enter">Enter</string>
     <string name="cancel">Cancel</string>
 
+    <string name="video_downloading">Video download</string>
+    <string name="download_in_progress">Download in progress</string>
+    <string name="download_complete">Download complete</string>
+    <string name="open_downloads_directory">Open downloads directory \"sdCard/Download\"</string>
+
     <string name="captcha_text">Type the captcha text</string>
     <string name="apply">Apply</string>
 

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -18,6 +19,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.gark.vk.R;
 import com.gark.vk.adapters.MusicAdapter;
@@ -47,12 +49,13 @@ public class PopularListFragment extends NavigationControllerFragment implements
     private AsyncQueryHandler mAsyncQueryHandler;
     private ApiHelper mApiHelper;
     private static int offset = 0;
-    private int receivedCount;
+    private int receivedCount = 1;
     private BroadcastReceiver onPrepareReceiver;
     //    private boolean isRequestProceed = false;
     private int mRequestType = ApiHelper.POPULAR_TOKEN;
     private String searchMask = null;
     private Tracker myTracker;
+    private Handler handler = new Handler();
 
 
     @Override
@@ -123,7 +126,6 @@ public class PopularListFragment extends NavigationControllerFragment implements
 
     @Override
     public void onDestroy() {
-
         offset = 0;
         mAsyncQueryHandler.startDelete(0, null, MusicObject.CONTENT_URI, null, null);
         super.onDestroy();
@@ -153,7 +155,14 @@ public class PopularListFragment extends NavigationControllerFragment implements
         musicAdapter.swapCursor(cursor);
 
 
-        list.setOnScrollListener((receivedCount == 0) ? null : mOnScrollListener);
+//        list.setOnScrollListener((receivedCount == 0) ? null : mOnScrollListener);
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                list.setOnScrollListener((musicAdapter.getCount() == 0 || receivedCount == 0) ? null : mOnScrollListener);
+            }
+        }, 5 * 1000);
 
         if (getActivity() != null) {
             Intent intent = new Intent(getActivity(), PlaybackService.class);
@@ -230,7 +239,6 @@ public class PopularListFragment extends NavigationControllerFragment implements
         if (getActivity() != null) {
             getActivity().setProgressBarIndeterminateVisibility(false);
         }
-
         mNoResult.setVisibility((musicAdapter.getCount() == 0 && receivedCount == 0) ? View.VISIBLE : View.GONE);
     }
 
@@ -242,12 +250,14 @@ public class PopularListFragment extends NavigationControllerFragment implements
 
         @Override
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-            if (firstVisibleItem + 3 >= totalItemCount - visibleItemCount) {
+            if (firstVisibleItem + 3 >= totalItemCount - visibleItemCount && musicAdapter.getCount() != 0) {
                 offset += ApiHelper.COUNT;
+                list.setOnScrollListener(null);
                 mApiHelper.getSongsList(offset, searchMask, mRequestType);
                 getActivity().setProgressBarIndeterminateVisibility(true);
-                list.setOnScrollListener(null);
+//                Toast.makeText(getActivity(), String.valueOf(offset) + " " + receivedCount, Toast.LENGTH_SHORT).show();
             }
+
         }
     };
 

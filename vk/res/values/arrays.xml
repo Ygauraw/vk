@@ -10,6 +10,7 @@
         <item>@string/clear_search_history</item>
         <item>@string/rate_me</item>
         <item>@string/more_app</item>
+        <item>@string/open_downloads_directory</item>
     </string-array>
 
 

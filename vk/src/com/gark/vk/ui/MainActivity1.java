@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -409,6 +410,18 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://developer?id=" + appName)));
                     } catch (android.content.ActivityNotFoundException anfe) {
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/developer?id=" + appName)));
+                    }
+                    break;
+                case 4:
+                    try {
+                        String folderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
+                        Intent intent = new Intent();
+                        intent.setAction(Intent.ACTION_GET_CONTENT);
+                        Uri myUri = Uri.parse(folderPath);
+                        intent.setDataAndType(myUri, "file/*");
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                     break;
             }

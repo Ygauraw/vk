@@ -16,13 +16,12 @@
 
 
 <!-- A DrawerLayout is intended to be used as the top-level content view using match_parent for both width and height to consume the full space available. -->
-<android.support.v4.widget.DrawerLayout
-        xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/drawer_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+<android.support.v4.widget.DrawerLayout xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <!-- As the main content view, the view below consumes the entire
          space available using match_parent in both dimensions. -->
@@ -33,50 +32,48 @@
 
 
     <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <com.viewpagerindicator.TitlePageIndicator
-                android:id="@+id/indicator"
-                android:layout_alignParentTop="true"
-                android:background="@android:color/white"
-                android:textColor="@color/yellow_bg"
-                app:footerColor="@color/yellow_bg"
-                app:footerIndicatorStyle="underline"
-                app:selectedColor="@android:color/black"
-                android:layout_height="wrap_content"
-                android:layout_width="fill_parent"/>
+            android:id="@+id/indicator"
+            android:layout_alignParentTop="true"
+            android:background="@android:color/white"
+            android:textColor="@color/yellow_bg"
+            app:footerColor="@color/yellow_bg"
+            app:footerIndicatorStyle="underline"
+            app:selectedColor="@android:color/black"
+            android:layout_height="wrap_content"
+            android:layout_width="fill_parent" />
 
         <!--app:selectedColor="@android:color/black"-->
         <!--app:selectedBold="true"-->
 
         <android.support.v4.view.ViewPager
-                android:id="@+id/view_pager"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/indicator"
-                android:layout_above="@+id/controls_frame"
-                />
+            android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/indicator"
+            android:layout_above="@+id/controls_frame" />
 
         <FrameLayout
-                android:id="@+id/controls_frame"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_above="@+id/ads"
-                />
+            android:id="@+id/controls_frame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/ads" />
 
         <!--android:layout_above="@+id/ads"-->
 
 
         <com.google.ads.AdView
-                android:id="@+id/ads"
-                android:layout_alignParentBottom="true"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                ads:adSize="SMART_BANNER"
-                ads:adUnitId="a151ed8f622db1f"
-                ads:loadAdOnCreate="true"/>
+            android:id="@+id/ads"
+            android:layout_alignParentBottom="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            ads:adSize="SMART_BANNER"
+            ads:adUnitId="a151ed8f622db1f"
+            ads:loadAdOnCreate="true" />
 
 
     </RelativeLayout>
@@ -88,31 +85,36 @@
          the container. A solid background is used for contrast
          with the content view. -->
     <LinearLayout
-            android:id="@+id/ll_container"
-            android:layout_width="240dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="start"
-            android:orientation="vertical"
-            android:background="@android:color/darker_gray">
+        android:id="@+id/ll_container"
+        android:layout_width="240dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:orientation="vertical"
+        android:background="@android:color/darker_gray">
 
         <Button
-                android:id="@+id/getMyMusic"
-                android:layout_width="240dp"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textSize="20dp"
-                android:textStyle="bold"
-                android:text="@string/login_to_vk"
-                />
+            android:id="@+id/getMyMusic"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="20dp"
+            android:textStyle="bold"
+            android:text="@string/login_to_vk" />
+
+        <View
+            android:layout_width="240dp"
+            android:layout_height="1dp"
+            android:background="@android:color/black" />
+
 
         <ListView
-                android:id="@+id/left_drawer"
-                android:layout_width="240dp"
-                android:layout_height="match_parent"
-                android:choiceMode="singleChoice"
-                android:divider="@android:color/transparent"
-                android:dividerHeight="0dp"
-                />
+            android:id="@+id/left_drawer"
+            android:layout_width="240dp"
+            android:layout_height="match_parent"
+            android:choiceMode="singleChoice"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="0dp" />
+
 
     </LinearLayout>
 </android.support.v4.widget.DrawerLayout>

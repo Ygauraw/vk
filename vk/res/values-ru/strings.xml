@@ -30,4 +30,10 @@
     <string name="enter">Войти</string>
     <string name="cancel">Отмена</string>
 
+    <string name="video_downloading">Загрузка видео</string>
+    <string name="download_in_progress">Загрузка</string>
+    <string name="download_complete">Загрузка завершена</string>
+
+    <string name="open_downloads_directory">Открыть папку загрузок \"sdCard/Download\"</string>
+
 </resources>

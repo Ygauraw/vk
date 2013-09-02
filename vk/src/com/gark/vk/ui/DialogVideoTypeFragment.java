@@ -157,6 +157,7 @@ public class DialogVideoTypeFragment extends DialogFragment implements DialogInt
                     request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
                     request.setAllowedOverRoaming(false);
                     request.setTitle(currentTitle);
+                    request.setMimeType(".mp4");
                     if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
                         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, currentTitle + ".mp4");
                     }
