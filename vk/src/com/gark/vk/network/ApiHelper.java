@@ -73,7 +73,7 @@ public class ApiHelper extends BaseApiHelper {
                 URL = "https://api.vk.com/method/audio.search.json?&q=%s&count=%s&offset=%s&access_token=" + getToken();
                 try {
                     URL = String.format(URL, URLEncoder.encode(query, HTTP.UTF_8), COUNT, offset);
-                } catch (UnsupportedEncodingException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 break;
@@ -98,11 +98,12 @@ public class ApiHelper extends BaseApiHelper {
         String URL = "https://api.vk.com/method/video.search.json?&q=%s&count=%s&offset=%s&adult=1&filters=mp4&access_token=" + getToken();
         try {
             URL = String.format(URL, URLEncoder.encode(query, HTTP.UTF_8), COUNT, offset);
-        } catch (UnsupportedEncodingException e) {
+            Request.Builder builder = new Request.Builder(URL, RequestMethod.GET).setResponseHandler(VideoResponseHandler.class);
+            sendRequest(builder.create());
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        Request.Builder builder = new Request.Builder(URL, RequestMethod.GET).setResponseHandler(VideoResponseHandler.class);
-        sendRequest(builder.create());
+
     }
 
     public void getVideoDirectFiles(String url) {
