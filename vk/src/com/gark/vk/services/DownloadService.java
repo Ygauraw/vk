@@ -90,7 +90,11 @@ public class DownloadService extends IntentService {
             e.printStackTrace();
         }
 
-        mBuilder.setContentText(getString(R.string.download_complete));
-        mNotifyManager.notify((int) id, mBuilder.build());
+        try {
+            mBuilder.setContentText(getString(R.string.download_complete));
+            mNotifyManager.notify((int) id, mBuilder.build());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

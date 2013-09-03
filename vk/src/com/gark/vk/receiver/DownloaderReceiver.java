@@ -25,37 +25,54 @@ public class DownloaderReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        dm = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
 
-        String action = intent.getAction();
-        if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-            Bundle extras = intent.getExtras();
+        try {
 
-            long id = extras.getLong(DownloadManager.EXTRA_DOWNLOAD_ID);
 
-            DownloadManager.Query q = new DownloadManager.Query();
-            q.setFilterById(id);
+            dm = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
 
-            Cursor c = dm.query(q);
-            if (c != null && c.moveToFirst()) {
-                if (c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_FAILED) {
-                    String uri = c.getString(c.getColumnIndex(DownloadManager.COLUMN_URI));
-                    dm.remove(id);
+            String action = intent.getAction();
+            if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
+                Bundle extras = intent.getExtras();
 
-                    String title = c.getString(c.getColumnIndex(DownloadManager.COLUMN_TITLE));
-                    String mime = c.getString(c.getColumnIndex(DownloadManager.COLUMN_MEDIA_TYPE));
+                long id = extras.getLong(DownloadManager.EXTRA_DOWNLOAD_ID);
 
-                    title = title.replaceAll("[^a-zA-Z0-9]+", "");
-                    title += mime;
+                DownloadManager.Query q = new DownloadManager.Query();
+                q.setFilterById(id);
 
-                    Intent downloadIntent = new Intent(context, DownloadService.class);
-                    downloadIntent.putExtra(DownloadService.URL, uri);
-                    downloadIntent.putExtra(DownloadService.ID, id);
-                    downloadIntent.putExtra(DownloadService.TITLE, title);
-                    context.startService(downloadIntent);
+                Cursor c = dm.query(q);
+                if (c != null && c.moveToFirst()) {
+                    if (c.getInt(c.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_FAILED) {
+                        String uri = c.getString(c.getColumnIndex(DownloadManager.COLUMN_URI));
+                        dm.remove(id);
 
+                        String title = c.getString(c.getColumnIndex(DownloadManager.COLUMN_TITLE));
+                        title = title.replaceAll("[^a-zA-Z0-9.]+", "");
+
+
+                        try {
+                            if (uri.contains("mp3")) {
+                                title += ".mp3";
+                            } else if (uri.contains("mp4")) {
+                                title += ".mp4";
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+
+                        Intent downloadIntent = new Intent(context, DownloadService.class);
+                        downloadIntent.putExtra(DownloadService.URL, uri);
+                        downloadIntent.putExtra(DownloadService.ID, id);
+                        downloadIntent.putExtra(DownloadService.TITLE, title);
+                        context.startService(downloadIntent);
+
+                    }
                 }
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
