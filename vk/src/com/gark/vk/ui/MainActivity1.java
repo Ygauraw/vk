@@ -396,23 +396,23 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
                     getContentResolver().delete(SuggestionObject.CONTENT_URI, null, null);
                     Toast.makeText(MainActivity1.this, R.string.history_was_erased, Toast.LENGTH_SHORT).show();
                     break;
+//                case 2:
+//                    appName = "com.gark.vk";
+//                    try {
+//                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appName)));
+//                    } catch (android.content.ActivityNotFoundException anfe) {
+//                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + appName)));
+//                    }
+//                    break;
+//                case 3:
+//                    appName = "Modest Fish";
+//                    try {
+//                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://developer?id=" + appName)));
+//                    } catch (android.content.ActivityNotFoundException anfe) {
+//                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/developer?id=" + appName)));
+//                    }
+//                    break;
                 case 2:
-                    appName = "com.gark.vk";
-                    try {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appName)));
-                    } catch (android.content.ActivityNotFoundException anfe) {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + appName)));
-                    }
-                    break;
-                case 3:
-                    appName = "Modest Fish";
-                    try {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://developer?id=" + appName)));
-                    } catch (android.content.ActivityNotFoundException anfe) {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/developer?id=" + appName)));
-                    }
-                    break;
-                case 4:
                     try {
                         String folderPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath();
                         Intent intent = new Intent();
