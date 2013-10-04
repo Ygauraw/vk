@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.gark.vk"
+          package="com.gark.vknew"
           android:versionCode="19"
           android:versionName="1.18">
 
@@ -46,7 +46,7 @@
 
         <provider
                 android:name=".db.VKProvider"
-                android:authorities="com.gark.vk"
+                android:authorities="com.gark.vknew"
                 android:exported="false"/>
 
         <service android:name=".services.PlaybackService"/>
