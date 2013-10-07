@@ -96,10 +96,18 @@ public class StorageUtils {
     }
 
 
-    public static String restoreToken(Context context) {
+    public static String getToken(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(PLAY_OPTIONS, Context.MODE_PRIVATE);
         return sharedPreferences.getString(ACCESS_TOKEN, null);
     }
+
+    public static void clearToken(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(PLAY_OPTIONS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(ACCESS_TOKEN);
+        editor.commit();
+    }
+
 
 //    public static long getLastTimeTokenUpdate(Context context) {
 //        SharedPreferences sharedPreferences = context.getSharedPreferences(PLAY_OPTIONS, Context.MODE_PRIVATE);

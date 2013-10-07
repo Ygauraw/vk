@@ -27,7 +27,7 @@ import com.gark.vknew.db.MusicQuery;
 import com.gark.vknew.model.MusicObject;
 import com.gark.vknew.navigation.NavigationControllerFragment;
 import com.gark.vknew.network.ApiHelper;
-import com.gark.vknew.network.PopularResponceHandler;
+import com.gark.vknew.network.PopularResponseHandler;
 import com.gark.vknew.services.PlaybackService;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Tracker;
@@ -53,7 +53,6 @@ public class PopularListFragment extends NavigationControllerFragment implements
     //    private boolean isRequestProceed = false;
     private int mRequestType = ApiHelper.POPULAR_TOKEN;
     private String searchMask = null;
-    private Tracker myTracker;
     private Handler handler = new Handler();
 
 
@@ -99,9 +98,6 @@ public class PopularListFragment extends NavigationControllerFragment implements
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        EasyTracker.getInstance().setContext(getActivity());
-        myTracker = EasyTracker.getTracker();
 
         list.setAdapter(musicAdapter);
         list.setOnItemClickListener(this);
@@ -185,13 +181,14 @@ public class PopularListFragment extends NavigationControllerFragment implements
             switch (token) {
                 case ApiHelper.AUDIO_TOKEN:
 
-                    receivedCount = result.getInt(PopularResponceHandler.COUNT);
+                    receivedCount = result.getInt(PopularResponseHandler.COUNT);
 //                    updateUI();
                     try {
-                        if (result.containsKey(PopularResponceHandler.CAPTCHA)) {
-                            DialogFragment dialogFragment = new DialogCaptchaFragment(result.getString(PopularResponceHandler.CAPTCHA));
+                        if (result.containsKey(PopularResponseHandler.CAPTCHA)) {
+                            DialogFragment dialogFragment = new DialogCaptchaFragment(result.getString(PopularResponseHandler.CAPTCHA));
                             dialogFragment.show(getActivity().getSupportFragmentManager(), "dlg2");
-
+                        } else if (result.containsKey(PopularResponseHandler.AUTHORIZATION_ERROR)) {
+                            ((MainActivity1) getActivity()).showDialogLogin(MainActivity1.POPULAR_VK_LIST);
                         } else {
                             updateUI();
                         }
@@ -219,18 +216,6 @@ public class PopularListFragment extends NavigationControllerFragment implements
         public void onError(int token, Exception e) {
             receivedCount = 0;
             updateUI();
-
-
-            StringBuffer sb = new StringBuffer();
-            if (e != null && e.getMessage() != null) {
-                sb.append(e.getMessage());
-            }
-
-            if (e != null && e.getLocalizedMessage() != null) {
-                sb.append(e.getLocalizedMessage());
-            }
-
-            myTracker.sendException(sb.toString() + "\n" + PopularListFragment.class.getSimpleName(), false);
         }
     };
 

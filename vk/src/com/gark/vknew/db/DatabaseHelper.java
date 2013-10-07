@@ -9,9 +9,9 @@ import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private static final String DATABASE_NAME = "vk.android.db";
+    private static final String DATABASE_NAME = "vknew.android.db";
     private Context context;
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 7;
 
     DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -57,20 +57,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         sql.append("UNIQUE (").append(VideoColumns.ID.getName()).append(") ON CONFLICT REPLACE)");
         db.execSQL(sql.toString());
         sql.setLength(0);
-
-
-        sql.append("CREATE TABLE ").append(VKDBSchema.Tables.BLOCKED_TOKENS).append(" (");
-        for (BlockedTokensColumns column : BlockedTokensColumns.values()) {
-            if (BlockedTokensColumns._ID.equals(column)) {
-                sql.append(BaseColumns._ID).append(" INTEGER PRIMARY KEY AUTOINCREMENT,");
-            } else {
-                sql.append(column.getName()).append(column.getType().getName());
-            }
-        }
-        sql.append("UNIQUE (").append(BlockedTokensColumns.TOKEN_VALUE.getName()).append(") ON CONFLICT REPLACE)");
-        db.execSQL(sql.toString());
-        sql.setLength(0);
-
     }
 
     @Override
@@ -78,7 +64,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.d(DatabaseHelper.class.getSimpleName(), "Upgrading database from v." + oldVersion + " to v." + newVersion);
 
         // drop all tables
-        final String tables[] = {VKDBSchema.Tables.MUSIC, VKDBSchema.Tables.SUGGESTION, VKDBSchema.Tables.VIDEO, VKDBSchema.Tables.BLOCKED_TOKENS};
+        final String tables[] = {VKDBSchema.Tables.MUSIC, VKDBSchema.Tables.SUGGESTION, VKDBSchema.Tables.VIDEO};
         for (final String table : tables)
             db.execSQL("DROP TABLE IF EXISTS " + table);
 

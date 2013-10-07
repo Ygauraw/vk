@@ -83,13 +83,13 @@ public class ApiHelper extends BaseApiHelper {
                 break;
         }
 
-        Request.Builder builder = new Request.Builder(URL, RequestMethod.GET).setResponseHandler(PopularResponceHandler.class);
+        Request.Builder builder = new Request.Builder(URL, RequestMethod.GET).setResponseHandler(PopularResponseHandler.class);
         sendRequest(builder.create(), AUDIO_TOKEN);
 
     }
 
     public void getRequestCaptcha(String url) {
-        Request.Builder builder = new Request.Builder(url, RequestMethod.GET).setResponseHandler(PopularResponceHandler.class);
+        Request.Builder builder = new Request.Builder(url, RequestMethod.GET).setResponseHandler(PopularResponseHandler.class);
         sendRequest(builder.create());
     }
 
@@ -111,7 +111,7 @@ public class ApiHelper extends BaseApiHelper {
     }
 
     private String getToken() {
-        return StorageUtils.restoreToken(context);
+        return StorageUtils.getToken(context);
     }
 
     private void setEnglishFitterByCountryISO(Context context) {

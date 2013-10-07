@@ -26,7 +26,7 @@ import com.gark.vknew.model.VideoTypes;
 import com.gark.vknew.navigation.NavigationControllerFragment;
 import com.gark.vknew.network.ApiHelper;
 import com.gark.vknew.network.DirectVideoFilesReposeHandler;
-import com.gark.vknew.network.PopularResponceHandler;
+import com.gark.vknew.network.PopularResponseHandler;
 import com.gark.vknew.services.PlaybackService;
 import com.google.analytics.tracking.android.EasyTracker;
 import com.google.analytics.tracking.android.Tracker;
@@ -178,14 +178,16 @@ public class VideoListFragment extends NavigationControllerFragment implements L
                     }
                     break;
                 default:
-                    receivedCount = result.getInt(PopularResponceHandler.COUNT);
+                    receivedCount = result.getInt(PopularResponseHandler.COUNT);
                     updateUI();
                     try {
-                        if (result.containsKey(PopularResponceHandler.CAPTCHA)) {
-                            DialogFragment dialogFragment = new DialogCaptchaFragment(result.getString(PopularResponceHandler.CAPTCHA));
+                        if (result.containsKey(PopularResponseHandler.CAPTCHA)) {
+                            DialogFragment dialogFragment = new DialogCaptchaFragment(result.getString(PopularResponseHandler.CAPTCHA));
                             dialogFragment.show(getActivity().getSupportFragmentManager(), "dlg2");
-
+                        } else if (result.containsKey(PopularResponseHandler.AUTHORIZATION_ERROR)) {
+                            ((MainActivity1) getActivity()).showDialogLogin(MainActivity1.POPULAR_VK_LIST);
                         }
+
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

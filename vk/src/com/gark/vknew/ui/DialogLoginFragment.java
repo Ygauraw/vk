@@ -29,8 +29,8 @@ public class DialogLoginFragment extends DialogFragment implements DialogInterfa
 
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.not_necessarily)
-                .setMessage(R.string.login_to_vk)
+                .setTitle(R.string.login_to_VK)
+                .setMessage(R.string.login_to_VK_description)
                 .setPositiveButton(R.string.enter, this)
                 .setNegativeButton(R.string.cancel, this);
         return adb.create();

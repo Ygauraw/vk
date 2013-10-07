@@ -57,39 +57,5 @@ public class DirectVideoFilesReposeHandler extends ResponseHandler {
         return map;
     }
 
-    private String getYTubeID(String text) {
-
-        String yTubeID = null;
-        try {
-
-            int startPosition = text.indexOf("src=\"http://www.youtube.com");
-            if (startPosition != -1) {
-                String yTubeURL = text.substring(startPosition, startPosition + 150);
-                Uri u = Uri.parse(yTubeURL.split(" ")[0]);
-                yTubeID = u.getLastPathSegment();
-            }
-        } catch (Exception e) {
-        }
-
-        return yTubeID;
-    }
-
-
-    private String getVimoID(String text) {
-
-        String yTubeID = null;
-        try {
-
-            int startPosition = text.indexOf("src=\"http://player.vimeo.com");
-            if (startPosition != -1) {
-                String yTubeURL = text.substring(startPosition, startPosition + 150);
-                Uri u = Uri.parse(yTubeURL.split(" ")[0]);
-                yTubeID = u.getLastPathSegment();
-            }
-        } catch (Exception e) {
-        }
-
-        return yTubeID;
-    }
 
 }

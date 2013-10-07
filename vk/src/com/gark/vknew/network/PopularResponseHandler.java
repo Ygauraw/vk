@@ -22,7 +22,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class PopularResponceHandler extends ResponseHandler {
+public class PopularResponseHandler extends ResponseHandler {
     private static final String RESPONSE = "response";
 
     public static final String COUNT = "count";
@@ -48,10 +48,8 @@ public class PopularResponceHandler extends ResponseHandler {
 //         text = "{\"error\":{\"error_code\":9,\"error_msg\":\"Flood control: too much captcha requests\",\"request_params\":[{\"key\":\"oauth\",\"value\":\"1\"},{\"key\":\"method\",\"value\":\"audio.search.json\"},{\"key\":\"\",\"value\":\"\"},{\"key\":\"q\",\"value\":\"аркадий лайкинshakira\"},{\"key\":\"count\",\"value\":\"20\"},{\"key\":\"offset\",\"value\":\"0\"},{\"key\":\"access_token\",\"value\":\"d868d0c17e551f0d61f01b0e2cdcbf31908531227dd036e43cb75ce33e66ce3a2eade69a53437dec6272a\"}]}}";
         //text = "{\"error\":{\"error_code\":5,\"error_msg\":\"User authorization failed: invalid access_token.\",\"request_params\":[{\"key\":\"oauth\",\"value\":\"1\"},{\"key\":\"method\",\"value\":\"audio.getPopular.json\"},{\"key\":\"\",\"value\":\"\"},{\"key\":\"count\",\"value\":\"40\"},{\"key\":\"offset\",\"value\":\"0\"},{\"key\":\"only_eng\",\"value\":\"0\"},{\"key\":\"access_token\",\"value\":\"ffda8c939a0aac0783e262fd98816ab47f0c3910d566ded21a9dd1b4f3a39c953c55c27bff8dabc976697\"}]}}\n";
 
-        EasyTracker.getInstance().setContext(context);
-        Tracker myTracker = EasyTracker.getTracker();
 
-        if (checkCaptcha(text, result, myTracker, context)) {
+        if (checkCaptcha(text, result, context)) {
             return true;
         }
 
@@ -136,29 +134,7 @@ public class PopularResponceHandler extends ResponseHandler {
 
         } catch (Exception e) {
             e.printStackTrace();
-
-            StringBuffer sb = new StringBuffer();
-            sb.append(" e.getMessage()=");
-            if (e != null && e.getMessage() != null) {
-                sb.append(e.getMessage());
-            }
-
-            sb.append(" e.getLocalizedMessage()=");
-            if (e != null && e.getLocalizedMessage() != null) {
-                sb.append(e.getLocalizedMessage());
-            }
-
-            sb.append(" e.getClass().getName()=");
-            try {
-                sb.append(e.getClass().getName());
-            } catch (Exception ex) {
-            }
-
-            myTracker.sendException(sb.toString() + "\n" + text, false);
-
-            myTracker.sendEvent("Popular Response handler " + StorageUtils.getAppVersion(context), sb.toString() + "\n" + text, "tratat", 1l);
         }
-
         return true;
     }
 
@@ -171,7 +147,7 @@ public class PopularResponceHandler extends ResponseHandler {
     public static String AUTHORIZATION_ERROR = "5";
 
 
-    private boolean checkCaptcha(String response, Bundle bundle, Tracker myTracker, Context context) throws Exception {
+    private boolean checkCaptcha(String response, Bundle bundle, Context context) throws Exception {
         boolean result = false;
         final JSONObject jsonObj;
         try {
@@ -181,17 +157,6 @@ public class PopularResponceHandler extends ResponseHandler {
                 if (!jSubObject.isNull(ERROR_CODE) && CAPTCHA_CODE.equals(jSubObject.getString(ERROR_CODE))) {
                     bundle.putString(CAPTCHA, response);
                     result = true;
-
-//                    try {
-//                        TelephonyManager manager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-//                        if (manager != null && manager.getNetworkCountryIso() != null) {
-//                            myTracker.sendException(manager.getNetworkCountryIso() + " network country ISO", false);
-//                        }
-//                    } catch (Exception e) {
-//
-//                    }
-
-                    myTracker.sendEvent("Captcha ", response + StorageUtils.getAppVersion(context), response, 3555l);
 
                 } else if (!jSubObject.isNull(ERROR_CODE) && TO_MANY_REQUEST.equals(jSubObject.getString(ERROR_CODE))) {
                     throw new ToManyRequestException();
@@ -213,51 +178,22 @@ public class PopularResponceHandler extends ResponseHandler {
 //                    StorageUtils.eraseUserID(context);
 //                    StorageUtils.updateToken(context);
 //
-//                } else if (!jSubObject.isNull(ERROR_CODE) && AUTHORIZATION_ERROR.equals(jSubObject.getString(ERROR_CODE))) {
-//                    try {
-//                        String badToken = getBadToken(jSubObject);
-//                        myTracker.sendEvent("Authorization error" + StorageUtils.getAppVersion(context), badToken, response, 3254l);
-//                        StorageUtils.sendAuthTokenError(badToken, context);
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//
-//                    StorageUtils.eraseUserID(context);
-//                    StorageUtils.updateToken(context);
 //                }
+                else if (!jSubObject.isNull(ERROR_CODE) && AUTHORIZATION_ERROR.equals(jSubObject.getString(ERROR_CODE))) {
+
+                    bundle.putString(AUTHORIZATION_ERROR, response);
+                    result = true;
+
+                    StorageUtils.eraseUserID(context);
+                    StorageUtils.clearToken(context);
+
+
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return result;
-    }
-
-    private String getBadToken(JSONObject jImg) throws JSONException {
-
-        final String KEY = "key";
-        final String ACCESS_TOKEN = "access_token";
-        final String VALUE = "value";
-        final String REQUEST_PARAMS = "request_params";
-        String token = null;
-
-        if (!jImg.isNull(REQUEST_PARAMS)) {
-
-            JSONArray jsonArray = jImg.getJSONArray(REQUEST_PARAMS);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject j = (JSONObject) jsonArray.get(i);
-                String key = j.getString(KEY);
-                String value = j.getString(VALUE);
-
-
-                if (ACCESS_TOKEN.equals(key)) {
-                    token = value;
-                    break;
-                }
-            }
-        }
-
-        return token;
-
     }
 
 

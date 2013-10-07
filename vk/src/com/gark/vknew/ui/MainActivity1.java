@@ -70,6 +70,10 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
     private TitlePageIndicator mIndicator;
     public final static int REQUEST_LOGIN = 125;
 
+    public static final int MY_VK_LIST = 222;
+    public static final int POPULAR_VK_LIST = 223;
+    private static int listType = POPULAR_VK_LIST;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(getWindow().FEATURE_INDETERMINATE_PROGRESS);
@@ -79,34 +83,17 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
         EasyTracker.getInstance().setContext(this);
         StorageUtils.notifyIfNoInternet(this);
 
-//        StorageUtils.manageBlockToken(this);
 
-        // first launch only
-        int countTimes = StorageUtils.getLaunchCount(this);
-        if (countTimes == 0) {
-//            StorageUtils.updateToken(this);
-//            StorageUtils.eraseUserID(this);
+//        // first launch only
+//        int countTimes = StorageUtils.getLaunchCount(this);
+//        if (countTimes == 0) {
+//        }
+//        StorageUtils.setLaunchCount(this, ++countTimes);
+//
+//        if (StorageUtils.getToken(this) == null) {
+//            showDialogLogin();
+//        }
 
-            // show fragment for vk present user only 1rst time
-//            if (StorageUtils.isVKpresents(MainActivity1.this)) {
-//                DialogFragment loginFragment = new DialogLoginFragment();
-//                loginFragment.show(getSupportFragmentManager(), "dlg5");
-//            }
-
-        }
-        StorageUtils.setLaunchCount(this, ++countTimes);
-
-//        // update token for not logged vk users
-        if (StorageUtils.restoreToken(this) == null) {
-            DialogFragment loginFragment = new DialogLoginFragment();
-            loginFragment.show(getSupportFragmentManager(), "dlg5");
-//            if (Calendar.getInstance().getTimeInMillis() - StorageUtils.getLastTimeTokenUpdate(this) > 1000 * 60 * 60 * 20) {
-//                StorageUtils.updateToken(this);
-//            }
-        }
-
-        // Change uncaught exception parser...
-        // Note: Checking uncaughtExceptionHandler type can be useful if clearing ga_trackingId during development to disable analytics - avoid NullPointerException.
         Thread.UncaughtExceptionHandler uncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
         if (uncaughtExceptionHandler instanceof ExceptionReporter) {
             ExceptionReporter exceptionReporter = (ExceptionReporter) uncaughtExceptionHandler;
@@ -122,7 +109,6 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
 
         titles = new String[]{getString(R.string.music), getString(R.string.video)};
 
-//        setTitle("");
         setSupportProgressBarIndeterminateVisibility(false);
 
         mAsyncQueryHandler = new AsyncQueryHandler(getContentResolver()) {
@@ -202,6 +188,12 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
         });
     }
 
+    public void showDialogLogin(int type) {
+        listType = type;
+        DialogFragment loginFragment = new DialogLoginFragment();
+        loginFragment.show(getSupportFragmentManager(), "dlg5");
+    }
+
     final ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
 
         @Override
@@ -237,12 +229,8 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
     }
 
 
-    /* Called whenever we call invalidateOptionsMenu() */
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        // If the nav drawer is open, hide action items related to the content view
-//        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
-//        menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -268,14 +256,13 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
         return super.onOptionsItemSelected(item);
     }
 
-
     @Override
     protected void onStop() {
         super.onStop();
         Intent intent = new Intent(this, PlaybackService.class);
         intent.setAction(PlaybackService.NOTIFICATION_CLOSE_APPLICATION);
         startService(intent);
-        EasyTracker.getInstance().activityStop(this); // Add this method.
+        EasyTracker.getInstance().activityStop(this);
 
 
     }
@@ -283,7 +270,7 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
     @Override
     public void onStart() {
         super.onStart();
-        EasyTracker.getInstance().activityStart(this); // Add this method.
+        EasyTracker.getInstance().activityStart(this);
     }
 
 
@@ -325,8 +312,6 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
         return false;
     }
 
-
-//    private final static String SEARCH = "search";
 
     @Override
     public boolean onQueryTextChange(String newText) {
@@ -396,7 +381,7 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
                     Toast.makeText(MainActivity1.this, R.string.history_was_erased, Toast.LENGTH_SHORT).show();
                     break;
                 case 2:
-                    appName = "com.gark.vk";
+                    appName = "com.gark.vknew";
                     try {
                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appName)));
                     } catch (android.content.ActivityNotFoundException anfe) {
@@ -423,6 +408,13 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
                         e.printStackTrace();
                     }
                     break;
+                case 5:
+                    StorageUtils.eraseUserID(MainActivity1.this);
+                    StorageUtils.clearToken(MainActivity1.this);
+                    if (mDrawerLayout.isDrawerOpen(llContainer))
+                        mDrawerLayout.closeDrawer(llContainer);
+                    showDialogLogin(POPULAR_VK_LIST);
+                    break;
             }
 
         }
@@ -431,11 +423,11 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
     @Override
     public void onClick(View view) {
         if (StorageUtils.getUserId(MainActivity1.this) == null) {
-            Intent intent = new Intent();
-            intent.setClass(MainActivity1.this, LoginActivity.class);
-            startActivityForResult(intent, REQUEST_LOGIN);
+            showDialogLogin(MY_VK_LIST);
         } else {
             getMyVkMusic();
+            if (mDrawerLayout.isDrawerOpen(llContainer))
+                mDrawerLayout.closeDrawer(llContainer);
         }
     }
 
@@ -445,6 +437,14 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
             popularListFragment.updateMyVKMusic(ApiHelper.VK_MUSIC_TOKEN);
         }
     }
+
+    private void getPopularMusicList() {
+        PopularListFragment popularListFragment = (PopularListFragment) getSupportFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":" + fragmentPagerAdapter.getItemId(0));
+        if (popularListFragment != null) {
+            popularListFragment.updateSearchFilter("", ApiHelper.POPULAR_TOKEN);
+        }
+    }
+
 
     public class MyFragmentPagerAdapter extends FragmentPagerAdapter {
 
@@ -480,23 +480,20 @@ public class MainActivity1 extends ActionBarActivity implements SearchView.OnQue
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_LOGIN) {
-            if (resultCode == RESULT_OK) {
-                String token = data.getStringExtra("token");
-                String userId = String.valueOf(data.getLongExtra("user_id", 0));
+        if (resultCode == RESULT_OK) {
+            String token = data.getStringExtra("token");
+            String userId = String.valueOf(data.getLongExtra("user_id", 0));
 
-                StorageUtils.saveToken(MainActivity1.this, token);
-                StorageUtils.saveUserID(MainActivity1.this, userId);
+            StorageUtils.saveToken(MainActivity1.this, token);
+            StorageUtils.saveUserID(MainActivity1.this, userId);
 
-//                EasyTracker.getInstance().setContext(MainActivity1.this);
-//                Tracker myTracker = EasyTracker.getTracker();
-//
-//
-//                String version = StorageUtils.getAppVersion(MainActivity1.this);
-//                myTracker.sendEvent("New valid TOKEN hurraa", token + " " + version + " " + StorageUtils.getUserId(this), token + " " + version, 33l);
-//                StorageUtils.sendNewToken(userId, token, MainActivity1.this);
-
-                getMyVkMusic();
+            switch (listType) {
+                case MY_VK_LIST:
+                    getMyVkMusic();
+                    break;
+                case POPULAR_VK_LIST:
+                    getPopularMusicList();
+                    break;
             }
         }
     }

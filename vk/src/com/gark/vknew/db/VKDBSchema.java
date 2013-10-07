@@ -4,7 +4,7 @@ import android.net.Uri;
 
 public interface VKDBSchema {
 
-	String CONTENT_AUTHORITY = "com.gark.vk";
+	String CONTENT_AUTHORITY = "com.gark.vknew";
 	Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
 
@@ -12,7 +12,6 @@ public interface VKDBSchema {
 		String MUSIC = "MusicTable";
         String SUGGESTION = "SuggestionTable";
         String VIDEO = "VideoTable";
-        String BLOCKED_TOKENS = "BlockedTokensTable";
 
 	}
 

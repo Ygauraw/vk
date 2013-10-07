@@ -5,5 +5,5 @@ package com.gark.vknew.utils;
  */
 public class Constants {
 
-    public static final String API_ID = "3746605";
+    public static final String API_ID = "3919626";
 }
