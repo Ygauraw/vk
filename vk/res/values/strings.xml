@@ -47,13 +47,13 @@
     <string name="foreground_service_label" translatable="false">Sample Foreground Service</string>
 
 
-    <!--    &lt;!&ndash; not for translate &ndash;&gt;
+        <!-- not for translate -->
         <string name="ga_trackingId" translatable="false">UA-44655873-1</string>
 
-        &lt;!&ndash; Enable automatic activity tracking &ndash;&gt;
+        <!-- Enable automatic activity tracking -->
         <bool name="ga_autoActivityTracking" translatable="false">true</bool>
-        &lt;!&ndash; Enable automatic exception tracking &ndash;&gt;
+        <!-- Enable automatic exception tracking -->
         <bool name="ga_reportUncaughtExceptions" translatable="false">true</bool>
-        <string name="admob_id" translatable="false">ca-app-pub-1964465537782430/8730503906</string>-->
+        <string name="admob_id" translatable="false">ca-app-pub-1964465537782430/8730503906</string>
 
 </resources>
