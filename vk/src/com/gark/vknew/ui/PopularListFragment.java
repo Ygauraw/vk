@@ -157,7 +157,7 @@ public class PopularListFragment extends NavigationControllerFragment implements
             public void run() {
                 list.setOnScrollListener((musicAdapter.getCount() == 0 || receivedCount == 0) ? null : mOnScrollListener);
             }
-        }, 5 * 1000);
+        }, 3 * 1000);
 
         if (getActivity() != null) {
             Intent intent = new Intent(getActivity(), PlaybackService.class);
@@ -234,7 +234,7 @@ public class PopularListFragment extends NavigationControllerFragment implements
 
         @Override
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-            if (firstVisibleItem + 3 >= totalItemCount - visibleItemCount && musicAdapter.getCount() != 0) {
+            if (firstVisibleItem + 3 >= totalItemCount - visibleItemCount && musicAdapter.getCount() != 0 && PopularListFragment.this.isVisible()) {
                 offset += ApiHelper.COUNT;
                 list.setOnScrollListener(null);
                 mApiHelper.getSongsList(offset, searchMask, mRequestType);

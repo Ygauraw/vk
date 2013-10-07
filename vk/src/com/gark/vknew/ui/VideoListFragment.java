@@ -143,7 +143,7 @@ public class VideoListFragment extends NavigationControllerFragment implements L
             public void run() {
                 list.setOnScrollListener((videoAdapter.getCount() == 0 || receivedCount == 0) ? null : mOnScrollListener);
             }
-        }, 5 * 1000);
+        }, 3 * 1000);
 
 //        if (isRequestProceed) {
 //            mNoResult.setVisibility((cursor.getCount() == 0) ? View.VISIBLE : View.GONE);
@@ -234,7 +234,7 @@ public class VideoListFragment extends NavigationControllerFragment implements L
 
         @Override
         public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-            if (firstVisibleItem + 3 >= totalItemCount - visibleItemCount && videoAdapter.getCount() != 0) {
+            if (firstVisibleItem + 3 >= totalItemCount - visibleItemCount && videoAdapter.getCount() != 0 && VideoListFragment.this.isVisible()) {
                 list.setOnScrollListener(null);
                 offset += ApiHelper.COUNT;
                 mApiHelper.getVideoList(offset, searchMask);
@@ -244,28 +244,16 @@ public class VideoListFragment extends NavigationControllerFragment implements L
         }
     };
 
-//    private void playMusic(String url) {
-//        Intent intent = new Intent(getActivity(), PlaybackService.class);
-//        intent.setAction(PlaybackService.SERVICE_PLAY_ENTRY);
-//        intent.putExtra(PlaybackService.EXTRA_URL, url);
-//        getActivity().startService(intent);
-//    }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-//        Intent intent = new Intent(getActivity(), PlaybackService.class);
-//        intent.setAction(PlaybackService.SERVICE_PLAY_SINGLE);
-//        intent.putExtra(PlaybackService.EXTRA_POSITION, position);
-//        getActivity().startService(intent);
 
         Intent intent = new Intent(getActivity(), PlaybackService.class);
         intent.setAction(PlaybackService.SERVICE_STOP);
         getActivity().startService(intent);
 
-//        getSherlockActivity().setTitle("ololol");
 
-//
         Cursor cursor = ((VideoAdapter) parent.getAdapter()).getCursor();
         if (cursor != null && cursor.moveToPosition(position)) {
             final String player = cursor.getString(cursor.getColumnIndex(VideoColumns.PLAYER.getName()));
@@ -273,63 +261,10 @@ public class VideoListFragment extends NavigationControllerFragment implements L
             currentTitle = title;
             mApiHelper.getVideoDirectFiles(player);
 
-//            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://rutube.ru/player.swf?hash=5925153")));
 
-//            final String title = cursor.getString(cursor.getColumnIndex(MusicColumns.TITLE.getName()));
-
-//            Intent i = new Intent(Intent.ACTION_VIEW);
-//            i.setData(Uri.parse(player));
-//            i.setDataAndType(Uri.parse("http://vimeo.com/30592532"), "video/*");
-//            startActivity(i);
-
-//            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://player.vimeo.com/video/30592532")));
-
-//            Intent localIntent = new Intent("android.intent.action.VIEW");
-//            localIntent.setDataAndType(Uri.fromFile(new File(((DownloadEntry)paramAnonymousView.getTag()).getFilename())), "video/mp4");
-//            App.getInstance().ma.startActivity(localIntent);
         }
 
     }
-
-
-//    private ArrayList<MusicObject> getPlaylist(Cursor cursor) {
-//        ArrayList<MusicObject> list = new ArrayList<MusicObject>();
-//        MusicObject musicObject;
-//        if (cursor != null && cursor.moveToFirst()) {
-//            do {
-//                musicObject = new MusicObject();
-//
-//                final String aid = cursor.getString(cursor.getColumnIndex(MusicColumns.AID.getName()));
-//                final String artist = cursor.getString(cursor.getColumnIndex(MusicColumns.ARTIST.getName()));
-//                final String title = cursor.getString(cursor.getColumnIndex(MusicColumns.TITLE.getName()));
-//                final String duration = cursor.getString(cursor.getColumnIndex(MusicColumns.DURATION.getName()));
-//                final String url = cursor.getString(cursor.getColumnIndex(MusicColumns.URL.getName()));
-//
-//                musicObject.setAid(aid);
-//                musicObject.setArtist(artist);
-//                musicObject.setTitle(title);
-//                musicObject.setDuration(duration);
-//                musicObject.setUrl(url);
-//
-//                list.add(musicObject);
-//
-//            } while (cursor.moveToNext());
-//        }
-//
-//        return list;
-//    }
-
-
-//    private class OnPrepareReceiver extends BroadcastReceiver {
-//
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            int position = intent.getIntExtra(PlaybackService.SERVICE_ON_PREPARE, 0);
-//            list.smoothScrollToPosition(position);
-//        }
-//    }
-//
-//    ;
 
 
 }
