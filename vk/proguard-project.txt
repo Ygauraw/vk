@@ -18,3 +18,14 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-keep class android.support.v4.app.** { *; }
+-keep interface android.support.v4.app.** { *; }
+
+#-injars ../RestApi/libs/apache-mime4j-0.5.jar
+#-injars ../RestApi/libs/httpclient-4.1.2.jar
+#-injars ../RestApi/libs/httpcore-4.1.2.jar
+#-injars ../RestApi/libs/httpmime-4.1.2.jar
+
+-dontwarn org.apache.**
+
